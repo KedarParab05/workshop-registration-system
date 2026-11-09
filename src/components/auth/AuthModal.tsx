@@ -1,0 +1,606 @@
+import React, { useState, useEffect } from 'react';
+import { useApp } from '../../context/AppContext';
+import {
+  X,
+  Lock,
+  Mail,
+  User as UserIcon,
+  Building,
+  Sparkles,
+  Loader2,
+  Phone,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  Briefcase,
+  LogIn,
+  UserPlus,
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { apiFetch, saveToken } from '../../utils/api';
+import { UserRole } from '../../types';
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialRole?: UserRole;
+  initialMode?: 'login' | 'register';
+}
+
+export const AuthModal: React.FC<AuthModalProps> = ({
+  isOpen,
+  onClose,
+  initialRole,
+  initialMode = 'login',
+}) => {
+  const { setCurrentUser, showAlert, navigateTo } = useApp();
+
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Form Fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [department, setDepartment] = useState('');
+  const [role, setRole] = useState<'PARTICIPANT' | 'ORGANIZER'>('PARTICIPANT');
+
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialRole ? 'register' : initialMode);
+      setEmail('');
+      setPassword('');
+      setFullName('');
+      setPhoneNumber('');
+      setDepartment('');
+      setErrorMsg('');
+      setShowPassword(false);
+      if (initialRole === 'ORGANIZER') {
+        setRole('ORGANIZER');
+      } else {
+        setRole('PARTICIPANT');
+      }
+    }
+  }, [isOpen, initialRole, initialMode]);
+
+  if (!isOpen) return null;
+
+  const applyBackendUser = (userData: {
+    id: string;
+    fullName: string;
+    email: string;
+    role: string;
+    accountStatus: string;
+    department?: string;
+    phoneNumber?: string;
+    createdAt?: string;
+  }) => {
+    const mapped = {
+      id: userData.id,
+      fullName: userData.fullName,
+      email: userData.email,
+      role: userData.role as any,
+      accountStatus: userData.accountStatus as any,
+      department: userData.department,
+      phoneNumber: userData.phoneNumber,
+      createdAt: userData.createdAt || new Date().toISOString(),
+    };
+    setCurrentUser(mapped);
+    localStorage.removeItem('wh_logged_out');
+    localStorage.setItem('wh_user', JSON.stringify(mapped));
+    localStorage.setItem('wh_current_user_email', mapped.email);
+    localStorage.setItem('wh_role_selected', mapped.role);
+
+    // Strictly redirect according to database role
+    if (mapped.role === 'SUPER_ADMIN') {
+      navigateTo('admin-dashboard');
+    } else if (mapped.role === 'ORGANIZER') {
+      navigateTo('organizer-dashboard');
+    } else if (mapped.role === 'VOLUNTEER') {
+      navigateTo('volunteer-portal');
+    } else {
+      navigateTo('workshops');
+    }
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
+
+    if (!password) {
+      setErrorMsg('Please enter your password.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: trimmedEmail, password }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success && data.token) {
+        saveToken(data.token);
+        applyBackendUser(data.user);
+        showAlert(`Welcome back, ${data.user.fullName}!`, 'success');
+        onClose();
+      } else {
+        setErrorMsg(data.error || 'Invalid email or password. Please try again.');
+      }
+    } catch {
+      setErrorMsg('Could not connect to the server. Please check your network connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    const trimmedName = fullName.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMsg('Full name must be at least 2 characters.');
+      return;
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await apiFetch('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          fullName: trimmedName,
+          email: trimmedEmail,
+          password,
+          role,
+          department: department.trim() || undefined,
+          phoneNumber: phoneNumber.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success && data.token) {
+        saveToken(data.token);
+        applyBackendUser(data.user);
+        showAlert(`Welcome to Kaushalya, ${data.user.fullName}!`, 'success');
+        onClose();
+      } else {
+        setErrorMsg(data.error || 'Registration failed. Please check your details and try again.');
+      }
+    } catch {
+      setErrorMsg('Could not reach the server. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 1-Click Fast Switch for Evaluators
+  const handleDemoSwitch = async (demoEmail: string) => {
+    setErrorMsg('');
+    setLoading(true);
+    try {
+      const res = await apiFetch('/api/auth/switch-demo', {
+        method: 'POST',
+        body: JSON.stringify({ email: demoEmail }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.token) {
+        saveToken(data.token);
+        applyBackendUser(data.user);
+        showAlert(`Signed in as demo persona: ${data.user.fullName}`, 'success');
+        onClose();
+      } else {
+        setErrorMsg(data.error || 'Could not switch to demo user.');
+      }
+    } catch {
+      setErrorMsg('Failed to connect to authentication server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputCls =
+    'w-full px-3.5 py-2.5 rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#101410] dark:text-[#f0f5ee] text-xs placeholder:text-[#5E5E61] dark:placeholder:text-[#8ba895] focus:outline-none focus:ring-2 focus:ring-[#08482D] transition';
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative bg-white dark:bg-[#14231b] rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[#DCE4D6] dark:border-[#233d2e] z-10 text-[#101410] dark:text-[#f0f5ee] transition-colors max-h-[92vh] overflow-y-auto my-auto"
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1.5 rounded-xl text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b3025] transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Header */}
+          <div className="text-center space-y-1 mb-5">
+            <div className="w-12 h-12 rounded-2xl bg-[#DAE7C7] text-[#08482D] flex items-center justify-center mx-auto mb-2.5 shadow-xs">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <h2 className="text-2xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee]">
+              {mode === 'login' ? 'Sign In to Kaushalya' : 'Create an Account'}
+            </h2>
+            <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
+              {mode === 'login'
+                ? 'Enter your credentials to access your dashboard and passes.'
+                : 'Join the academic skills platform to attend or host workshops.'}
+            </p>
+          </div>
+
+          {/* Mode Switch Tabs */}
+          <div className="flex rounded-2xl bg-[#F5F8EF] dark:bg-[#1b3025] p-1 border border-[#DCE4D6] dark:border-[#233d2e] mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setErrorMsg('');
+              }}
+              className={`flex-1 py-2 rounded-xl text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all ${
+                mode === 'login'
+                  ? 'bg-white dark:bg-[#14231b] text-[#08482D] dark:text-[#DAE7C7] shadow-xs'
+                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('register');
+                setErrorMsg('');
+              }}
+              className={`flex-1 py-2 rounded-xl text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all ${
+                mode === 'register'
+                  ? 'bg-white dark:bg-[#14231b] text-[#08482D] dark:text-[#DAE7C7] shadow-xs'
+                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+              }`}
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Create Account</span>
+            </button>
+          </div>
+
+          {/* Error Message */}
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 text-xs rounded-2xl">
+              {errorMsg}
+            </div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────
+              SIGN IN FORM
+          ───────────────────────────────────────────────────────────── */}
+          {mode === 'login' ? (
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1.5">
+                  Email Address *
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setErrorMsg('');
+                    }}
+                    placeholder="alex@student.edu"
+                    className={`${inputCls} pl-10`}
+                    autoFocus
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1.5">
+                  Password *
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setErrorMsg('');
+                    }}
+                    placeholder="Enter your password"
+                    className={`${inputCls} pl-10 pr-10`}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5E5E61] hover:text-[#101410] dark:hover:text-[#f0f5ee]"
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-60 text-[#F5F8EF] font-heading font-semibold text-xs rounded-2xl shadow-md shadow-[#08482D]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                <span>{loading ? 'Authenticating…' : 'Sign In'}</span>
+              </button>
+
+              <div className="text-center pt-1">
+                <span className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
+                  Don't have an account yet?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('register');
+                      setErrorMsg('');
+                    }}
+                    className="text-[#08482D] dark:text-[#DAE7C7] font-bold hover:underline"
+                  >
+                    Create Account
+                  </button>
+                </span>
+              </div>
+            </form>
+          ) : (
+            /* ─────────────────────────────────────────────────────────────
+                REGISTRATION FORM
+            ───────────────────────────────────────────────────────────── */
+            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                  Full Name *
+                </label>
+                <div className="relative">
+                  <UserIcon className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => {
+                      setFullName(e.target.value);
+                      setErrorMsg('');
+                    }}
+                    placeholder="e.g. Alex Morgan"
+                    className={`${inputCls} pl-10`}
+                    autoFocus
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                  Email Address *
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setErrorMsg('');
+                    }}
+                    placeholder="e.g. alex@student.edu"
+                    className={`${inputCls} pl-10`}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Role Selection */}
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                  I want to join as *
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole('PARTICIPANT')}
+                    className={`p-2.5 rounded-2xl border text-left transition-all flex items-center gap-2 ${
+                      role === 'PARTICIPANT'
+                        ? 'border-[#08482D] dark:border-[#DAE7C7] bg-[#DAE7C7]/30 dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-bold'
+                        : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#5E5E61] dark:text-[#8ba895]'
+                    }`}
+                  >
+                    <GraduationCap className="w-4 h-4 shrink-0" />
+                    <div>
+                      <div className="text-xs font-heading">Student</div>
+                      <div className="text-[10px] font-normal opacity-80">Attendee</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRole('ORGANIZER')}
+                    className={`p-2.5 rounded-2xl border text-left transition-all flex items-center gap-2 ${
+                      role === 'ORGANIZER'
+                        ? 'border-[#08482D] dark:border-[#DAE7C7] bg-[#DAE7C7]/30 dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-bold'
+                        : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#5E5E61] dark:text-[#8ba895]'
+                    }`}
+                  >
+                    <Briefcase className="w-4 h-4 shrink-0" />
+                    <div>
+                      <div className="text-xs font-heading">Organizer</div>
+                      <div className="text-[10px] font-normal opacity-80">Faculty / Host</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                  Password * <span className="font-normal text-[#5E5E61]">(min. 6 characters)</span>
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setErrorMsg('');
+                    }}
+                    placeholder="Create a strong password"
+                    className={`${inputCls} pl-10 pr-10`}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5E5E61] hover:text-[#101410] dark:hover:text-[#f0f5ee]"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                  Department / Institution <span className="font-normal text-[#5E5E61]">(optional)</span>
+                </label>
+                <div className="relative">
+                  <Building className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    placeholder="e.g. Computer Science, AI Lab"
+                    className={`${inputCls} pl-10`}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                  Phone Number <span className="font-normal text-[#5E5E61]">(optional)</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className={`${inputCls} pl-10`}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-60 text-[#F5F8EF] font-heading font-semibold text-xs rounded-2xl shadow-md shadow-[#08482D]/20 transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                <span>{loading ? 'Creating Account…' : 'Create Account'}</span>
+              </button>
+
+              <div className="text-center pt-1">
+                <span className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('login');
+                      setErrorMsg('');
+                    }}
+                    className="text-[#08482D] dark:text-[#DAE7C7] font-bold hover:underline"
+                  >
+                    Sign In
+                  </button>
+                </span>
+              </div>
+            </form>
+          )}
+
+          {/* Instant Evaluation Demo Personas */}
+          <div className="mt-5 pt-4 border-t border-[#DCE4D6] dark:border-[#233d2e] space-y-2">
+            <div className="flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+              <span className="font-heading font-semibold flex items-center gap-1 text-[#08482D] dark:text-[#DAE7C7]">
+                <Sparkles className="w-3 h-3" />
+                <span>Instant Demo Login (Evaluators):</span>
+              </span>
+              <span className="text-[10px]">1-click sign in</span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleDemoSwitch('alex.morgan@student.edu')}
+                className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors text-[10px]"
+              >
+                <div className="font-heading font-bold truncate">Alex Morgan</div>
+                <div className="text-[#5E5E61] dark:text-[#8ba895] truncate">Student</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDemoSwitch('sarah.lin@faculty.edu')}
+                className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors text-[10px]"
+              >
+                <div className="font-heading font-bold truncate">Dr. Sarah Lin</div>
+                <div className="text-[#5E5E61] dark:text-[#8ba895] truncate">Organizer</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDemoSwitch('admin@workshophub.edu')}
+                className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors text-[10px]"
+              >
+                <div className="font-heading font-bold truncate">System Admin</div>
+                <div className="text-[#5E5E61] dark:text-[#8ba895] truncate">Admin</div>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
