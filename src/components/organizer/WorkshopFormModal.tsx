@@ -313,7 +313,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                           className="h-16 w-full object-cover"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/assets/images/banner_fullstack_web.jpg';
+                            e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
                           }}
                         />
                         <div className="p-1 text-[10px] font-semibold text-[#101410] dark:text-slate-300 truncate">
