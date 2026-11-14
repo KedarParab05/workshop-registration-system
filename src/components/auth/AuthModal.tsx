@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { BrandLogo } from '../common/BrandLogo';
 import {
   X,
   Lock,
   Mail,
   User as UserIcon,
   Building,
-  Sparkles,
+  KeyRound,
   Loader2,
   Phone,
   Eye,
@@ -287,13 +288,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Header */}
+          {/* Header with Standardized BrandLogo */}
           <div className="text-center space-y-1 mb-5">
-            <div className="w-12 h-12 rounded-2xl bg-[#DAE7C7] text-[#08482D] flex items-center justify-center mx-auto mb-2.5 shadow-xs">
-              <Sparkles className="w-6 h-6" />
+            <div className="flex justify-center mb-2.5">
+              <BrandLogo size="md" showTagline={true} />
             </div>
-            <h2 className="text-2xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee]">
-              {mode === 'login' ? 'Sign In to Kaushalya' : 'Create an Account'}
+            <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee]">
+              {mode === 'login' ? 'Sign In to Your Account' : 'Create an Account'}
             </h2>
             <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
               {mode === 'login'
@@ -600,7 +601,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="mt-5 pt-4 border-t border-[#DCE4D6] dark:border-[#233d2e] space-y-2.5">
             <div className="flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
               <span className="font-heading font-semibold flex items-center gap-1.5 text-[#08482D] dark:text-[#DAE7C7]">
-                <Sparkles className="w-3.5 h-3.5" />
+                <KeyRound className="w-3.5 h-3.5" />
                 <span>Instant Demo Login</span>
               </span>
               <span className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">1-Click Evaluation</span>
