@@ -397,9 +397,9 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({ isOpen, on
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button
                     onClick={() => handleQuickSwitch('PARTICIPANT')}
-                    className="p-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors"
+                    className="p-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors cursor-pointer"
                   >
-                    <div className="text-[11px] font-heading font-bold text-[#101410] dark:text-[#f0f5ee] truncate">Alex Morgan</div>
+                    <div className="text-[11px] font-heading font-bold text-[#101410] dark:text-[#f0f5ee] truncate">Aary Nikam</div>
                     <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Student Participant</div>
                   </button>
 
@@ -434,7 +434,7 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({ isOpen, on
                   setVolunteerError('');
                   setReqSuccessMsg('');
                 }}
-                className="text-xs font-heading font-semibold text-[#5E5E61] hover:text-[#101410] inline-flex items-center gap-1.5 transition-colors"
+                className="text-xs font-heading font-semibold text-[#5E5E61] dark:text-[#95ad9e] hover:text-[#101410] dark:hover:text-[#f0f5ee] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Role Selection</span>
