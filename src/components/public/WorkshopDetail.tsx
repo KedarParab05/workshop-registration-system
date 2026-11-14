@@ -161,7 +161,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
 
         <button
           onClick={handleShare}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-white dark:bg-[#14231b] hover:bg-[#E8F0DF] text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] transition-colors shadow-xs"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-white dark:bg-[#14231b] hover:bg-[#E8F0DF] dark:hover:bg-[#1a3325] text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] transition-colors shadow-xs cursor-pointer"
         >
           {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5" />}
           <span>{copiedLink ? 'Link Copied!' : 'Share'}</span>
@@ -226,7 +226,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
               className="w-full h-full object-cover max-h-96"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = '/assets/images/banner_fullstack_web.jpg';
+                e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
               }}
             />
           </div>
@@ -365,7 +365,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                   href={gpsMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 px-3 rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#E8F0DF] text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-3 rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#E8F0DF] dark:hover:bg-[#14231b] text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Navigation className="w-3.5 h-3.5 text-[#08482D] dark:text-[#9ee2b8]" />
                   <span>Get GPS Directions to Venue</span>
@@ -386,7 +386,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
               </p>
               <button
                 onClick={() => setShowVolunteerModal(true)}
-                className="w-full py-2 bg-white dark:bg-[#1b3025] hover:bg-[#E8F0DF] text-[#08482D] dark:text-[#9ee2b8] rounded-xl text-xs font-heading font-semibold border border-[#DCE4D6] dark:border-[#233d2e] transition-colors"
+                className="w-full py-2 bg-white dark:bg-[#1b3025] hover:bg-[#E8F0DF] dark:hover:bg-[#14231b] text-[#08482D] dark:text-[#9ee2b8] rounded-xl text-xs font-heading font-semibold border border-[#DCE4D6] dark:border-[#233d2e] transition-colors cursor-pointer"
               >
                 Apply as Gate Volunteer
               </button>
@@ -465,7 +465,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 <button
                   onClick={() => setShowConfirmModal(false)}
                   disabled={isRegistering}
-                  className="px-4 py-2 text-xs font-heading font-semibold text-[#5E5E61] hover:bg-[#E8F0DF] rounded-xl transition-colors"
+                  className="px-4 py-2 text-xs font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] hover:bg-[#E8F0DF] dark:hover:bg-[#1a3325] rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -532,7 +532,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                     <button
                       type="button"
                       onClick={() => setShowVolunteerModal(false)}
-                      className="px-4 py-2 text-xs font-heading font-semibold text-[#5E5E61] hover:bg-[#E8F0DF] rounded-xl"
+                      className="px-4 py-2 text-xs font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] hover:bg-[#E8F0DF] dark:hover:bg-[#1a3325] rounded-xl transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
