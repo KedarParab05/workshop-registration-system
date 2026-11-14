@@ -18,9 +18,11 @@ import {
   QrCode,
   HandHeart,
   Send,
-  Sparkles,
   Check,
   Award,
+  CreditCard,
+  Tag,
+  Ticket,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRTicketModal } from '../common/QRTicketModal';
@@ -219,11 +221,12 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
           </div>
 
           {/* Banner Image */}
-          <div className="rounded-3xl overflow-hidden border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm max-h-96 bg-[#E8F0DF]">
+          <div className="rounded-3xl overflow-hidden border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm max-h-[360px] sm:max-h-[440px] bg-[#E8F0DF] dark:bg-[#1b3025]">
             <img
               src={workshop.bannerImageUrl}
               alt={workshop.title}
-              className="w-full h-full object-cover max-h-96"
+              className="w-full h-full max-h-[360px] sm:max-h-[440px] object-cover transition-opacity duration-300"
+              loading="eager"
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
@@ -267,7 +270,11 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
           <div className="bg-white dark:bg-[#14231b] p-6 rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm space-y-5">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-heading font-bold bg-[#DAE7C7] text-[#08482D]">
-                <Sparkles className="w-3.5 h-3.5" />
+                {workshop.pricingType === 'PAID' ? (
+                  <CreditCard className="w-3.5 h-3.5" />
+                ) : (
+                  <Tag className="w-3.5 h-3.5" />
+                )}
                 <span>
                   {workshop.pricingType === 'PAID' ? `₹${workshop.price} • Paid Workshop` : '100% Free Admission'}
                 </span>
