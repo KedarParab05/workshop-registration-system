@@ -47,7 +47,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
-            className="font-display text-[clamp(2rem,6vw,3.8125rem)] leading-[1.14] sm:leading-[1.08] tracking-[-0.03em] font-normal sm:font-medium text-[#101410] dark:text-[#f0f5ee] max-w-4xl mx-auto break-words px-2"
+            className="font-display text-[clamp(1.75rem,5.5vw,3.75rem)] leading-[1.12] sm:leading-[1.08] tracking-[-0.03em] font-normal sm:font-medium text-[#101410] dark:text-[#f0f5ee] max-w-4xl mx-auto break-words px-2"
           >
             Good Ideas Start{' '}
             <br className="hidden sm:inline" />
@@ -61,7 +61,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1 }}
-            className="text-sm sm:text-base lg:text-lg text-[#5E5E61] dark:text-[#95ad9e] max-w-2xl mx-auto font-sans leading-relaxed px-2"
+            className="text-xs sm:text-base lg:text-lg text-[#5E5E61] dark:text-[#95ad9e] max-w-xl sm:max-w-2xl mx-auto font-sans leading-relaxed px-2"
           >
             Discover practical workshops led by practitioners, build real-world skills, and reserve your place with a verified digital pass.
           </motion.p>
@@ -102,7 +102,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
               Why Kaushalya
             </span>
-            <h2 className="text-[24px] xs:text-[28px] sm:text-[36px] lg:text-[46px] leading-[1.2] lg:leading-[59px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
+            <h2 className="text-[22px] xs:text-[26px] sm:text-[34px] lg:text-[44px] leading-tight lg:leading-[54px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
               Engineered for Real Engineering Skills
             </h2>
             <p className="text-xs sm:text-sm lg:text-base text-[#5E5E61] dark:text-slate-400 leading-relaxed font-sans max-w-xl mx-auto">
@@ -198,7 +198,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
             Clear 4-Step Process
           </span>
-          <h2 className="text-[24px] xs:text-[28px] sm:text-[36px] lg:text-[46px] leading-[1.2] lg:leading-[59px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
+          <h2 className="text-[22px] xs:text-[26px] sm:text-[34px] lg:text-[44px] leading-tight lg:leading-[54px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
             How Registration &amp; Entry Works
           </h2>
           <p className="text-xs sm:text-sm lg:text-base text-[#5E5E61] dark:text-slate-400 font-sans max-w-xl mx-auto">
@@ -347,7 +347,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
             Interactive Tour
           </span>
-          <h2 className="text-[24px] xs:text-[28px] sm:text-[36px] lg:text-[46px] leading-[1.2] lg:leading-[59px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
+          <h2 className="text-[22px] xs:text-[26px] sm:text-[34px] lg:text-[44px] leading-tight lg:leading-[54px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
             Explore the Platform Experience
           </h2>
           <p className="text-xs sm:text-sm lg:text-base text-[#5E5E61] dark:text-slate-400 font-sans max-w-xl mx-auto">
@@ -510,7 +510,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
               <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
                 Got Questions?
               </span>
-              <h2 className="text-[24px] xs:text-[28px] sm:text-[36px] lg:text-[46px] leading-[1.2] lg:leading-[54px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
+              <h2 className="text-[22px] xs:text-[26px] sm:text-[34px] lg:text-[44px] leading-tight lg:leading-[54px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
                 Frequently Asked Questions
               </h2>
               <p className="text-sm text-[#5E5E61] dark:text-slate-300 leading-relaxed font-sans">
