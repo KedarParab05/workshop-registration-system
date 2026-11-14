@@ -185,7 +185,7 @@ export const ManageWorkshops: React.FC = () => {
                             referrerPolicy="no-referrer"
                             onError={(e) => {
                               e.currentTarget.onerror = null;
-                              e.currentTarget.src = '/assets/images/banner_fullstack_web.jpg';
+                              e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
                             }}
                           />
                           <div>
