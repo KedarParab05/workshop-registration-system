@@ -6,6 +6,7 @@ import {
   Send,
   MapPin,
   Clock,
+  Phone,
   CheckCircle2,
   AlertCircle,
   Sparkles,
@@ -169,7 +170,7 @@ export const ContactPage: React.FC = () => {
                     disabled={loading}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Alex Morgan"
+                    placeholder="e.g. Omkar Parelkar"
                     className="w-full px-3.5 py-2.5 rounded-xl text-xs border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] disabled:opacity-50"
                   />
                 </div>
@@ -185,7 +186,7 @@ export const ContactPage: React.FC = () => {
                     disabled={loading}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. alex@student.edu"
+                    placeholder="e.g. mca26.omkar.parelkar@gnims.com"
                     className="w-full px-3.5 py-2.5 rounded-xl text-xs border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] disabled:opacity-50"
                   />
                 </div>
@@ -237,10 +238,10 @@ export const ContactPage: React.FC = () => {
                 <Building2 className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-[#101410] dark:text-white font-heading font-semibold">
-                    Department of Computer Science & Engineering
+                    Master of Computer Applications (MCA)
                   </strong>
                   <span className="text-[#5E5E61] dark:text-slate-300">
-                    Academic Block 4, Computing Labs Complex
+                    Guru Nanak Institute of Management Studies (GNIMS)
                   </span>
                 </div>
               </div>
@@ -252,7 +253,22 @@ export const ContactPage: React.FC = () => {
                     Campus Location
                   </strong>
                   <span className="text-[#5E5E61] dark:text-slate-300">
-                    University Main Campus, Tech Hub Lane
+                    Guru Nanak Institute of Management Studies, Kings Circle, Matunga East, Mumbai, Maharashtra 400019
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Phone className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block text-[#101410] dark:text-white font-heading font-semibold">
+                    Direct Contact / Helpline
+                  </strong>
+                  <span className="text-[#5E5E61] dark:text-slate-300 flex items-center gap-1.5">
+                    <a href="tel:8657790811" className="font-semibold text-[#08482D] dark:text-[#DAE7C7] hover:underline">
+                      +91 86577 90811
+                    </a>
+                    <span>(Omkar Parelkar)</span>
                   </span>
                 </div>
               </div>
@@ -264,7 +280,7 @@ export const ContactPage: React.FC = () => {
                     Coordinator Hours
                   </strong>
                   <span className="text-[#5E5E61] dark:text-slate-300">
-                    Monday – Friday: 09:00 AM – 05:00 PM IST
+                    Monday – Saturday: 09:00 AM – 06:00 PM IST
                   </span>
                 </div>
               </div>
