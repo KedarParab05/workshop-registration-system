@@ -592,7 +592,7 @@ export const SuperAdminDashboard: React.FC = () => {
                     className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors text-xs ${
                       targetRole === r
                         ? 'border-[#08482D] bg-[#E8F0DF]/60 dark:bg-[#1b3025] font-semibold text-[#08482D] dark:text-[#9ee2b8]'
-                        : 'border-[#DCE4D6] dark:border-[#233d2e] text-[#5E5E61] dark:text-[#8ba895] hover:bg-[#F5F8EF]'
+                        : 'border-[#DCE4D6] dark:border-[#233d2e] text-[#5E5E61] dark:text-[#8ba895] hover:bg-[#F5F8EF] dark:hover:bg-[#1b3025]'
                     }`}
                   >
                     <span>{r}</span>
