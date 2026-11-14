@@ -98,7 +98,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             SECTION 2 — WHY KAUSHALYA (BENTO GRID OF CORE VALUES)
         ───────────────────────────────────────────────────────────── */}
         <section id="why-kaushalya" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24 sm:scroll-mt-28">
-          <div className="text-center max-w-2xl mx-auto space-y-3 px-2">
+          <div className="text-center max-w-2xl mx-auto space-y-3.5 px-3 sm:px-4">
             <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
               Why Kaushalya
             </span>
@@ -194,14 +194,14 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           SECTION 3 — HOW IT WORKS (4-STEP VISUAL STEPPER)
       ───────────────────────────────────────────────────────────── */}
       <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12 scroll-mt-24 sm:scroll-mt-28">
-        <div className="text-center max-w-2xl mx-auto space-y-3 px-2">
+        <div className="text-center max-w-2xl mx-auto space-y-3.5 px-3 sm:px-4">
           <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
             Clear 4-Step Process
           </span>
           <h2 className="text-[22px] xs:text-[26px] sm:text-[34px] lg:text-[44px] leading-tight lg:leading-[54px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
             How Registration &amp; Entry Works
           </h2>
-          <p className="text-xs sm:text-sm lg:text-base text-[#5E5E61] dark:text-slate-400 font-sans max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm lg:text-base text-[#5E5E61] dark:text-slate-400 font-sans leading-relaxed max-w-xl mx-auto">
             A frictionless journey from discovering a new technical track to entering the workshop lab.
           </p>
         </div>
@@ -343,14 +343,14 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           SECTION 5 — PRODUCT PREVIEW / PLATFORM TOUR (TAB SWITCHER)
       ───────────────────────────────────────────────────────────── */}
       <section id="platform-tour" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24 sm:scroll-mt-28">
-        <div className="text-center max-w-2xl mx-auto space-y-3 px-2">
+        <div className="text-center max-w-2xl mx-auto space-y-3.5 px-3 sm:px-4">
           <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
             Interactive Tour
           </span>
           <h2 className="text-[22px] xs:text-[26px] sm:text-[34px] lg:text-[44px] leading-tight lg:leading-[54px] font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-[-0.02em] break-words">
             Explore the Platform Experience
           </h2>
-          <p className="text-xs sm:text-sm lg:text-base text-[#5E5E61] dark:text-slate-400 font-sans max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm lg:text-base text-[#5E5E61] dark:text-slate-400 font-sans leading-relaxed max-w-xl mx-auto">
             A cohesive design system tailored for students, faculty mentors, and event gatekeepers.
           </p>
         </div>
