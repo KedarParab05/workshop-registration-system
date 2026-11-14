@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   ArrowRight,
-  Sparkles,
   CheckCircle2,
   Users,
   QrCode,
   Scan,
   HelpCircle,
   ChevronDown,
+  CreditCard,
+  Ticket,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -111,11 +112,11 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           </div>
 
           {/* Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             {/* Bento Card 1: Free & Paid Seating */}
-            <div className="md:col-span-2 p-5 sm:p-7 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-4">
+            <div className="md:col-span-2 p-6 sm:p-7 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center font-bold">
-                <Sparkles className="w-6 h-6" />
+                <CreditCard className="w-6 h-6" />
               </div>
               <div>
                 <span className="text-xs font-heading font-semibold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider">
@@ -131,7 +132,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             </div>
 
             {/* Bento Card 2: Cryptographic QR Passes */}
-            <div className="p-5 sm:p-7 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-4">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center font-bold">
                 <QrCode className="w-6 h-6" />
               </div>
@@ -149,7 +150,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             </div>
 
             {/* Bento Card 3: Live Seat Governance */}
-            <div className="p-5 sm:p-7 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-4">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center font-bold">
                 <Users className="w-6 h-6" />
               </div>
@@ -167,7 +168,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             </div>
 
             {/* Bento Card 4: In-Browser Gate Scanning */}
-            <div className="md:col-span-2 p-5 sm:p-7 rounded-3xl bg-[#08482D] text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+            <div className="md:col-span-2 p-6 sm:p-7 rounded-3xl bg-[#08482D] text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
               <div className="space-y-2 relative z-10">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DAE7C7] text-[#08482D] text-xs font-bold">
                   <Scan className="w-3.5 h-3.5" />
