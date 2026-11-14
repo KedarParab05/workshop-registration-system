@@ -93,11 +93,11 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
       </section>
 
       {/* Main content sections container with intentional, unified vertical rhythm */}
-      <div className="pt-16 sm:pt-24 lg:pt-32 space-y-20 sm:space-y-28 lg:space-y-36">
+      <div className="pt-10 sm:pt-14 lg:pt-16 space-y-16 sm:space-y-20 lg:space-y-24">
         {/* ─────────────────────────────────────────────────────────────
             SECTION 2 — WHY KAUSHALYA (BENTO GRID OF CORE VALUES)
         ───────────────────────────────────────────────────────────── */}
-        <section id="why-kaushalya" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24">
+        <section id="why-kaushalya" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24 sm:scroll-mt-28">
           <div className="text-center max-w-2xl mx-auto space-y-3 px-2">
             <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
               Why Kaushalya
@@ -193,7 +193,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
       {/* ─────────────────────────────────────────────────────────────
           SECTION 3 — HOW IT WORKS (4-STEP VISUAL STEPPER)
       ───────────────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12 scroll-mt-24">
+      <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12 scroll-mt-24 sm:scroll-mt-28">
         <div className="text-center max-w-2xl mx-auto space-y-3 px-2">
           <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
             Clear 4-Step Process
@@ -265,7 +265,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
       {/* ─────────────────────────────────────────────────────────────
           SECTION 4 — VOLUNTEER / EVENT-DAY GATE EXPERIENCE
       ───────────────────────────────────────────────────────────── */}
-      <section id="volunteer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24">
+      <section id="volunteer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24 sm:scroll-mt-28">
         <div className="bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-5 sm:p-8 lg:p-12 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
             {/* Left Column: Scanner Reticle Preview */}
@@ -342,7 +342,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
       {/* ─────────────────────────────────────────────────────────────
           SECTION 5 — PRODUCT PREVIEW / PLATFORM TOUR (TAB SWITCHER)
       ───────────────────────────────────────────────────────────── */}
-      <section id="platform-tour" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24">
+      <section id="platform-tour" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24 sm:scroll-mt-28">
         <div className="text-center max-w-2xl mx-auto space-y-3 px-2">
           <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
             Interactive Tour
@@ -502,7 +502,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
       {/* ─────────────────────────────────────────────────────────────
           SECTION 6 — FREQUENTLY ASKED QUESTIONS (BALANCED TWO-COLUMN LAYOUT)
       ───────────────────────────────────────────────────────────── */}
-      <section id="faq" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
+      <section id="faq" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24 sm:scroll-mt-28">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* Left Column: Eyebrow, Heading, Description & Contact Action */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
