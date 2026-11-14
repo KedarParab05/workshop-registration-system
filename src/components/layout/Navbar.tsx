@@ -50,6 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const roleDropdownRef = React.useRef<HTMLDivElement>(null);
 
   // Close menus on Escape key
   React.useEffect(() => {
@@ -62,6 +63,21 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Close role dropdown on click outside
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
+        setRoleDropdownOpen(false);
+      }
+    };
+    if (roleDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [roleDropdownOpen]);
 
   // Prevent background scrolling when mobile menu is open
   React.useEffect(() => {
@@ -94,23 +110,29 @@ export const Navbar: React.FC<NavbarProps> = ({
     navigateTo('home');
   };
 
-  // Smooth scroll handler for homepage sections
+  // Smooth scroll handler for homepage sections with offset compensation
   const scrollToSection = (sectionId: string) => {
     setMobileMenuOpen(false);
+    setRoleDropdownOpen(false);
+
+    const performScroll = () => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const headerOffset = 90;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        });
+      }
+    };
 
     if (activePage !== 'home') {
       navigateTo('home');
-      setTimeout(() => {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 150);
+      setTimeout(performScroll, 120);
     } else {
-      const el = document.getElementById(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      performScroll();
     }
   };
 
@@ -293,10 +315,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               </div>
             ) : currentUser ? (
-              <div className="relative">
+              <div className="relative" ref={roleDropdownRef}>
                 <button
                   onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                  className="flex items-center gap-2 py-1.5 px-3 rounded-full border border-[#DCE4D6] dark:border-[#203a2c] bg-white dark:bg-[#14231b] hover:border-[#08482D]/40 transition-colors text-xs font-medium shadow-xs"
+                  aria-expanded={roleDropdownOpen}
+                  aria-haspopup="true"
+                  className="flex items-center gap-2 py-1.5 px-3 rounded-full border border-[#DCE4D6] dark:border-[#203a2c] bg-white dark:bg-[#14231b] hover:border-[#08482D]/40 transition-colors text-xs font-medium shadow-xs cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-full bg-[#DAE7C7] text-[#08482D] flex items-center justify-center font-bold text-xs uppercase">
                     {currentUser.fullName.charAt(0)}
