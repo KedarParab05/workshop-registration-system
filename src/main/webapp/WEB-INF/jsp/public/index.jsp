@@ -29,7 +29,7 @@
             </div>
             <div class="col-lg-5">
                 <div class="card bg-secondary border-0 overflow-hidden shadow-lg">
-                    <img src="${pageContext.request.contextPath}/assets/images/hero_workshop_collab_1793237229343.jpg"
+                    <img src="${pageContext.request.contextPath}/assets/images/workshop-collaboration-hero.jpg"
                          class="card-img-top object-fit-cover"
                          style="height: 320px;"
                          alt="Academic Workshop Session"
@@ -61,7 +61,7 @@
                 <div class="card h-100 shadow-sm">
                     <div class="position-relative">
                         <img src="${ws.bannerImageUrl}" class="card-img-top object-fit-cover" style="height: 180px;" alt="${ws.title}"
-                             onerror="this.src='${pageContext.request.contextPath}/assets/images/banner_fullstack_web_1793237230200.jpg'">
+                             onerror="this.src='${pageContext.request.contextPath}/assets/images/fullstack-web-workshop-banner.jpg'">
                         <span class="badge bg-dark position-absolute top-0 end-0 m-2">100% Free</span>
                     </div>
                     <div class="card-body d-flex flex-col justify-content-between">

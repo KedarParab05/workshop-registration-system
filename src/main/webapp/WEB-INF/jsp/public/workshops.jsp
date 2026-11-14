@@ -56,7 +56,7 @@
                         <div class="card h-100 shadow-sm">
                             <div class="position-relative">
                                 <img src="${ws.bannerImageUrl}" class="card-img-top object-fit-cover" style="height: 180px;" alt="${ws.title}"
-                                     onerror="this.src='${pageContext.request.contextPath}/assets/images/banner_fullstack_web_1793237230200.jpg'">
+                                     onerror="this.src='${pageContext.request.contextPath}/assets/images/fullstack-web-workshop-banner.jpg'">
                                 <span class="badge bg-dark position-absolute top-0 start-0 m-2">Free</span>
                                 <c:if test="${ws.status == 'DRAFT'}">
                                     <span class="badge bg-warning position-absolute top-0 end-0 m-2">DRAFT</span>

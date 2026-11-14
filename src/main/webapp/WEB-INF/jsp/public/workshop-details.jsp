@@ -13,7 +13,7 @@
         <div class="col-lg-8">
             <div class="card overflow-hidden mb-4 shadow-sm">
                 <img src="${workshop.bannerImageUrl}" class="w-100 object-fit-cover" style="height: 320px;" alt="${workshop.title}"
-                     onerror="this.src='${pageContext.request.contextPath}/assets/images/banner_fullstack_web_1793237230200.jpg'">
+                     onerror="this.src='${pageContext.request.contextPath}/assets/images/fullstack-web-workshop-banner.jpg'">
                 <div class="card-body p-4">
                     <div class="text-muted small mb-2">
                         <span class="text-primary fw-bold">${workshop.category}</span> · Led by ${workshop.organizerNameSnapshot}
