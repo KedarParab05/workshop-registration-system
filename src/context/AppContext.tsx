@@ -13,6 +13,7 @@ import {
   INITIAL_WORKSHOPS,
   INITIAL_REGISTRATIONS,
   INITIAL_AUDIT_LOGS,
+  normalizeBannerUrl,
 } from '../data/seedData';
 import {
   validateWorkshopInput,
@@ -31,7 +32,9 @@ export type ActivePage =
   | 'organizer-workshops'
   | 'organizer-registrations'
   | 'volunteer-portal'
-  | 'admin-dashboard';
+  | 'admin-dashboard'
+  | 'our-story'
+  | 'contact';
 
 interface ToastAlert {
   id: string;
@@ -121,7 +124,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [workshops, setWorkshops] = useState<Workshop[]>(() => {
     const saved = localStorage.getItem('wh_workshops');
-    return saved ? JSON.parse(saved) : INITIAL_WORKSHOPS;
+    if (saved) {
+      try {
+        const list: Workshop[] = JSON.parse(saved);
+        return list.map((w) => ({ ...w, bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl) }));
+      } catch {}
+    }
+    return INITIAL_WORKSHOPS;
   });
 
   const [registrations, setRegistrations] = useState<Registration[]>(() => {
@@ -190,6 +199,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [activePage, setActivePage] = useState<ActivePage>(() => {
+    // Check direct URL hash or pathname first for dedicated pages
+    const hash = window.location.hash.toLowerCase();
+    const path = window.location.pathname.toLowerCase();
+    if (hash === '#our-story' || path.includes('/our-story')) return 'our-story';
+    if (hash === '#contact' || path.includes('/contact')) return 'contact';
+
     const isExplicitlyLoggedOut = localStorage.getItem('wh_logged_out') === 'true';
     if (isExplicitlyLoggedOut) return 'home';
 
@@ -216,8 +231,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [alerts, setAlerts] = useState<ToastAlert[]>([]);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('wh_theme');
-    if (saved === 'dark' || saved === 'light') return saved;
-    return 'dark';
+    // Strict requirement: Light mode is the default for first-time visitors
+    if (saved === 'dark') return 'dark';
+    return 'light';
   });
 
   useEffect(() => {
@@ -266,8 +282,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (wsRes.status === 'fulfilled' && wsRes.value.ok) {
         const wsData = await wsRes.value.json();
         if (wsData.success && Array.isArray(wsData.data)) {
-          setWorkshops(wsData.data);
-          localStorage.setItem('wh_workshops', JSON.stringify(wsData.data));
+          const normalized = wsData.data.map((w: Workshop) => ({
+            ...w,
+            bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
+          }));
+          setWorkshops(normalized);
+          localStorage.setItem('wh_workshops', JSON.stringify(normalized));
         }
       }
 
@@ -337,10 +357,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     setActivePage(page);
     localStorage.setItem('wh_active_page', page);
+
+    if (page === 'our-story') {
+      window.location.hash = 'our-story';
+    } else if (page === 'contact') {
+      window.location.hash = 'contact';
+    } else if (page === 'home') {
+      if (window.location.hash === '#our-story' || window.location.hash === '#contact') {
+        history.replaceState(null, '', window.location.pathname);
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
     // Immediate background fetch from MongoDB Atlas
     refreshData();
   };
+
+  // Sync navigation on browser hash change
+  useEffect(() => {
+    const handleHash = () => {
+      const h = window.location.hash.toLowerCase();
+      if (h === '#our-story') {
+        setActivePage('our-story');
+      } else if (h === '#contact') {
+        setActivePage('contact');
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // Continuous DB polling & window focus listener for real-time synchronization across devices
   useEffect(() => {
@@ -428,7 +473,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           } else if (data.user.role === 'ORGANIZER') {
             navigateTo('organizer-dashboard');
           } else {
-            navigateTo('workshops');
+            navigateTo('participant-dashboard');
           }
         }
       }
@@ -461,7 +506,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           } else if (data.user.role === 'ORGANIZER') {
             navigateTo('organizer-dashboard');
           } else {
-            navigateTo('workshops');
+            navigateTo('participant-dashboard');
           }
           await refreshData();
           return true;
@@ -851,7 +896,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       summary: data.summary.trim(),
       description: data.description.trim(),
       category: data.category.trim(),
-      bannerImageUrl: data.bannerImageUrl || '/assets/images/banner_fullstack_web.jpg',
+      bannerImageUrl: data.bannerImageUrl || '/assets/images/fullstack-web-workshop-banner.jpg',
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
