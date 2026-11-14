@@ -118,15 +118,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* ─────────────────────────────────────────────────────────────
           FLOATING CENTERED ROUNDED CAPSULE NAVBAR
       ───────────────────────────────────────────────────────────── */}
-      <div className="w-full max-w-6xl pointer-events-auto bg-[#F5F8EF]/95 dark:bg-[#0c1610]/95 backdrop-blur-md rounded-full border border-[#DCE4D6] dark:border-[#203a2c] shadow-lg shadow-[#08482D]/5 px-4 sm:px-6 py-2.5 transition-all duration-200">
-        <div className="flex items-center justify-between gap-3 sm:gap-6">
+      <div className="w-full max-w-7xl pointer-events-auto bg-[#F5F8EF]/95 dark:bg-[#0c1610]/95 backdrop-blur-md rounded-full border border-[#DCE4D6] dark:border-[#203a2c] shadow-lg shadow-[#08482D]/5 px-4 sm:px-6 py-2 sm:py-2.5 transition-all duration-200">
+        <div className="flex items-center justify-between gap-3 lg:gap-6">
           {/* Brand: Kaushalya Official Logo */}
           <button
             onClick={() => {
               setMobileMenuOpen(false);
               navigateTo('home');
             }}
-            className="flex items-center text-left group shrink-0 transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] rounded-full py-0.5"
+            className="flex items-center text-left group shrink-0 transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] rounded-full py-0.5 cursor-pointer"
             aria-label="Kaushalya Home"
           >
             {/* Desktop & Laptop Full Logo (md and above: 240px–280px) */}
@@ -156,25 +156,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </button>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2 text-sm font-heading font-semibold text-[#5E5E61] dark:text-[#9eb3a2]">
+          {/* Desktop Navigation Links — Centered, No Two-Line Wrapping */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs xl:text-sm font-heading font-semibold text-[#5E5E61] dark:text-[#9eb3a2]">
             {/* 1. Discover Workshops */}
             <button
               onClick={() => navigateTo('workshops')}
-              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 activePage === 'workshops'
                   ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                   : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
               <span>Discover Workshops</span>
             </button>
 
             {/* 2. How It Works */}
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="px-3.5 py-2 rounded-full transition-all hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] cursor-pointer"
+              className="px-3 xl:px-3.5 py-2 rounded-full transition-all hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] cursor-pointer whitespace-nowrap shrink-0"
             >
               How It Works
             </button>
@@ -182,26 +182,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* 3. Our Story (Direct visible public navigation destination) */}
             <button
               onClick={() => navigateTo('our-story')}
-              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 activePage === 'our-story'
                   ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                   : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
               <span>Our Story</span>
             </button>
 
             {/* 4. Contact Team (Direct visible public navigation destination) */}
             <button
               onClick={() => navigateTo('contact')}
-              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 activePage === 'contact'
                   ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                   : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
               <span>Contact Team</span>
             </button>
 
@@ -209,13 +209,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             {currentUser?.role === 'ORGANIZER' && (
               <button
                 onClick={() => navigateTo('organizer-dashboard')}
-                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                   activePage === 'organizer-dashboard'
                     ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                     : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
-                <PlusCircle className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                <PlusCircle className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
                 <span>Organizer Studio</span>
               </button>
             )}
@@ -223,13 +223,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             {(currentVolunteer || currentUser?.role === 'VOLUNTEER') && (
               <button
                 onClick={() => navigateTo('volunteer-portal')}
-                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                   activePage === 'volunteer-portal'
                     ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                     : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
-                <Scan className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                <Scan className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
                 <span>Gate Station</span>
               </button>
             )}
@@ -238,25 +238,25 @@ export const Navbar: React.FC<NavbarProps> = ({
               <>
                 <button
                   onClick={() => navigateTo('participant-dashboard')}
-                  className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                     activePage === 'participant-dashboard'
                       ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                       : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                   }`}
                 >
-                  <GraduationCap className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <GraduationCap className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
                   <span>Student Desk</span>
                 </button>
 
                 <button
                   onClick={() => navigateTo('my-registrations')}
-                  className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                     activePage === 'my-registrations'
                       ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                       : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                   }`}
                 >
-                  <QrCode className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <QrCode className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
                   <span>My Passes</span>
                 </button>
               </>
@@ -265,20 +265,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             {currentUser?.role === 'SUPER_ADMIN' && (
               <button
                 onClick={() => navigateTo('admin-dashboard')}
-                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                   activePage === 'admin-dashboard'
                     ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
                     : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
-                <ShieldAlert className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                <ShieldAlert className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
                 <span>Governance Console</span>
               </button>
             )}
           </nav>
 
           {/* Right Controls: Theme Toggle & Prominent Auth Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Theme Toggle */}
             <motion.button
               whileTap={{ scale: 0.92 }}
