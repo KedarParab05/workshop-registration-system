@@ -55,7 +55,7 @@ export const ParticipantDashboard: React.FC = () => {
       >
         <div className="space-y-2 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-semibold bg-[#DAE7C7] text-[#08482D]">
-            <Sparkles className="w-3.5 h-3.5" />
+            <GraduationCap className="w-3.5 h-3.5" />
             <span>Student Learning Desk</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-[#F5F8EF]">
@@ -63,7 +63,7 @@ export const ParticipantDashboard: React.FC = () => {
           </h1>
           <p className="text-xs sm:text-sm text-[#DAE7C7]/90 max-w-xl leading-relaxed">
             You are enrolled in <strong className="text-white font-mono">{confirmedRegistrations.length}</strong> active academic sessions.
-            All workshops are completely free. Access your schedule, digital QR passes, and venue maps below.
+            Access your schedule, verified digital QR passes, and venue maps below for both free and paid masterclasses.
           </p>
         </div>
 
