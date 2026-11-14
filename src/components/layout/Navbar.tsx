@@ -452,51 +452,79 @@ export const Navbar: React.FC<NavbarProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.2 }}
-              className="w-full max-w-sm pointer-events-auto mt-2 bg-white dark:bg-[#122218] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-2xl p-5 space-y-2 text-sm font-heading font-semibold z-40 relative"
+              className="w-full max-w-[calc(100vw-24px)] sm:max-w-sm max-h-[85vh] overflow-y-auto pointer-events-auto mt-2 bg-white/95 dark:bg-[#122218]/95 backdrop-blur-xl rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-2xl p-4 sm:p-5 space-y-1.5 text-sm font-heading font-semibold z-40 relative"
             >
-            {/* 1. Discover Workshops */}
-            <button
-              onClick={() => {
-                navigateTo('workshops');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
-            >
-              <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-              <span>Discover Workshops</span>
-            </button>
+              {/* Mobile Drawer Header with Close & Section Label */}
+              <div className="flex items-center justify-between pb-3 mb-1 border-b border-[#DCE4D6]/70 dark:border-[#203a2c]/70">
+                <span className="text-[11px] uppercase tracking-wider font-sans font-bold text-[#5E5E61] dark:text-[#9eb3a2]">
+                  Explore Kaushalya
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-full hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#5E5E61] dark:text-[#9eb3a2] transition-colors cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-            {/* 2. How It Works */}
-            <button
-              onClick={() => scrollToSection('how-it-works')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] cursor-pointer"
-            >
-              How It Works
-            </button>
+              {/* 1. Discover Workshops */}
+              <button
+                onClick={() => {
+                  navigateTo('workshops');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left py-2.5 px-3.5 rounded-2xl flex items-center gap-2.5 cursor-pointer transition-colors ${
+                  activePage === 'workshops'
+                    ? 'bg-[#DAE7C7]/70 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] font-bold'
+                    : 'text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
+                }`}
+              >
+                <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
+                <span>Discover Workshops</span>
+              </button>
 
-            {/* 3. Our Story (Direct visible public navigation) */}
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                navigateTo('our-story');
-              }}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
-            >
-              <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-              <span>Our Story</span>
-            </button>
+              {/* 2. How It Works */}
+              <button
+                onClick={() => scrollToSection('how-it-works')}
+                className="w-full text-left py-2.5 px-3.5 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2.5 cursor-pointer transition-colors"
+              >
+                <Sparkles className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
+                <span>How It Works</span>
+              </button>
 
-            {/* 4. Contact Team (Direct visible public navigation) */}
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                navigateTo('contact');
-              }}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
-            >
-              <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-              <span>Contact Team</span>
-            </button>
+              {/* 3. Our Story */}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigateTo('our-story');
+                }}
+                className={`w-full text-left py-2.5 px-3.5 rounded-2xl flex items-center gap-2.5 cursor-pointer transition-colors ${
+                  activePage === 'our-story'
+                    ? 'bg-[#DAE7C7]/70 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] font-bold'
+                    : 'text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
+                }`}
+              >
+                <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
+                <span>Our Story</span>
+              </button>
+
+              {/* 4. Contact Team */}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigateTo('contact');
+                }}
+                className={`w-full text-left py-2.5 px-3.5 rounded-2xl flex items-center gap-2.5 cursor-pointer transition-colors ${
+                  activePage === 'contact'
+                    ? 'bg-[#DAE7C7]/70 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] font-bold'
+                    : 'text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
+                }`}
+              >
+                <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
+                <span>Contact Team</span>
+              </button>
 
             {/* Role-Specific Navigation Items */}
             {currentUser?.role === 'ORGANIZER' && (
