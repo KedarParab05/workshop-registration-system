@@ -269,7 +269,7 @@ export const MyRegistrations: React.FC = () => {
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#DCE4D6] dark:border-[#233d2e]">
                 <button
                   onClick={() => setSelectedRegToCancel(null)}
-                  className="px-4 py-2 text-xs font-heading font-semibold text-[#5E5E61] hover:bg-[#E8F0DF] rounded-xl"
+                  className="px-4 py-2 text-xs font-heading font-semibold text-[#5E5E61] dark:text-[#95ad9e] hover:bg-[#E8F0DF] dark:hover:bg-[#1a3325] rounded-xl transition-colors cursor-pointer"
                 >
                   Keep Seat
                 </button>
