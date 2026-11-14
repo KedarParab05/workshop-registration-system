@@ -10,16 +10,9 @@ import {
   PlusCircle,
   Sun,
   Moon,
-  Sparkles,
   User as UserIcon,
   ShieldAlert,
-  Compass,
-  HelpCircle,
-  Info,
-  BookOpen,
-  Mail,
   GraduationCap,
-  Briefcase,
   Scan,
   QrCode,
 } from 'lucide-react';
@@ -154,60 +147,71 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Desktop Navigation Links — Centered, No Two-Line Wrapping */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs xl:text-sm font-heading font-semibold text-[#5E5E61] dark:text-[#9eb3a2]">
-            {/* 1. Discover Workshops */}
+            {/* 1. Discover */}
             <button
               onClick={() => navigateTo('workshops')}
-              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activePage === 'workshops'
-                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
                   : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
-              <span>Discover Workshops</span>
+              <span>Discover</span>
             </button>
 
-            {/* 2. How It Works */}
+            {/* 2. Process */}
             <button
               onClick={() => scrollToSection('how-it-works')}
               className="px-3 xl:px-3.5 py-2 rounded-full transition-all hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] cursor-pointer whitespace-nowrap shrink-0"
             >
-              How It Works
+              <span>Process</span>
             </button>
 
-            {/* 3. Our Story (Direct visible public navigation destination) */}
+            {/* 3. Our Story */}
             <button
               onClick={() => navigateTo('our-story')}
-              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activePage === 'our-story'
-                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
                   : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
               <span>Our Story</span>
             </button>
 
-            {/* 4. Contact Team (Direct visible public navigation destination) */}
+            {/* 4. Contact */}
             <button
               onClick={() => navigateTo('contact')}
-              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-3 xl:px-3.5 py-2 rounded-full transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activePage === 'contact'
-                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
                   : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
-              <span>Contact Team</span>
+              <span>Contact</span>
             </button>
 
             {/* Role-Aware Authenticated Navigation (Strictly Role-Specific) */}
+            {currentUser?.role === 'SUPER_ADMIN' && (
+              <button
+                onClick={() => navigateTo('admin-dashboard')}
+                className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                  activePage === 'admin-dashboard'
+                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
+                    : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
+                }`}
+              >
+                <ShieldAlert className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
+                <span>Dashboard</span>
+              </button>
+            )}
+
             {currentUser?.role === 'ORGANIZER' && (
               <button
                 onClick={() => navigateTo('organizer-dashboard')}
                 className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                   activePage === 'organizer-dashboard'
-                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
                     : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
@@ -221,7 +225,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => navigateTo('volunteer-portal')}
                 className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                   activePage === 'volunteer-portal'
-                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
                     : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
@@ -236,7 +240,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => navigateTo('participant-dashboard')}
                   className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                     activePage === 'participant-dashboard'
-                      ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                      ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
                       : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                   }`}
                 >
@@ -248,7 +252,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => navigateTo('my-registrations')}
                   className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                     activePage === 'my-registrations'
-                      ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                      ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold shadow-xs'
                       : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                   }`}
                 >
@@ -256,20 +260,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span>My Passes</span>
                 </button>
               </>
-            )}
-
-            {currentUser?.role === 'SUPER_ADMIN' && (
-              <button
-                onClick={() => navigateTo('admin-dashboard')}
-                className={`px-3 xl:px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                  activePage === 'admin-dashboard'
-                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
-                    : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
-                }`}
-              >
-                <ShieldAlert className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
-                <span>Governance Console</span>
-              </button>
             )}
           </nav>
 
@@ -371,11 +361,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                       {currentUser.role === 'SUPER_ADMIN' && (
                         <button
-                          onClick={() => navigateTo('admin-dashboard')}
-                          className="w-full text-left px-4 py-2.5 text-[#08482D] dark:text-[#DAE7C7] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] flex items-center gap-2 font-semibold"
+                          onClick={() => {
+                            setRoleDropdownOpen(false);
+                            navigateTo('admin-dashboard');
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-[#08482D] dark:text-[#DAE7C7] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] flex items-center gap-2 font-semibold cursor-pointer"
                         >
                           <ShieldAlert className="w-4 h-4" />
-                          <span>Governance Console</span>
+                          <span>Dashboard</span>
                         </button>
                       )}
 
@@ -452,11 +445,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               transition={{ duration: 0.2 }}
               className="w-full max-w-[calc(100vw-24px)] sm:max-w-sm max-h-[85vh] overflow-y-auto pointer-events-auto mt-2 bg-white/95 dark:bg-[#122218]/95 backdrop-blur-xl rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-2xl p-4 sm:p-5 space-y-1.5 text-sm font-heading font-semibold z-40 relative"
             >
-              {/* Mobile Drawer Header with Close & Section Label */}
+              {/* Mobile Drawer Header with Compact BrandLogo & Close */}
               <div className="flex items-center justify-between pb-3 mb-1 border-b border-[#DCE4D6]/70 dark:border-[#203a2c]/70">
-                <span className="text-[11px] uppercase tracking-wider font-sans font-bold text-[#5E5E61] dark:text-[#9eb3a2]">
-                  Explore Kaushalya
-                </span>
+                <BrandLogo
+                  size="sm"
+                  showTagline={false}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigateTo('home');
+                  }}
+                />
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
@@ -467,29 +465,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               </div>
 
-              {/* 1. Discover Workshops */}
+              {/* 1. Discover */}
               <button
                 onClick={() => {
                   navigateTo('workshops');
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full text-left py-2.5 px-3.5 rounded-2xl flex items-center gap-2.5 cursor-pointer transition-colors ${
+                className={`w-full text-left py-2.5 px-3.5 rounded-2xl cursor-pointer transition-colors ${
                   activePage === 'workshops'
                     ? 'bg-[#DAE7C7]/70 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] font-bold'
                     : 'text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
-                <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
-                <span>Discover Workshops</span>
+                <span>Discover</span>
               </button>
 
-              {/* 2. How It Works */}
+              {/* 2. Process */}
               <button
                 onClick={() => scrollToSection('how-it-works')}
-                className="w-full text-left py-2.5 px-3.5 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2.5 cursor-pointer transition-colors"
+                className="w-full text-left py-2.5 px-3.5 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] cursor-pointer transition-colors"
               >
-                <Sparkles className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
-                <span>How It Works</span>
+                <span>Process</span>
               </button>
 
               {/* 3. Our Story */}
@@ -498,40 +494,51 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setMobileMenuOpen(false);
                   navigateTo('our-story');
                 }}
-                className={`w-full text-left py-2.5 px-3.5 rounded-2xl flex items-center gap-2.5 cursor-pointer transition-colors ${
+                className={`w-full text-left py-2.5 px-3.5 rounded-2xl cursor-pointer transition-colors ${
                   activePage === 'our-story'
                     ? 'bg-[#DAE7C7]/70 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] font-bold'
                     : 'text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
-                <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
                 <span>Our Story</span>
               </button>
 
-              {/* 4. Contact Team */}
+              {/* 4. Contact */}
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   navigateTo('contact');
                 }}
-                className={`w-full text-left py-2.5 px-3.5 rounded-2xl flex items-center gap-2.5 cursor-pointer transition-colors ${
+                className={`w-full text-left py-2.5 px-3.5 rounded-2xl cursor-pointer transition-colors ${
                   activePage === 'contact'
                     ? 'bg-[#DAE7C7]/70 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] font-bold'
                     : 'text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
-                <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
-                <span>Contact Team</span>
+                <span>Contact</span>
               </button>
 
             {/* Role-Specific Navigation Items */}
+            {currentUser?.role === 'SUPER_ADMIN' && (
+              <button
+                onClick={() => {
+                  navigateTo('admin-dashboard');
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full text-left py-2.5 px-3.5 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer font-semibold"
+              >
+                <ShieldAlert className="w-4 h-4" />
+                <span>Dashboard</span>
+              </button>
+            )}
+
             {currentUser?.role === 'ORGANIZER' && (
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   navigateTo('organizer-dashboard');
                 }}
-                className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer"
+                className="w-full text-left py-2.5 px-3.5 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer font-semibold"
               >
                 <PlusCircle className="w-4 h-4" />
                 <span>Organizer Studio</span>
@@ -544,7 +551,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setMobileMenuOpen(false);
                   navigateTo('volunteer-portal');
                 }}
-                className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer"
+                className="w-full text-left py-2.5 px-3.5 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer font-semibold"
               >
                 <Scan className="w-4 h-4" />
                 <span>Gate Volunteer Station</span>
@@ -558,7 +565,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     navigateTo('participant-dashboard');
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer font-semibold"
+                  className="w-full text-left py-2.5 px-3.5 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer font-semibold"
                 >
                   <GraduationCap className="w-4 h-4" />
                   <span>Student Learning Desk</span>
@@ -568,25 +575,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                     navigateTo('my-registrations');
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
+                  className="w-full text-left py-2.5 px-3.5 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
                 >
                   <QrCode className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
                   <span>My Passes & QR Tickets</span>
                 </button>
               </>
-            )}
-
-            {currentUser?.role === 'SUPER_ADMIN' && (
-              <button
-                onClick={() => {
-                  navigateTo('admin-dashboard');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer"
-              >
-                <ShieldAlert className="w-4 h-4" />
-                <span>Governance Console</span>
-              </button>
             )}
 
             <div className="pt-3 border-t border-[#DCE4D6] dark:border-[#203a2c] space-y-2">

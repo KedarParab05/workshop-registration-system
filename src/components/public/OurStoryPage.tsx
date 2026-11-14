@@ -2,7 +2,6 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Compass,
-  Sparkles,
   BookOpen,
   Award,
   Users,
@@ -79,25 +78,15 @@ export const OurStoryPage: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────
           HERO EDITORIAL HEADER
       ───────────────────────────────────────────────────────────── */}
-      <section className="text-center max-w-3xl mx-auto space-y-5">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DAE7C7] text-[#08482D] text-xs font-heading font-bold"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>About & Philosophy</span>
-        </motion.div>
-
+      <section className="text-center max-w-3xl mx-auto space-y-6 pt-2 sm:pt-4">
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.05 }}
+          transition={{ duration: 0.35 }}
           className="text-3xl sm:text-5xl lg:text-6xl font-display font-normal sm:font-medium text-[#101410] dark:text-[#f0f5ee] tracking-tight leading-tight break-words px-2"
         >
           The Spirit of Kaushalya
-          <span className="block text-2xl sm:text-3xl font-sans font-medium text-[#08482D] dark:text-[#DAE7C7] mt-1">
+          <span className="block text-2xl sm:text-3xl font-sans font-medium text-[#08482D] dark:text-[#DAE7C7] mt-1.5">
             (कौशल्य)
           </span>
         </motion.h1>
