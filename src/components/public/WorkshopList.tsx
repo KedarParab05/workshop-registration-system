@@ -10,7 +10,7 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowRight,
-  Sparkles,
+  BookOpen,
   X,
   Compass,
 } from 'lucide-react';
@@ -82,7 +82,7 @@ export const WorkshopList: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#DCE4D6] dark:border-[#233d2e] pb-6">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-semibold bg-[#DAE7C7] dark:bg-[#1e3828] text-[#08482D] dark:text-[#9ee2b8] mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
+            <BookOpen className="w-3.5 h-3.5" />
             <span>Academic Schedule & Discovery</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-heading font-bold text-[#101410] dark:text-[#f0f5ee] tracking-tight">
@@ -209,7 +209,7 @@ export const WorkshopList: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
           {filteredWorkshops.map((workshop) => {
             const seats = calculateSeats(workshop, registrations);
             return (
@@ -218,8 +218,8 @@ export const WorkshopList: React.FC = () => {
                 whileHover={{ y: -4 }}
                 className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] overflow-hidden shadow-xs hover:shadow-xl transition-all flex flex-col justify-between"
               >
-                {/* Banner Thumbnail */}
-                <div className="relative h-44 bg-[#E8F0DF] dark:bg-[#1b3025] overflow-hidden">
+                {/* Banner Thumbnail with 16:10 Aspect Ratio */}
+                <div className="relative aspect-[16/10] bg-[#E8F0DF] dark:bg-[#1b3025] overflow-hidden">
                   <img
                     src={workshop.bannerImageUrl}
                     alt={workshop.title}
@@ -229,10 +229,10 @@ export const WorkshopList: React.FC = () => {
                       e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
                     }}
                   />
-                  <div className="absolute top-3 left-3 bg-[#DAE7C7] text-[#08482D] text-[10px] font-heading font-bold px-2.5 py-1 rounded-full shadow-xs">
+                  <div className="absolute top-3 left-3 bg-[#DAE7C7] text-[#08482D] text-[10px] font-heading font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap">
                     {workshop.category}
                   </div>
-                  <div className={`absolute top-3 right-3 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shadow-xs ${
+                  <div className={`absolute top-3 right-3 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap ${
                     workshop.pricingType === 'PAID'
                       ? 'bg-[#08482D] text-[#DAE7C7] border border-[#DAE7C7]/40'
                       : 'bg-[#08482D] text-[#F5F8EF]'
@@ -279,8 +279,8 @@ export const WorkshopList: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Card Footer */}
-                  <div className="pt-3 border-t border-[#DCE4D6]/70 dark:border-[#233d2e] flex items-center justify-between">
+                  {/* Card Footer with Mobile-Friendly Action */}
+                  <div className="pt-3 border-t border-[#DCE4D6]/70 dark:border-[#233d2e] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div className="text-xs">
                       {seats.isFull ? (
                         <span className="text-rose-600 font-semibold">0 seats remaining</span>
@@ -293,9 +293,10 @@ export const WorkshopList: React.FC = () => {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => navigateTo('workshop-detail', workshop.id)}
-                      className="px-3.5 py-1.5 text-xs font-heading font-semibold text-[#08482D] dark:text-[#9ee2b8] bg-[#E8F0DF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] rounded-xl transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 text-xs font-heading font-semibold text-[#08482D] dark:text-[#9ee2b8] bg-[#E8F0DF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] dark:hover:bg-[#223f2f] rounded-xl transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
                     >
-                      View Details
+                      <span>View Details</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </motion.button>
                   </div>
                 </div>
