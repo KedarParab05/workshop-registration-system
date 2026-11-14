@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { RefreshCw, Sparkles, ShieldCheck, Mail, MapPin, Compass, BookOpen, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { BrandLogo } from '../common/BrandLogo';
+import { RefreshCw, ShieldCheck, Mail, MapPin, Compass, BookOpen, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface FooterProps {
   onOpenAuth?: () => void;
@@ -26,48 +27,21 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAuth, onOpenRoleSelector }
   return (
     <footer className="bg-[#08482D] dark:bg-[#07160f] text-[#DAE7C7]/80 dark:text-[#95ad9e] text-xs border-t border-[#0b5c3b] dark:border-[#1a3826] mt-auto transition-colors relative overflow-hidden grid-background-footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-8 mb-10 sm:mb-12">
           {/* Brand & Mission Column */}
           <div className="space-y-4 lg:col-span-2">
-            <button
+            <BrandLogo
+              size="md"
+              inverseText={true}
               onClick={() => navigateTo('home')}
-              className="flex items-center gap-2.5 text-left group focus:outline-none cursor-pointer"
-              aria-label="Kaushalya Home"
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#DAE7C7] text-[#08482D] flex items-center justify-center shadow-md font-bold group-hover:scale-105 transition-transform">
-                <svg
-                  className="w-5 h-5 text-[#08482D]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-heading font-extrabold text-xl tracking-tight text-white leading-none">
-                    Kaushalya
-                  </span>
-                  <span className="text-[11px] font-sans font-semibold text-[#08482D] bg-[#DAE7C7] px-1.5 py-0.5 rounded-md">
-                    कौशल्य
-                  </span>
-                </div>
-                <span className="text-[10px] text-[#DAE7C7]/90 font-medium tracking-wider uppercase block mt-1">
-                  Learn. Build. Grow.
-                </span>
-              </div>
-            </button>
+            />
 
             <p className="text-[#DAE7C7]/80 dark:text-[#95ad9e] text-xs leading-relaxed max-w-sm font-sans">
               An academic-first workshop discovery and seat capacity governance platform. Dedicated to hands-on technical learning, tamper-proof digital QR passes, and transparent collegiate event operations.
             </p>
 
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0b5c3b]/70 dark:bg-[#12281c] text-[#DAE7C7] text-[11px] font-heading font-medium border border-[#DAE7C7]/20 shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#DAE7C7] shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#DAE7C7] shrink-0" />
               <span>Free &amp; Paid Academic Sessions · Razorpay Test Checkout</span>
             </div>
           </div>
