@@ -15,6 +15,9 @@ import {
   Briefcase,
   LogIn,
   UserPlus,
+  ShieldAlert,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { apiFetch, saveToken } from '../../utils/api';
@@ -37,6 +40,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
+  const [activeDemoEmail, setActiveDemoEmail] = useState<string | null>(null);
+  const [showAllStudents, setShowAllStudents] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -102,8 +107,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } else if (mapped.role === 'VOLUNTEER') {
       navigateTo('volunteer-portal');
     } else {
-      navigateTo('workshops');
+      navigateTo('participant-dashboard');
     }
+  };
+
+  const parseAuthResponse = async (res: Response) => {
+    let data: any = {};
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+    return data;
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -127,18 +142,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         method: 'POST',
         body: JSON.stringify({ email: trimmedEmail, password }),
       });
-      const data = await res.json();
+      const data = await parseAuthResponse(res);
 
       if (res.ok && data.success && data.token) {
         saveToken(data.token);
         applyBackendUser(data.user);
         showAlert(`Welcome back, ${data.user.fullName}!`, 'success');
         onClose();
+      } else if (res.status === 401) {
+        setErrorMsg('Email or password is incorrect.');
+      } else if (res.status === 403) {
+        setErrorMsg('Your account has been suspended.');
+      } else if (res.status === 502 || res.status === 503 || res.status === 504) {
+        setErrorMsg("We couldn't connect to the server. Please try again.");
+      } else if (data.error) {
+        setErrorMsg(data.error);
       } else {
-        setErrorMsg(data.error || 'Invalid email or password. Please try again.');
+        setErrorMsg('Something went wrong. Please try again shortly.');
       }
     } catch {
-      setErrorMsg('Could not connect to the server. Please check your network connection.');
+      setErrorMsg("We couldn't connect to the server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -179,18 +202,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }),
       });
 
-      const data = await res.json();
+      const data = await parseAuthResponse(res);
 
       if (res.ok && data.success && data.token) {
         saveToken(data.token);
         applyBackendUser(data.user);
         showAlert(`Welcome to Kaushalya, ${data.user.fullName}!`, 'success');
         onClose();
+      } else if (res.status === 400 && data.error && data.error.toLowerCase().includes('already exists')) {
+        setErrorMsg('An account with this email already exists.');
+      } else if (res.status === 502 || res.status === 503 || res.status === 504) {
+        setErrorMsg("We couldn't connect to the server. Please try again.");
+      } else if (data.error) {
+        setErrorMsg(data.error);
       } else {
-        setErrorMsg(data.error || 'Registration failed. Please check your details and try again.');
+        setErrorMsg('Something went wrong. Please try again shortly.');
       }
     } catch {
-      setErrorMsg('Could not reach the server. Please check your connection.');
+      setErrorMsg("We couldn't connect to the server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -198,26 +227,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // 1-Click Fast Switch for Evaluators
   const handleDemoSwitch = async (demoEmail: string) => {
+    if (loading) return;
     setErrorMsg('');
     setLoading(true);
+    setActiveDemoEmail(demoEmail);
     try {
       const res = await apiFetch('/api/auth/switch-demo', {
         method: 'POST',
         body: JSON.stringify({ email: demoEmail }),
       });
-      const data = await res.json();
+      const data = await parseAuthResponse(res);
       if (res.ok && data.success && data.token) {
         saveToken(data.token);
         applyBackendUser(data.user);
         showAlert(`Signed in as demo persona: ${data.user.fullName}`, 'success');
         onClose();
+      } else if (res.status === 502 || res.status === 503 || res.status === 504) {
+        setErrorMsg("We couldn't connect to the server. Please try again.");
+      } else if (data.error) {
+        setErrorMsg(data.error);
       } else {
-        setErrorMsg(data.error || 'Could not switch to demo user.');
+        setErrorMsg('Something went wrong. Please try again shortly.');
       }
     } catch {
-      setErrorMsg('Failed to connect to authentication server.');
+      setErrorMsg("We couldn't connect to the server. Please try again.");
     } finally {
       setLoading(false);
+      setActiveDemoEmail(null);
     }
   };
 
@@ -561,42 +597,189 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {/* Instant Evaluation Demo Personas */}
-          <div className="mt-5 pt-4 border-t border-[#DCE4D6] dark:border-[#233d2e] space-y-2">
+          <div className="mt-5 pt-4 border-t border-[#DCE4D6] dark:border-[#233d2e] space-y-2.5">
             <div className="flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
-              <span className="font-heading font-semibold flex items-center gap-1 text-[#08482D] dark:text-[#DAE7C7]">
-                <Sparkles className="w-3 h-3" />
-                <span>Instant Demo Login (Evaluators):</span>
+              <span className="font-heading font-semibold flex items-center gap-1.5 text-[#08482D] dark:text-[#DAE7C7]">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Instant Demo Login</span>
               </span>
-              <span className="text-[10px]">1-click sign in</span>
+              <span className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">1-Click Evaluation</span>
             </div>
 
-            <div className="grid grid-cols-3 gap-1.5">
+            <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] leading-relaxed">
+              Explore Kaushalya using our preconfigured demo accounts.
+            </p>
+
+            {/* Primary 3 Demo Cards */}
+            <div className="grid grid-cols-3 gap-2">
+              {/* Student Demo Login */}
               <button
                 type="button"
-                onClick={() => handleDemoSwitch('alex.morgan@student.edu')}
-                className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors text-[10px]"
+                disabled={loading}
+                onClick={() => handleDemoSwitch('aary.nikam@student.edu')}
+                className={`p-2 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
+                  activeDemoEmail === 'aary.nikam@student.edu'
+                    ? 'border-[#08482D] bg-[#DAE7C7]/50 dark:bg-[#1a3826]'
+                    : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:border-[#08482D] dark:hover:border-[#DAE7C7] hover:bg-white dark:hover:bg-[#14231b]'
+                } ${loading && activeDemoEmail !== 'aary.nikam@student.edu' ? 'opacity-50 pointer-events-none' : ''}`}
               >
-                <div className="font-heading font-bold truncate">Alex Morgan</div>
-                <div className="text-[#5E5E61] dark:text-[#8ba895] truncate">Student</div>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="w-5 h-5 rounded-lg bg-[#DAE7C7] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
+                    {activeDemoEmail === 'aary.nikam@student.edu' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <GraduationCap className="w-3 h-3" />
+                    )}
+                  </div>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#E8F0DF] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
+                    Student
+                  </span>
+                </div>
+                <div className="font-heading font-bold text-[11px] text-[#101410] dark:text-[#f0f5ee] truncate">
+                  Aary Nikam
+                </div>
+                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
+                  Demo Attendee
+                </div>
               </button>
 
+              {/* Organizer Demo Login */}
               <button
                 type="button"
+                disabled={loading}
                 onClick={() => handleDemoSwitch('sarah.lin@faculty.edu')}
-                className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors text-[10px]"
+                className={`p-2 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
+                  activeDemoEmail === 'sarah.lin@faculty.edu'
+                    ? 'border-[#08482D] bg-[#DAE7C7]/50 dark:bg-[#1a3826]'
+                    : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:border-[#08482D] dark:hover:border-[#DAE7C7] hover:bg-white dark:hover:bg-[#14231b]'
+                } ${loading && activeDemoEmail !== 'sarah.lin@faculty.edu' ? 'opacity-50 pointer-events-none' : ''}`}
               >
-                <div className="font-heading font-bold truncate">Dr. Sarah Lin</div>
-                <div className="text-[#5E5E61] dark:text-[#8ba895] truncate">Organizer</div>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="w-5 h-5 rounded-lg bg-[#DAE7C7] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
+                    {activeDemoEmail === 'sarah.lin@faculty.edu' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Briefcase className="w-3 h-3" />
+                    )}
+                  </div>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#E8F0DF] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
+                    Organizer
+                  </span>
+                </div>
+                <div className="font-heading font-bold text-[11px] text-[#101410] dark:text-[#f0f5ee] truncate">
+                  Dr. Sarah Lin
+                </div>
+                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
+                  Faculty Host
+                </div>
               </button>
 
+              {/* Admin Demo Login */}
               <button
                 type="button"
+                disabled={loading}
                 onClick={() => handleDemoSwitch('admin@workshophub.edu')}
-                className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors text-[10px]"
+                className={`p-2 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
+                  activeDemoEmail === 'admin@workshophub.edu'
+                    ? 'border-[#08482D] bg-[#DAE7C7]/50 dark:bg-[#1a3826]'
+                    : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:border-[#08482D] dark:hover:border-[#DAE7C7] hover:bg-white dark:hover:bg-[#14231b]'
+                } ${loading && activeDemoEmail !== 'admin@workshophub.edu' ? 'opacity-50 pointer-events-none' : ''}`}
               >
-                <div className="font-heading font-bold truncate">System Admin</div>
-                <div className="text-[#5E5E61] dark:text-[#8ba895] truncate">Admin</div>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="w-5 h-5 rounded-lg bg-[#DAE7C7] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
+                    {activeDemoEmail === 'admin@workshophub.edu' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <ShieldAlert className="w-3 h-3" />
+                    )}
+                  </div>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#E8F0DF] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
+                    Admin
+                  </span>
+                </div>
+                <div className="font-heading font-bold text-[11px] text-[#101410] dark:text-[#f0f5ee] truncate">
+                  System Admin
+                </div>
+                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
+                  Platform Lead
+                </div>
               </button>
+            </div>
+
+            {/* Persona Switcher Toggle */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowAllStudents((prev) => !prev)}
+                className="w-full py-1 px-2 text-[10px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] hover:text-[#08482D] dark:hover:text-[#DAE7C7] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+              >
+                <span>{showAllStudents ? 'Hide additional demo personas' : 'More demo personas (Omkar, Kedar, Vaibhavi, Sonal…)'}</span>
+                {showAllStudents ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+
+              {showAllStudents && (
+                <div className="mt-2 grid grid-cols-2 gap-1.5 pt-1 border-t border-dashed border-[#DCE4D6] dark:border-[#233d2e]">
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleDemoSwitch('omkar.parelkar@student.edu')}
+                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
+                  >
+                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (4 Passes)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleDemoSwitch('kedar.parab@student.edu')}
+                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
+                  >
+                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Kedar Parab</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (AWS + SQL)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleDemoSwitch('vaibhavi.parmar@student.edu')}
+                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
+                  >
+                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Vaibhavi Parmar</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (IoT + AI)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleDemoSwitch('sonal.sharma@student.edu')}
+                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
+                  >
+                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Sonal Sharma</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (Cybersecurity)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleDemoSwitch('omkar.parelkar@faculty.edu')}
+                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
+                  >
+                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Organizer (AI & IoT)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleDemoSwitch('alex.morgan@student.edu')}
+                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
+                  >
+                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Alex Morgan</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (Legacy Test)</div>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
