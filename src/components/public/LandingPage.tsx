@@ -71,11 +71,11 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4 w-full max-w-xs sm:max-w-none mx-auto"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-3 sm:pt-4 w-full sm:w-auto max-w-sm sm:max-w-none mx-auto"
           >
             <button
               onClick={() => navigateTo('workshops')}
-              className="w-full sm:w-auto px-7 py-3.5 bg-[#08482D] hover:bg-[#0c5c3b] dark:bg-[#106b43] dark:hover:bg-[#158052] text-[#F5F8EF] font-heading font-semibold text-sm sm:text-base rounded-full shadow-md shadow-[#08482D]/15 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] active:scale-95"
+              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 bg-[#08482D] hover:bg-[#0c5c3b] dark:bg-[#106b43] dark:hover:bg-[#158052] text-[#F5F8EF] font-heading font-semibold text-sm sm:text-base rounded-full shadow-md shadow-[#08482D]/15 hover:shadow-lg transition-all flex items-center justify-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] active:scale-95 shrink-0"
             >
               <span>Explore Workshops</span>
               <ArrowRight className="w-4 h-4 text-[#DAE7C7]" />
@@ -83,7 +83,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
 
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="w-full sm:w-auto px-7 py-3.5 bg-white dark:bg-[#14231b] hover:bg-[#E8F0DF] dark:hover:bg-[#1a3325] text-[#101410] dark:text-[#f0f5ee] font-heading font-semibold text-sm sm:text-base rounded-full border border-[#DCE4D6] dark:border-[#203a2c] shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] active:scale-95"
+              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 bg-white dark:bg-[#14231b] hover:bg-[#E8F0DF] dark:hover:bg-[#1a3325] text-[#101410] dark:text-[#f0f5ee] font-heading font-semibold text-sm sm:text-base rounded-full border border-[#DCE4D6] dark:border-[#203a2c] shadow-xs transition-colors flex items-center justify-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] active:scale-95 shrink-0"
             >
               <span>How It Works</span>
               <ChevronDown className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
