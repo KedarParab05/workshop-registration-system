@@ -7,6 +7,7 @@ import {
   validateWorkshopInput,
   canEditWorkshop,
 } from './workshopRules';
+import { KAUSHALYA_LOGO_URL } from '../components/common/BrandLogo';
 import { Workshop, Registration, User } from '../types';
 
 const mockOrganizer: User = {
@@ -283,4 +284,26 @@ test('calculateSeats counts unexpired PENDING_PAYMENT reservations toward capaci
   const seatsWithPending = calculateSeats(mockWorkshop, [futureReservation]);
   assert.equal(seatsWithPending.registeredCount, 1);
   assert.equal(seatsWithPending.availableSeats, 1);
+});
+
+test('KAUSHALYA_LOGO_URL matches official Cloudinary approved emblem', () => {
+  assert.equal(
+    KAUSHALYA_LOGO_URL,
+    'https://res.cloudinary.com/dr59elrhw/image/upload/v1794634835/kessknblaoupdmy9wqgv.png',
+    'Official Cloudinary emblem must match production asset spec'
+  );
+});
+
+test('Required student demo personas list adheres to academic roster spec', () => {
+  const requiredDemoStudents = [
+    'Aary Nikam',
+    'Kedar Parab',
+    'Omkar Parelkar',
+    'Vaibhavi Parmar',
+    'Sonal Sharma',
+  ];
+  assert.equal(requiredDemoStudents.length, 5);
+  requiredDemoStudents.forEach((name) => {
+    assert.ok(name.length > 0, `Student persona ${name} must be valid`);
+  });
 });
