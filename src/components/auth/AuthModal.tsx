@@ -362,7 +362,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setEmail(e.target.value);
                       setErrorMsg('');
                     }}
-                    placeholder="alex@student.edu"
+                    placeholder="mca26.omkar.parelkar@gnims.com"
                     className={`${inputCls} pl-10`}
                     autoFocus
                     required
@@ -463,7 +463,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setEmail(e.target.value);
                       setErrorMsg('');
                     }}
-                    placeholder="e.g. alex@student.edu"
+                    placeholder="e.g. mca26.omkar.parelkar@gnims.com"
                     className={`${inputCls} pl-10`}
                     required
                   />
@@ -548,7 +548,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="text"
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
-                    placeholder="e.g. Computer Science, AI Lab"
+                    placeholder="e.g. Master of Computer Applications (MCA), GNIMS"
                     className={`${inputCls} pl-10`}
                   />
                 </div>
@@ -564,7 +564,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 86577 90811"
                     className={`${inputCls} pl-10`}
                   />
                 </div>
@@ -617,16 +617,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 disabled={loading}
-                onClick={() => handleDemoSwitch('aary.nikam@student.edu')}
+                onClick={() => handleDemoSwitch('mca26.aary.nikam@gnims.com')}
                 className={`p-2 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
-                  activeDemoEmail === 'aary.nikam@student.edu'
+                  activeDemoEmail === 'mca26.aary.nikam@gnims.com'
                     ? 'border-[#08482D] bg-[#DAE7C7]/50 dark:bg-[#1a3826]'
                     : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:border-[#08482D] dark:hover:border-[#DAE7C7] hover:bg-white dark:hover:bg-[#14231b]'
-                } ${loading && activeDemoEmail !== 'aary.nikam@student.edu' ? 'opacity-50 pointer-events-none' : ''}`}
+                } ${loading && activeDemoEmail !== 'mca26.aary.nikam@gnims.com' ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="w-5 h-5 rounded-lg bg-[#DAE7C7] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
-                    {activeDemoEmail === 'aary.nikam@student.edu' ? (
+                    {activeDemoEmail === 'mca26.aary.nikam@gnims.com' ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
                       <GraduationCap className="w-3 h-3" />
@@ -640,7 +640,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   Aary Nikam
                 </div>
                 <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
-                  Demo Attendee
+                  GNIMS MCA (9800000001)
                 </div>
               </button>
 
@@ -723,51 +723,51 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     disabled={loading}
-                    onClick={() => handleDemoSwitch('omkar.parelkar@student.edu')}
+                    onClick={() => handleDemoSwitch('mca26.omkar.parelkar@gnims.com')}
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (4 Passes)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000003)</div>
                   </button>
 
                   <button
                     type="button"
                     disabled={loading}
-                    onClick={() => handleDemoSwitch('kedar.parab@student.edu')}
+                    onClick={() => handleDemoSwitch('mca26.kedar.parab@gnims.com')}
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Kedar Parab</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (AWS + SQL)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000002)</div>
                   </button>
 
                   <button
                     type="button"
                     disabled={loading}
-                    onClick={() => handleDemoSwitch('vaibhavi.parmar@student.edu')}
+                    onClick={() => handleDemoSwitch('mca26.vaibhavi.parmar@gnims.com')}
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Vaibhavi Parmar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (IoT + AI)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000004)</div>
                   </button>
 
                   <button
                     type="button"
                     disabled={loading}
-                    onClick={() => handleDemoSwitch('sonal.sharma@student.edu')}
+                    onClick={() => handleDemoSwitch('mca26.sonal.sharma@gnims.com')}
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Sonal Sharma</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (Cybersecurity)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000005)</div>
                   </button>
 
                   <button
                     type="button"
                     disabled={loading}
-                    onClick={() => handleDemoSwitch('omkar.parelkar@faculty.edu')}
+                    onClick={() => handleDemoSwitch('omkar.parelkar@gnims.com')}
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Organizer (AI & IoT)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Host (GNIMS • 9800000003)</div>
                   </button>
 
                   <button

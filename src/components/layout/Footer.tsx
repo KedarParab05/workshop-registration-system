@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { BrandLogo } from '../common/BrandLogo';
-import { RefreshCw, ShieldCheck, Mail, MapPin, Compass, BookOpen, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, ShieldCheck, Mail, MapPin, Phone, Compass, BookOpen, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface FooterProps {
   onOpenAuth?: () => void;
@@ -225,10 +225,16 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAuth, onOpenRoleSelector }
             )}
 
             {/* Department info */}
-            <div className="pt-2 border-t border-[#0b5c3b] dark:border-[#1a3826] text-[11px] text-[#DAE7C7]/80 dark:text-[#95ad9e] space-y-1">
+            <div className="pt-2 border-t border-[#0b5c3b] dark:border-[#1a3826] text-[11px] text-[#DAE7C7]/80 dark:text-[#95ad9e] space-y-1.5">
               <div className="flex items-start gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-[#DAE7C7] shrink-0 mt-0.5" />
-                <span>Department of CSE &amp; IT Labs</span>
+                <span>Guru Nanak Institute of Management Studies, Mumbai</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-[#DAE7C7] shrink-0" />
+                <a href="tel:9800000003" className="hover:text-white dark:hover:text-[#DAE7C7] transition-colors">
+                  +91 86577 90811
+                </a>
               </div>
               <div className="flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-[#DAE7C7] shrink-0" />

@@ -414,7 +414,7 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({ isOpen, on
                     className="p-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] hover:text-[#08482D] text-left transition-colors cursor-pointer"
                   >
                     <div className="text-[11px] font-heading font-bold text-[#101410] dark:text-[#f0f5ee] truncate">Aary Nikam</div>
-                    <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Student Participant</div>
+                    <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Student (GNIMS MCA)</div>
                   </button>
 
                   <button
