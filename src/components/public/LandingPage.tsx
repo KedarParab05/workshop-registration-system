@@ -40,7 +40,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           Brand palette: Deep ink primary text, forest green emphasis.
           Balanced spacing, subtle grid, no decorative pills or arrows.
       ───────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 border-b border-[#DCE4D6] dark:border-[#203a2c] bg-[#F5F8EF] dark:bg-[#0a130e] grid-background-hero min-h-[72vh] sm:min-h-[78vh] lg:min-h-[84vh] pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 md:pb-24">
+      <section className="relative overflow-hidden flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 border-b border-[#DCE4D6] dark:border-[#203a2c] bg-[#F5F8EF] dark:bg-[#0a130e] grid-background-hero min-h-[58vh] sm:min-h-[64vh] lg:min-h-[68vh] pt-24 sm:pt-28 lg:pt-32 pb-10 sm:pb-14 lg:pb-16">
         <div className="max-w-4xl mx-auto text-center relative z-10 space-y-6 sm:space-y-7">
           {/* Main Technical Display Headline with Responsive clamp() */}
           <motion.h1
