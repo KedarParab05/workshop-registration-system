@@ -72,7 +72,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F8EF] dark:bg-[#0b140e] font-sans text-[#101410] dark:text-[#f0f5ee] selection:bg-[#DAE7C7] selection:text-[#08482D] transition-colors duration-200 w-full max-w-full overflow-x-clip">
+    <div className="min-h-screen flex flex-col bg-[#F5F8EF] dark:bg-[#0b140e] font-sans text-[#101410] dark:text-[#f0f5ee] selection:bg-[#DAE7C7] selection:text-[#08482D] transition-colors duration-200 w-full max-w-full overflow-x-clip relative">
       <Navbar
         onOpenAuth={() => setAuthModalOpen(true)}
         onOpenRoleSelector={() => setRoleModalOpen(true)}
@@ -80,7 +80,7 @@ const MainContent: React.FC = () => {
       />
 
       {/* Toast Notification Container with Motion */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none">
+      <div className="fixed bottom-4 sm:bottom-5 right-4 sm:right-5 z-50 flex flex-col gap-2 w-full max-w-[calc(100vw-32px)] sm:max-w-sm pointer-events-none">
         <AnimatePresence>
           {alerts.map((alert) => (
             <motion.div
