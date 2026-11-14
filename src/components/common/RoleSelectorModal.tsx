@@ -88,6 +88,16 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({ isOpen, on
     }
   }, [workshops, reqWorkshopId]);
 
+  // Keyboard accessibility: Dismiss modal on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const availableWorkshops = workshops.filter((w) => w.status === 'PUBLISHED');
@@ -213,12 +223,16 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({ isOpen, on
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.92, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="role-selector-title"
           className="relative bg-white dark:bg-[#14231b] rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-[#DCE4D6] dark:border-[#233d2e] z-10 text-[#101410] dark:text-[#f0f5ee] transition-colors max-h-[92vh] overflow-y-auto my-auto"
         >
           {/* Close button */}
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-xl text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b3025] transition-colors"
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-xl text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b3025] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D]"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -229,10 +243,10 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({ isOpen, on
               {/* Header */}
               <div className="text-center mb-6 sm:mb-8 px-2 space-y-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DAE7C7] text-[#08482D] text-xs font-heading font-semibold shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Briefcase className="w-3.5 h-3.5" />
                   <span>Choose Your Workspace</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee] tracking-tight">
+                <h2 id="role-selector-title" className="text-3xl sm:text-4xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee] tracking-tight">
                   Who are you?
                 </h2>
                 <p className="text-xs sm:text-sm text-[#5E5E61] dark:text-[#8ba895] max-w-lg mx-auto">
@@ -388,7 +402,7 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({ isOpen, on
               <div className="mt-6 pt-5 border-t border-[#DCE4D6] dark:border-[#233d2e] space-y-2.5">
                 <div className="flex items-center justify-between text-xs text-[#5E5E61] dark:text-[#8ba895]">
                   <span className="font-heading font-semibold flex items-center gap-1.5 text-[#08482D] dark:text-[#9ee2b8]">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <UserIcon className="w-3.5 h-3.5" />
                     <span>Instant Evaluation Personas (1-Click Switch):</span>
                   </span>
                   <span className="text-[10px]">No typing required</span>
