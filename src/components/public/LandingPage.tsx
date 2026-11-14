@@ -207,55 +207,63 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           </p>
         </div>
 
-        {/* Stepper Cards */}
+        {/* Stepper Cards — Balanced Tablet and Desktop Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 relative">
           {/* Step 1 */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm space-y-3.5 relative">
-            <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md">
-              01
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-3.5 relative min-h-[180px]">
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md mb-3">
+                01
+              </div>
+              <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
+                Discover Workshop
+              </h3>
             </div>
-            <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
-              Discover Workshop
-            </h3>
             <p className="text-xs text-[#5E5E61] dark:text-slate-400 leading-relaxed font-sans">
               Browse curated technical sessions by domain, schedule, and room venue. Inspect prerequisites and itemized learning outcomes.
             </p>
           </div>
 
           {/* Step 2 */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm space-y-3.5 relative">
-            <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md">
-              02
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-3.5 relative min-h-[180px]">
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md mb-3">
+                02
+              </div>
+              <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
+                Instant RSVP &amp; Payment
+              </h3>
             </div>
-            <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
-              Instant RSVP &amp; Payment
-            </h3>
             <p className="text-xs text-[#5E5E61] dark:text-slate-400 leading-relaxed font-sans">
               Register instantly for free sessions or complete quick test checkout for paid sessions. Concurrency controls guarantee accurate capacity decrement.
             </p>
           </div>
 
           {/* Step 3 */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm space-y-3.5 relative">
-            <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md">
-              03
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-3.5 relative min-h-[180px]">
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md mb-3">
+                03
+              </div>
+              <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
+                Get Digital Pass
+              </h3>
             </div>
-            <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
-              Get Digital Pass
-            </h3>
             <p className="text-xs text-[#5E5E61] dark:text-slate-400 leading-relaxed font-sans">
               Receive a tamper-proof single-use QR ticket code. Access direct GPS directions to the campus lab room on Google Maps.
             </p>
           </div>
 
           {/* Step 4 */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm space-y-3.5 relative">
-            <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md">
-              04
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex flex-col justify-between space-y-3.5 relative min-h-[180px]">
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] font-mono font-bold text-sm flex items-center justify-center shadow-md mb-3">
+                04
+              </div>
+              <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
+                Gate Check-In
+              </h3>
             </div>
-            <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
-              Gate Check-In
-            </h3>
             <p className="text-xs text-[#5E5E61] dark:text-slate-400 leading-relaxed font-sans">
               Show your digital pass to the volunteer at the entrance gate. A quick camera scan records attendance and unlocks lab entry.
             </p>
@@ -268,7 +276,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
       ───────────────────────────────────────────────────────────── */}
       <section id="volunteer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24 sm:scroll-mt-28">
         <div className="bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-5 sm:p-8 lg:p-12 shadow-sm">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-8 lg:gap-10 items-center">
             {/* Left Column: Scanner Reticle Preview */}
             <div className="relative rounded-3xl overflow-hidden bg-slate-950 aspect-video max-h-[340px] flex items-center justify-center border-2 border-[#DCE4D6] dark:border-[#203a2c] shadow-2xl p-4 sm:p-6">
               <div className="w-44 h-44 xs:w-52 xs:h-52 sm:w-56 sm:h-56 max-w-full max-h-full border border-[#DAE7C7]/50 rounded-2xl relative flex items-center justify-center">
@@ -504,9 +512,9 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           SECTION 6 — FREQUENTLY ASKED QUESTIONS (BALANCED TWO-COLUMN LAYOUT)
       ───────────────────────────────────────────────────────────── */}
       <section id="faq" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24 sm:scroll-mt-28">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-start">
           {/* Left Column: Eyebrow, Heading, Description & Contact Action */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
+          <div className="md:col-span-5 space-y-6 md:sticky md:top-28">
             <div className="space-y-3">
               <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider bg-[#DAE7C7]/50 dark:bg-[#192f22] px-3 py-1 rounded-full inline-block">
                 Got Questions?
@@ -538,7 +546,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           </div>
 
           {/* Right Column: Accordion */}
-          <div className="lg:col-span-7 space-y-3">
+          <div className="md:col-span-7 space-y-3">
             {[
               {
                 q: 'How does workshop pricing work on Kaushalya?',
