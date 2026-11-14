@@ -1,12 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Inter Tight', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-hand: 'Caveat', cursive;
+  --font-sans: 'Manrope', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Neue Machina', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, Cambria, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -21,19 +22,41 @@
   --color-sage-border: #DCE4D6;
   --color-ink: #101410;
   --color-ink-muted: #5E5E61;
+
+  /* Architectural Grid Variables (Crisp & Visible in Light Mode) */
+  --grid-line-hero: rgba(8, 72, 45, 0.08);
+  --grid-line-subtle: rgba(8, 72, 45, 0.04);
+  --grid-line-footer: rgba(218, 231, 199, 0.06);
+  --grid-size: 44px;
 }
 
 :root.dark {
   color-scheme: dark;
-  --bg-warm: #0b140e;
-  --color-forest: #1e3d29;
-  --color-forest-hover: #264e35;
-  --color-mint: #223f2b;
-  --color-mint-subtle: #182d20;
-  --color-sage: #14231b;
-  --color-sage-border: #233d2e;
+  --bg-warm: #0a130e;
+  --color-forest: #10442b;
+  --color-forest-hover: #165637;
+  --color-mint: #254432;
+  --color-mint-subtle: #162a1f;
+  --color-sage: #132219;
+  --color-sage-border: #22382b;
   --color-ink: #f0f5ee;
-  --color-ink-muted: #8ba895;
+  --color-ink-muted: #95ad9e;
+
+  /* Architectural Grid Variables (Luminous Mint & Subtle in Dark Mode) */
+  --grid-line-hero: rgba(218, 231, 199, 0.07);
+  --grid-line-subtle: rgba(218, 231, 199, 0.035);
+  --grid-line-footer: rgba(218, 231, 199, 0.04);
+  --grid-size: 44px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -45,8 +68,22 @@ body {
   overflow-x: hidden;
 }
 
+@media (max-width: 640px) {
+  :root {
+    --grid-size: 32px;
+    --grid-line-hero: rgba(8, 72, 45, 0.05);
+    --grid-line-subtle: rgba(8, 72, 45, 0.03);
+  }
+
+  :root.dark {
+    --grid-size: 32px;
+    --grid-line-hero: rgba(218, 231, 199, 0.04);
+    --grid-line-subtle: rgba(218, 231, 199, 0.025);
+  }
+}
+
 :root.dark body {
-  background-color: #0b140e;
+  background-color: #0a130e;
   color: #f0f5ee;
 }
 
@@ -55,37 +92,39 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   letter-spacing: -0.025em;
 }
 
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
 .font-hand {
   font-family: var(--font-hand);
 }
 
-/* Subtle Architectural CSS Grid Background Pattern */
-.grid-background {
+/* Crisp Architectural CSS Grid Background Patterns */
+.grid-background,
+.grid-background-hero {
   background-image:
-    linear-gradient(to right, rgba(8, 72, 45, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(8, 72, 45, 0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-:root.dark .grid-background {
-  background-image:
-    linear-gradient(to right, rgba(218, 231, 199, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(218, 231, 199, 0.035) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(to right, var(--grid-line-hero) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-hero) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
 }
 
 .grid-background-subtle {
   background-image:
-    linear-gradient(to right, rgba(8, 72, 45, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(8, 72, 45, 0.025) 1px, transparent 1px);
-  background-size: 44px 44px;
+    linear-gradient(to right, var(--grid-line-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-subtle) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
 }
 
-:root.dark .grid-background-subtle {
+.grid-background-footer {
   background-image:
-    linear-gradient(to right, rgba(218, 231, 199, 0.022) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(218, 231, 199, 0.022) 1px, transparent 1px);
-  background-size: 44px 44px;
+    linear-gradient(to right, var(--grid-line-footer) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-footer) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
 }
 
 /* Custom Soft-Mint scrollbar */
