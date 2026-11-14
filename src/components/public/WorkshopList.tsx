@@ -116,7 +116,7 @@ export const WorkshopList: React.FC = () => {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5E5E61] hover:text-[#101410]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5E5E61] dark:text-[#95ad9e] hover:text-[#101410] dark:hover:text-[#f0f5ee] cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -226,7 +226,7 @@ export const WorkshopList: React.FC = () => {
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/assets/images/banner_fullstack_web.jpg';
+                      e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
                     }}
                   />
                   <div className="absolute top-3 left-3 bg-[#DAE7C7] text-[#08482D] text-[10px] font-heading font-bold px-2.5 py-1 rounded-full shadow-xs">
