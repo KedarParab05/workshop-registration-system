@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
+import { BrandLogo } from '../common/BrandLogo';
 import {
   LogOut,
   ChevronDown,
@@ -120,41 +121,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       ───────────────────────────────────────────────────────────── */}
       <div className="w-full max-w-7xl pointer-events-auto bg-[#F5F8EF]/95 dark:bg-[#0c1610]/95 backdrop-blur-md rounded-full border border-[#DCE4D6] dark:border-[#203a2c] shadow-lg shadow-[#08482D]/5 px-4 sm:px-6 py-2 sm:py-2.5 transition-all duration-200">
         <div className="flex items-center justify-between gap-3 lg:gap-6">
-          {/* Brand: Kaushalya Official Logo */}
-          <button
+          {/* Brand: Kaushalya Official Standardized Logo */}
+          <BrandLogo
+            size="md"
             onClick={() => {
               setMobileMenuOpen(false);
               navigateTo('home');
             }}
-            className="flex items-center text-left group shrink-0 transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] rounded-full py-0.5 cursor-pointer"
-            aria-label="Kaushalya Home"
-          >
-            {/* Desktop & Laptop Full Logo (md and above: 240px–280px) */}
-            <img
-              src="https://res.cloudinary.com/dr59elrhw/image/upload/v1794634775/r8u6zhsvotsychqo4h6h.png"
-              alt="Kaushalya"
-              className="hidden md:block w-[240px] lg:w-[275px] h-11 lg:h-12 object-contain"
-              loading="eager"
-            />
-
-            {/* Mobile Brand (below md: 42-48px mobile icon + Kaushalya wordmark + tagline) */}
-            <div className="flex md:hidden items-center gap-2 sm:gap-2.5">
-              <img
-                src="https://res.cloudinary.com/dr59elrhw/image/upload/v1794634835/kessknblaoupdmy9wqgv.png"
-                alt="Kaushalya"
-                className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0"
-                loading="eager"
-              />
-              <div className="flex flex-col">
-                <span className="font-heading font-extrabold text-base sm:text-lg text-[#101410] dark:text-[#f0f5ee] leading-tight tracking-tight">
-                  Kaushalya
-                </span>
-                <span className="text-[8px] sm:text-[9px] font-sans font-bold text-[#08482D] dark:text-[#DAE7C7] tracking-wider uppercase leading-none mt-0.5">
-                  Learn. Build. Grow.
-                </span>
-              </div>
-            </div>
-          </button>
+          />
 
           {/* Desktop Navigation Links — Centered, No Two-Line Wrapping */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs xl:text-sm font-heading font-semibold text-[#5E5E61] dark:text-[#9eb3a2]">
