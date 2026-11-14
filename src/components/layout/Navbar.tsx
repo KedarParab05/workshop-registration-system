@@ -20,6 +20,7 @@ import {
   GraduationCap,
   Briefcase,
   Scan,
+  QrCode,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -48,7 +49,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
-  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
+
+  // Close menus on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setRoleDropdownOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Prevent background scrolling when mobile menu is open
+  React.useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const getRoleLabel = (role: UserRole) => {
     switch (role) {
@@ -72,7 +96,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   // Smooth scroll handler for homepage sections
   const scrollToSection = (sectionId: string) => {
     setMobileMenuOpen(false);
-    setMoreDropdownOpen(false);
 
     if (activePage !== 'home') {
       navigateTo('home');
@@ -97,176 +120,155 @@ export const Navbar: React.FC<NavbarProps> = ({
       ───────────────────────────────────────────────────────────── */}
       <div className="w-full max-w-6xl pointer-events-auto bg-[#F5F8EF]/95 dark:bg-[#0c1610]/95 backdrop-blur-md rounded-full border border-[#DCE4D6] dark:border-[#203a2c] shadow-lg shadow-[#08482D]/5 px-4 sm:px-6 py-2.5 transition-all duration-200">
         <div className="flex items-center justify-between gap-3 sm:gap-6">
-          {/* Brand: Kaushalya (कौशल्य) */}
+          {/* Brand: Kaushalya Official Logo */}
           <button
             onClick={() => {
               setMobileMenuOpen(false);
               navigateTo('home');
             }}
-            className="flex items-center gap-3 text-left group shrink-0 transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] rounded-full"
+            className="flex items-center text-left group shrink-0 transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#08482D] rounded-full py-0.5"
             aria-label="Kaushalya Home"
           >
-            <div className="w-10 h-10 rounded-full bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shadow-md shadow-[#08482D]/20 group-hover:bg-[#0c5c3b] transition-colors">
-              <svg
-                className="w-5 h-5 text-[#DAE7C7]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-heading font-extrabold text-xl tracking-tight text-[#101410] dark:text-[#f0f5ee] leading-none">
+            {/* Desktop & Laptop Full Logo (md and above: 240px–280px) */}
+            <img
+              src="https://res.cloudinary.com/dr59elrhw/image/upload/v1794634775/r8u6zhsvotsychqo4h6h.png"
+              alt="Kaushalya"
+              className="hidden md:block w-[240px] lg:w-[275px] h-11 lg:h-12 object-contain"
+              loading="eager"
+            />
+
+            {/* Mobile Brand (below md: 42-48px mobile icon + Kaushalya wordmark + tagline) */}
+            <div className="flex md:hidden items-center gap-2 sm:gap-2.5">
+              <img
+                src="https://res.cloudinary.com/dr59elrhw/image/upload/v1794634835/kessknblaoupdmy9wqgv.png"
+                alt="Kaushalya"
+                className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0"
+                loading="eager"
+              />
+              <div className="flex flex-col">
+                <span className="font-heading font-extrabold text-base sm:text-lg text-[#101410] dark:text-[#f0f5ee] leading-tight tracking-tight">
                   Kaushalya
                 </span>
-                <span className="text-[11px] font-sans font-medium text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/70 dark:bg-[#1f3d2d] px-1.5 py-0.5 rounded-md">
-                  कौशल्य
+                <span className="text-[8px] sm:text-[9px] font-sans font-bold text-[#08482D] dark:text-[#DAE7C7] tracking-wider uppercase leading-none mt-0.5">
+                  Learn. Build. Grow.
                 </span>
               </div>
-              <span className="text-[10px] text-[#5E5E61] dark:text-emerald-400 font-medium tracking-wide uppercase block mt-0.5">
-                Learn. Build. Grow.
-              </span>
             </div>
           </button>
 
-          {/* Desktop Navigation Links (Visibly Larger text-sm font-semibold) */}
-          <nav className="hidden lg:flex items-center gap-2 xl:gap-3 text-sm font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895]">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2 text-sm font-heading font-semibold text-[#5E5E61] dark:text-[#9eb3a2]">
+            {/* 1. Discover Workshops */}
             <button
               onClick={() => navigateTo('workshops')}
-              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
                 activePage === 'workshops'
-                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#192f22] font-bold'
-                  : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22]'
+                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                  : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
               <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
               <span>Discover Workshops</span>
             </button>
 
+            {/* 2. How It Works */}
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="px-3.5 py-2 rounded-full transition-all hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22]"
+              className="px-3.5 py-2 rounded-full transition-all hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] cursor-pointer"
             >
               How It Works
             </button>
 
+            {/* 3. Our Story (Direct visible public navigation destination) */}
             <button
-              onClick={() => {
-                if (currentUser?.role === 'ORGANIZER') {
-                  navigateTo('organizer-dashboard');
-                } else {
-                  scrollToSection('for-organizers');
-                }
-              }}
-              className={`px-3.5 py-2 rounded-full transition-all ${
-                activePage === 'organizer-dashboard'
-                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#192f22] font-bold'
-                  : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22]'
+              onClick={() => navigateTo('our-story')}
+              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                activePage === 'our-story'
+                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                  : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              For Organizers
+              <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <span>Our Story</span>
             </button>
 
+            {/* 4. Contact Team (Direct visible public navigation destination) */}
             <button
-              onClick={() => {
-                if (currentVolunteer || currentUser?.role === 'VOLUNTEER') {
-                  navigateTo('volunteer-portal');
-                } else {
-                  scrollToSection('volunteer');
-                }
-              }}
-              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 ${
-                activePage === 'volunteer-portal'
-                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#192f22] font-bold'
-                  : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22]'
+              onClick={() => navigateTo('contact')}
+              className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                activePage === 'contact'
+                  ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                  : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
               }`}
             >
-              <span>Volunteer</span>
+              <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <span>Contact Team</span>
             </button>
 
-            {/* About & More Dropdown */}
-            <div className="relative">
+            {/* Role-Aware Authenticated Navigation (Strictly Role-Specific) */}
+            {currentUser?.role === 'ORGANIZER' && (
               <button
-                onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
-                className="px-3.5 py-2 rounded-full transition-all hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22] flex items-center gap-1"
-                aria-expanded={moreDropdownOpen}
-              >
-                <span>About & More</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-
-              <AnimatePresence>
-                {moreDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute left-0 mt-2 w-52 bg-white dark:bg-[#14231b] rounded-2xl shadow-xl border border-[#DCE4D6] dark:border-[#203a2c] py-2 z-50 text-xs"
-                    onClick={() => setMoreDropdownOpen(false)}
-                  >
-                    <button
-                      onClick={() => scrollToSection('about')}
-                      className="w-full text-left px-4 py-2.5 text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] flex items-center gap-2 font-medium"
-                    >
-                      <Info className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-                      <span>About Kaushalya</span>
-                    </button>
-                    <button
-                      onClick={() => scrollToSection('our-story')}
-                      className="w-full text-left px-4 py-2.5 text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] flex items-center gap-2 font-medium"
-                    >
-                      <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-                      <span>Our Story</span>
-                    </button>
-                    <button
-                      onClick={() => scrollToSection('faq')}
-                      className="w-full text-left px-4 py-2.5 text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] flex items-center gap-2 font-medium"
-                    >
-                      <HelpCircle className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-                      <span>FAQ & Support</span>
-                    </button>
-                    <div className="border-t border-[#DCE4D6] dark:border-[#203a2c] my-1" />
-                    <button
-                      onClick={() => scrollToSection('contact')}
-                      className="w-full text-left px-4 py-2.5 text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] flex items-center gap-2 font-medium"
-                    >
-                      <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-                      <span>Contact Team</span>
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Student Shortcut */}
-            {currentUser?.role === 'PARTICIPANT' && (
-              <button
-                onClick={() => navigateTo('my-registrations')}
-                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 ${
-                  activePage === 'my-registrations'
-                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#192f22] font-bold'
-                    : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22]'
+                onClick={() => navigateTo('organizer-dashboard')}
+                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activePage === 'organizer-dashboard'
+                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                    : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
-                <GraduationCap className="w-4 h-4" />
-                <span>My Passes</span>
+                <PlusCircle className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                <span>Organizer Studio</span>
               </button>
             )}
 
-            {/* Admin Shortcut */}
+            {(currentVolunteer || currentUser?.role === 'VOLUNTEER') && (
+              <button
+                onClick={() => navigateTo('volunteer-portal')}
+                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activePage === 'volunteer-portal'
+                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                    : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
+                }`}
+              >
+                <Scan className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                <span>Gate Station</span>
+              </button>
+            )}
+
+            {currentUser?.role === 'PARTICIPANT' && (
+              <>
+                <button
+                  onClick={() => navigateTo('participant-dashboard')}
+                  className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activePage === 'participant-dashboard'
+                      ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                      : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
+                  }`}
+                >
+                  <GraduationCap className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <span>Student Desk</span>
+                </button>
+
+                <button
+                  onClick={() => navigateTo('my-registrations')}
+                  className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activePage === 'my-registrations'
+                      ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                      : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
+                  }`}
+                >
+                  <QrCode className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <span>My Passes</span>
+                </button>
+              </>
+            )}
+
             {currentUser?.role === 'SUPER_ADMIN' && (
               <button
                 onClick={() => navigateTo('admin-dashboard')}
-                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 ${
+                className={`px-3.5 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
                   activePage === 'admin-dashboard'
-                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#192f22] font-bold'
-                    : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22]'
+                    ? 'text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/60 dark:bg-[#1a3826] font-bold'
+                    : 'hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]'
                 }`}
               >
                 <ShieldAlert className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
@@ -403,8 +405,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </AnimatePresence>
               </div>
             ) : (
-              /* Distinct Sign In and Get Started Pills */
-              <div className="flex items-center gap-2 sm:gap-2.5">
+              /* Desktop Sign In and Get Started Pills (Hidden on mobile to guarantee zero navbar overflow) */
+              <div className="hidden md:flex items-center gap-2 sm:gap-2.5">
                 <button
                   onClick={onOpenAuth}
                   className="px-4 py-2 text-sm font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#192f22] rounded-full transition-colors cursor-pointer"
@@ -423,8 +425,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile hamburger button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-full text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#14231b] transition-colors"
+              className="lg:hidden p-2 rounded-full text-[#101410] dark:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#14231b] transition-colors cursor-pointer"
               aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -432,85 +435,131 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Drawer (Card floating cleanly below pill) */}
+      {/* Mobile Drawer & Backdrop Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-sm pointer-events-auto mt-2 bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-2xl p-5 space-y-2 text-sm font-heading font-semibold"
-          >
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs z-30 pointer-events-auto lg:hidden"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-sm pointer-events-auto mt-2 bg-white dark:bg-[#122218] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-2xl p-5 space-y-2 text-sm font-heading font-semibold z-40 relative"
+            >
+            {/* 1. Discover Workshops */}
             <button
               onClick={() => {
                 navigateTo('workshops');
                 setMobileMenuOpen(false);
               }}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2"
+              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
             >
               <Compass className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
               <span>Discover Workshops</span>
             </button>
 
+            {/* 2. How It Works */}
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee]"
+              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] cursor-pointer"
             >
               How It Works
             </button>
 
+            {/* 3. Our Story (Direct visible public navigation) */}
             <button
-              onClick={() => scrollToSection('for-organizers')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee]"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigateTo('our-story');
+              }}
+              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
             >
-              For Organizers
+              <BookOpen className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <span>Our Story</span>
             </button>
 
+            {/* 4. Contact Team (Direct visible public navigation) */}
             <button
-              onClick={() => scrollToSection('volunteer')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee]"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigateTo('contact');
+              }}
+              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
             >
-              Gate Volunteer Station
+              <Mail className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <span>Contact Team</span>
             </button>
 
-            <button
-              onClick={() => scrollToSection('about')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee]"
-            >
-              About Kaushalya
-            </button>
-
-            <button
-              onClick={() => scrollToSection('our-story')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee]"
-            >
-              Our Story
-            </button>
-
-            <button
-              onClick={() => scrollToSection('faq')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee]"
-            >
-              FAQ & Support
-            </button>
-
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-[#f0f5ee]"
-            >
-              Contact Team
-            </button>
-
-            {currentUser?.role === 'PARTICIPANT' && (
+            {/* Role-Specific Navigation Items */}
+            {currentUser?.role === 'ORGANIZER' && (
               <button
                 onClick={() => {
-                  navigateTo('my-registrations');
+                  setMobileMenuOpen(false);
+                  navigateTo('organizer-dashboard');
+                }}
+                className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Organizer Studio</span>
+              </button>
+            )}
+
+            {(currentVolunteer || currentUser?.role === 'VOLUNTEER') && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigateTo('volunteer-portal');
+                }}
+                className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer"
+              >
+                <Scan className="w-4 h-4" />
+                <span>Gate Volunteer Station</span>
+              </button>
+            )}
+
+            {currentUser?.role === 'PARTICIPANT' && (
+              <>
+                <button
+                  onClick={() => {
+                    navigateTo('participant-dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer font-semibold"
+                >
+                  <GraduationCap className="w-4 h-4" />
+                  <span>Student Learning Desk</span>
+                </button>
+                <button
+                  onClick={() => {
+                    navigateTo('my-registrations');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2.5 px-3 rounded-2xl hover:bg-[#E8F0DF] dark:hover:bg-[#18281f] text-[#101410] dark:text-[#f0f5ee] flex items-center gap-2 cursor-pointer"
+                >
+                  <QrCode className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <span>My Passes & QR Tickets</span>
+                </button>
+              </>
+            )}
+
+            {currentUser?.role === 'SUPER_ADMIN' && (
+              <button
+                onClick={() => {
+                  navigateTo('admin-dashboard');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/40 text-[#08482D] dark:text-[#DAE7C7]"
+                className="w-full text-left py-2.5 px-3 rounded-2xl bg-[#DAE7C7]/50 dark:bg-[#1a3826] text-[#08482D] dark:text-[#DAE7C7] flex items-center gap-2 cursor-pointer"
               >
-                My Passes & Registrations
+                <ShieldAlert className="w-4 h-4" />
+                <span>Governance Console</span>
               </button>
             )}
 
@@ -521,7 +570,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setMobileMenuOpen(false);
                     handleSignOut();
                   }}
-                  className="w-full text-center py-3 text-rose-600 font-semibold rounded-2xl bg-rose-50 dark:bg-rose-950/40"
+                  className="w-full text-center py-3 text-rose-600 dark:text-rose-400 font-semibold rounded-2xl bg-rose-50 dark:bg-rose-950/40 cursor-pointer"
                 >
                   Sign Out
                 </button>
@@ -532,7 +581,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setMobileMenuOpen(false);
                       onOpenAuth();
                     }}
-                    className="w-full text-center py-2.5 text-[#101410] dark:text-[#f0f5ee] font-semibold border border-[#DCE4D6] dark:border-[#203a2c] rounded-2xl"
+                    className="w-full text-center py-2.5 text-[#101410] dark:text-[#f0f5ee] font-semibold border border-[#DCE4D6] dark:border-[#203a2c] rounded-2xl cursor-pointer hover:bg-[#E8F0DF] dark:hover:bg-[#18281f]"
                   >
                     Sign In
                   </button>
@@ -541,7 +590,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setMobileMenuOpen(false);
                       onOpenRoleSelector?.();
                     }}
-                    className="w-full text-center py-2.5 text-white font-bold bg-[#08482D] rounded-2xl shadow-md"
+                    className="w-full text-center py-2.5 text-white font-bold bg-[#08482D] hover:bg-[#0c5c3b] rounded-2xl shadow-md cursor-pointer"
                   >
                     Get Started
                   </button>
@@ -549,6 +598,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>
