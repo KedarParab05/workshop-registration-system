@@ -10,6 +10,8 @@ import { Footer } from './components/layout/Footer';
 import { LandingPage } from './components/public/LandingPage';
 import { WorkshopList } from './components/public/WorkshopList';
 import { WorkshopDetail } from './components/public/WorkshopDetail';
+import { OurStoryPage } from './components/public/OurStoryPage';
+import { ContactPage } from './components/public/ContactPage';
 import { AuthModal } from './components/auth/AuthModal';
 import { RoleSelectorModal } from './components/common/RoleSelectorModal';
 import { ProfileModal } from './components/common/ProfileModal';
@@ -55,6 +57,10 @@ const MainContent: React.FC = () => {
         return <SuperAdminDashboard />;
       case 'volunteer-portal':
         return <VolunteerGatePortal />;
+      case 'our-story':
+        return <OurStoryPage />;
+      case 'contact':
+        return <ContactPage />;
       default:
         return (
           <LandingPage
@@ -66,7 +72,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F8EF] dark:bg-[#0b140e] font-sans text-[#101410] dark:text-[#f0f5ee] selection:bg-[#DAE7C7] selection:text-[#08482D] transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-[#F5F8EF] dark:bg-[#0b140e] font-sans text-[#101410] dark:text-[#f0f5ee] selection:bg-[#DAE7C7] selection:text-[#08482D] transition-colors duration-200 w-full max-w-full overflow-x-clip">
       <Navbar
         onOpenAuth={() => setAuthModalOpen(true)}
         onOpenRoleSelector={() => setRoleModalOpen(true)}
@@ -106,11 +112,14 @@ const MainContent: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      <main className={`flex-1 ${activePage === 'home' ? 'pt-16 sm:pt-20' : 'pt-24 sm:pt-28'}`}>
+      <main className={`flex-1 w-full max-w-full overflow-x-clip ${activePage === 'home' ? 'pt-0' : 'pt-24 sm:pt-28'}`}>
         {renderCurrentPage()}
       </main>
 
-      <Footer />
+      <Footer
+        onOpenAuth={() => setAuthModalOpen(true)}
+        onOpenRoleSelector={() => setRoleModalOpen(true)}
+      />
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialRole={authInitialRole} />
       <RoleSelectorModal
