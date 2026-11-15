@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { User, UserRole } from '../../types';
+import { apiFetch } from '../../utils/api';
 import {
   ShieldAlert,
   Users,
@@ -18,6 +19,10 @@ import {
   Clock,
   ChevronRight,
   TrendingUp,
+  CreditCard,
+  Download,
+  ShieldCheck,
+  DollarSign,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -34,13 +39,38 @@ export const SuperAdminDashboard: React.FC = () => {
     navigateTo,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'users' | 'audit' | 'workshops'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'audit' | 'workshops' | 'payments'>('users');
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [selectedUserToToggle, setSelectedUserToToggle] = useState<User | null>(null);
   const [roleModalUser, setRoleModalUser] = useState<User | null>(null);
   const [targetRole, setTargetRole] = useState<UserRole>('PARTICIPANT');
+
+  // Razorpay Payments state
+  const [paymentRecords, setPaymentRecords] = useState<any[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<'ALL' | 'SUCCESS' | 'ORDER_CREATED' | 'FAILED'>('ALL');
+
+  const fetchPayments = async () => {
+    setLoadingPayments(true);
+    try {
+      const res = await apiFetch(`/api/payments/admin/all?status=${paymentStatusFilter}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.payments) {
+          setPaymentRecords(data.payments);
+        }
+      }
+    } catch {}
+    setLoadingPayments(false);
+  };
+
+  useEffect(() => {
+    if (activeTab === 'payments') {
+      fetchPayments();
+    }
+  }, [activeTab, paymentStatusFilter]);
 
   React.useEffect(() => {
     refreshData();
@@ -231,6 +261,18 @@ export const SuperAdminDashboard: React.FC = () => {
         >
           <Calendar className="w-4 h-4" />
           <span>Workshops Catalog ({workshops.length})</span>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab('payments'); setSearchQuery(''); }}
+          className={`px-4 py-2.5 font-heading font-semibold text-xs rounded-xl transition-all flex items-center gap-2 ${
+            activeTab === 'payments'
+              ? 'bg-[#08482D] text-[#F5F8EF] shadow-md shadow-[#08482D]/20'
+              : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF]/60 dark:hover:bg-[#14231b]'
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Razorpay Payments ({paymentRecords.length})</span>
         </button>
       </div>
 
@@ -514,6 +556,301 @@ export const SuperAdminDashboard: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 4: Razorpay Payment Records */}
+      {activeTab === 'payments' && (
+        <div className="space-y-5">
+          {/* Payment Stats Overview */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm">
+              <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] uppercase tracking-wider">
+                Total Verified Revenue
+              </div>
+              <div className="text-xl sm:text-2xl font-heading font-extrabold text-[#08482D] dark:text-[#DAE7C7] mt-1">
+                ₹{paymentRecords
+                  .filter((p) => p.status === 'SUCCESS')
+                  .reduce((sum, p) => sum + (p.amountInRupees || (p.amount ? p.amount / 100 : 0)), 0)
+                  .toLocaleString('en-IN')}
+              </div>
+              <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                Cryptographically Verified
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm">
+              <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] uppercase tracking-wider">
+                Paid Transactions
+              </div>
+              <div className="text-xl sm:text-2xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee] mt-1">
+                {paymentRecords.filter((p) => p.status === 'SUCCESS').length}
+              </div>
+              <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">
+                Confirmed tickets issued
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm">
+              <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] uppercase tracking-wider">
+                Pending Checkout
+              </div>
+              <div className="text-xl sm:text-2xl font-heading font-extrabold text-amber-600 dark:text-amber-400 mt-1">
+                {paymentRecords.filter((p) => p.status === 'ORDER_CREATED' || p.status === 'CREATED').length}
+              </div>
+              <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">
+                Awaiting payment completion
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm">
+              <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] uppercase tracking-wider">
+                Failed / Cancelled
+              </div>
+              <div className="text-xl sm:text-2xl font-heading font-extrabold text-rose-600 dark:text-rose-400 mt-1">
+                {paymentRecords.filter((p) => p.status === 'FAILED').length}
+              </div>
+              <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">
+                Declined or signature mismatch
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Filter & Action Bar */}
+          <div className="bg-white dark:bg-[#14231b] p-4 rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-[#5E5E61] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by Razorpay Order ID, Payment ID, Attendee, or Workshop..."
+                className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#101410] dark:text-[#f0f5ee] focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1 bg-[#F5F8EF] dark:bg-[#1b3025] p-1 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e]">
+                {(['ALL', 'SUCCESS', 'ORDER_CREATED', 'FAILED'] as const).map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setPaymentStatusFilter(st)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-heading font-semibold transition-all ${
+                      paymentStatusFilter === st
+                        ? 'bg-[#08482D] text-[#F5F8EF] shadow-xs'
+                        : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+                    }`}
+                  >
+                    {st === 'ALL' ? 'All Payments' : st === 'SUCCESS' ? 'Paid' : st === 'ORDER_CREATED' ? 'Pending' : 'Failed'}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => {
+                  const filtered = paymentRecords.filter((p) => {
+                    if (!searchQuery.trim()) return true;
+                    const q = searchQuery.toLowerCase();
+                    return (
+                      (p.participantName && p.participantName.toLowerCase().includes(q)) ||
+                      (p.participantEmail && p.participantEmail.toLowerCase().includes(q)) ||
+                      (p.workshopTitle && p.workshopTitle.toLowerCase().includes(q)) ||
+                      (p.razorpayOrderId && p.razorpayOrderId.toLowerCase().includes(q)) ||
+                      (p.razorpayPaymentId && p.razorpayPaymentId.toLowerCase().includes(q)) ||
+                      (p.id && p.id.toLowerCase().includes(q))
+                    );
+                  });
+                  if (filtered.length === 0) return;
+                  const headers = ['Ref', 'Razorpay Order ID', 'Razorpay Payment ID', 'Workshop', 'Attendee', 'Email', 'Amount (INR)', 'Status', 'Signature Verified', 'Created At'];
+                  const rows = filtered.map((p) => [
+                    `"${p.id || ''}"`,
+                    `"${p.razorpayOrderId || ''}"`,
+                    `"${p.razorpayPaymentId || ''}"`,
+                    `"${(p.workshopTitle || '').replace(/"/g, '""')}"`,
+                    `"${(p.participantName || '').replace(/"/g, '""')}"`,
+                    `"${p.participantEmail || ''}"`,
+                    `"${p.amountInRupees || (p.amount ? p.amount / 100 : 0)}"`,
+                    `"${p.status || ''}"`,
+                    `"${p.signatureVerified ? 'YES' : 'NO'}"`,
+                    `"${p.createdAt || ''}"`,
+                  ]);
+                  const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+                  const a = document.createElement('a');
+                  a.href = encodeURI(csv);
+                  a.download = `razorpay-payments-${new Date().toISOString().slice(0, 10)}.csv`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }}
+                className="px-3.5 py-2 text-xs font-heading font-semibold text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/50 dark:bg-[#08482D]/40 hover:bg-[#DAE7C7] rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
+
+              <button
+                onClick={fetchPayments}
+                disabled={loadingPayments}
+                className="p-2 text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee] rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] transition-colors cursor-pointer disabled:opacity-50"
+                title="Refresh payments"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingPayments ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Payment Records Table */}
+          <div className="bg-white dark:bg-[#14231b] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#F5F8EF] dark:bg-[#1b3025] border-b border-[#DCE4D6] dark:border-[#233d2e] text-[#5E5E61] dark:text-[#8ba895] font-heading font-semibold uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th className="p-3 sm:p-4">Payment Ref &amp; Order</th>
+                    <th className="p-3 sm:p-4">Workshop</th>
+                    <th className="p-3 sm:p-4">Attendee</th>
+                    <th className="p-3 sm:p-4">Amount</th>
+                    <th className="p-3 sm:p-4">Status</th>
+                    <th className="p-3 sm:p-4">Signature</th>
+                    <th className="p-3 sm:p-4">Date &amp; Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#DCE4D6]/60 dark:divide-[#233d2e]/60">
+                  {loadingPayments ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-[#5E5E61] dark:text-[#8ba895]">
+                        <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#08482D] dark:text-[#DAE7C7]" />
+                        <span>Loading verified payment records from database...</span>
+                      </td>
+                    </tr>
+                  ) : paymentRecords.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-[#5E5E61] dark:text-[#8ba895]">
+                        <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#5E5E61]" />
+                        <p className="font-heading font-semibold">No payment records found.</p>
+                        <p className="text-[11px] mt-0.5">Paid registrations through Razorpay will appear here in real time.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    paymentRecords
+                      .filter((p) => {
+                        if (!searchQuery.trim()) return true;
+                        const q = searchQuery.toLowerCase();
+                        return (
+                          (p.participantName && p.participantName.toLowerCase().includes(q)) ||
+                          (p.participantEmail && p.participantEmail.toLowerCase().includes(q)) ||
+                          (p.workshopTitle && p.workshopTitle.toLowerCase().includes(q)) ||
+                          (p.razorpayOrderId && p.razorpayOrderId.toLowerCase().includes(q)) ||
+                          (p.razorpayPaymentId && p.razorpayPaymentId.toLowerCase().includes(q)) ||
+                          (p.id && p.id.toLowerCase().includes(q))
+                        );
+                      })
+                      .map((p) => {
+                        const isSuccess = p.status === 'SUCCESS';
+                        const isFailed = p.status === 'FAILED';
+                        const isPending = !isSuccess && !isFailed;
+                        const amt = p.amountInRupees || (p.amount ? p.amount / 100 : 0);
+
+                        return (
+                          <tr key={p.id} className="hover:bg-[#F5F8EF]/40 dark:hover:bg-[#16291e] transition-colors">
+                            <td className="p-3 sm:p-4 space-y-0.5">
+                              <div className="font-mono font-bold text-[#101410] dark:text-[#f0f5ee]">
+                                {p.id}
+                              </div>
+                              <div className="text-[10px] font-mono text-[#5E5E61] dark:text-[#8ba895]">
+                                Order: {p.razorpayOrderId || '—'}
+                              </div>
+                              {p.razorpayPaymentId && (
+                                <div className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400">
+                                  Pay ID: {p.razorpayPaymentId}
+                                </div>
+                              )}
+                            </td>
+
+                            <td className="p-3 sm:p-4">
+                              <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] line-clamp-1">
+                                {p.workshopTitle || 'Workshop Session'}
+                              </div>
+                              {p.ticketCode && (
+                                <div className="text-[10px] font-mono text-[#08482D] dark:text-[#DAE7C7] mt-0.5">
+                                  Ticket: {p.ticketCode}
+                                </div>
+                              )}
+                            </td>
+
+                            <td className="p-3 sm:p-4">
+                              <div className="font-medium text-[#101410] dark:text-[#f0f5ee]">
+                                {p.participantName || 'Participant'}
+                              </div>
+                              <div className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+                                {p.participantEmail || '—'}
+                              </div>
+                            </td>
+
+                            <td className="p-3 sm:p-4 font-mono font-bold text-sm text-[#08482D] dark:text-[#DAE7C7]">
+                              ₹{amt}
+                            </td>
+
+                            <td className="p-3 sm:p-4">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider ${
+                                  isSuccess
+                                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                                    : isFailed
+                                    ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
+                                    : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+                                }`}
+                              >
+                                {isSuccess && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                                {isFailed && <AlertTriangle className="w-3 h-3 text-rose-600" />}
+                                {isPending && <Clock className="w-3 h-3 text-amber-600" />}
+                                {isSuccess ? 'PAID' : isFailed ? 'FAILED' : 'PENDING'}
+                              </span>
+                            </td>
+
+                            <td className="p-3 sm:p-4">
+                              {p.signatureVerified ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>HMAC Verified</span>
+                                </span>
+                              ) : isFailed ? (
+                                <span className="text-[11px] font-medium text-rose-600">
+                                  Declined / Mismatch
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+                                  Pending Checkout
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="p-3 sm:p-4 text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+                              {p.paidAt ? (
+                                <div>
+                                  <div className="font-medium text-[#101410] dark:text-[#f0f5ee]">
+                                    {new Date(p.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  </div>
+                                  <div>
+                                    {new Date(p.paidAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                  </div>
+                                </div>
+                              ) : p.createdAt ? (
+                                <div>
+                                  <div>{new Date(p.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                                  <div className="text-[10px]">{new Date(p.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+                                </div>
+                              ) : (
+                                '—'
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

@@ -205,5 +205,30 @@ public class PaymentRestController {
                     .body(Map.of("success", false, "error", e.getMessage()));
         }
     }
+
+    /**
+     * GET /api/payments/admin/all
+     * Lists all payment records for Administrators with status filter and verified payment details.
+     */
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllPaymentsForAdmin(@RequestParam(value = "status", required = false, defaultValue = "ALL") String status,
+                                                    @RequestHeader(value = "Authorization", required = false) String authHeader,
+                                                    Principal principal) {
+        User admin = getAuthenticatedUser(principal, null, authHeader);
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "error", "Authentication required."));
+        }
+
+        try {
+            java.util.List<Map<String, Object>> records = paymentService.getAllPaymentRecordsForAdmin(status, admin);
+            return ResponseEntity.ok(Map.of("success", true, "payments", records));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
 }
 

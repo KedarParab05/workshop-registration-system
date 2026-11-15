@@ -142,13 +142,7 @@ public class RazorpayService {
             throw new IllegalStateException("Razorpay Order Creation Failed: " + errorDesc);
         } catch (Exception e) {
             System.err.println("[RazorpayService] Connection exception during order creation: " + e.getMessage());
-            // In case of network interruption or test sandbox availability, fallback to mock order ID in test mode
-            if ("test".equalsIgnoreCase(mode)) {
-                String testOrderId = "order_test_" + UUID.randomUUID().toString().substring(0, 14);
-                System.out.println("[RazorpayService] Test mode active: Generated simulated test order " + testOrderId);
-                return testOrderId;
-            }
-            throw e;
+            throw new IllegalStateException("Failed to communicate with Razorpay payment gateway: " + e.getMessage(), e);
         }
     }
 
@@ -157,13 +151,8 @@ public class RazorpayService {
      * signature = HmacSHA256(razorpay_order_id + "|" + razorpay_payment_id, key_secret)
      */
     public boolean verifyCheckoutSignature(String orderId, String paymentId, String signature) {
-        if (orderId == null || paymentId == null || signature == null) {
+        if (orderId == null || paymentId == null || signature == null || keySecret == null || keySecret.isBlank()) {
             return false;
-        }
-
-        // Test mode shortcut for offline simulation test signatures
-        if ("test".equalsIgnoreCase(mode) && orderId.startsWith("order_test_") && signature.startsWith("simulated_test_sig")) {
-            return true;
         }
 
         try {

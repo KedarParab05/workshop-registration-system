@@ -135,9 +135,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return {
             ...w,
             bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl, w),
-            payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
-            payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
-            razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
+                                    razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
           };
         });
       } catch {}
@@ -146,9 +144,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const cred = savedCreds[w.id] || {};
       return {
         ...w,
-        payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
-        payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
-        razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
+                        razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
       };
     });
   });
@@ -310,9 +306,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...w,
               bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl, w),
-              payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
-              payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
-              razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
+                                          razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
             };
           });
           setWorkshops(normalized);
@@ -943,9 +937,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       pricingType: data.pricingType || 'FREE',
       price: data.pricingType === 'PAID' ? Number(data.price) || 0 : 0,
       currency: data.currency || 'INR',
-      payeeVpa: data.payeeVpa?.trim() || '',
-      payeeName: data.payeeName?.trim() || '',
-      razorpayKeyId: data.razorpayKeyId?.trim() || '',
+                  razorpayKeyId: data.razorpayKeyId?.trim() || '',
       organizerId: currentUser?.id,
     };
 
@@ -954,9 +946,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...payload,
       id: tempId,
       learningOutcomes: outcomes,
-      payeeVpa: data.payeeVpa?.trim() || '',
-      payeeName: data.payeeName?.trim() || '',
-      razorpayKeyId: data.razorpayKeyId?.trim() || '',
+                  razorpayKeyId: data.razorpayKeyId?.trim() || '',
       organizerNameSnapshot: currentUser?.fullName || 'Organizer',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -991,9 +981,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const creds = JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}');
         creds[finalId] = {
-          payeeVpa: data.payeeVpa?.trim() || '',
-          payeeName: data.payeeName?.trim() || '',
-          razorpayKeyId: data.razorpayKeyId?.trim() || '',
+                              razorpayKeyId: data.razorpayKeyId?.trim() || '',
         };
         localStorage.setItem('wh_workshop_creds', JSON.stringify(creds));
       } catch {}
@@ -1062,9 +1050,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       pricingType: data.pricingType || existing.pricingType || 'FREE',
       price: (data.pricingType === 'PAID' ? Number(data.price) : (data.pricingType === 'FREE' ? 0 : Number(existing.price || 0))) || 0,
       currency: data.currency || existing.currency || 'INR',
-      payeeVpa: data.payeeVpa !== undefined ? data.payeeVpa.trim() : (existing.payeeVpa || ''),
-      payeeName: data.payeeName !== undefined ? data.payeeName.trim() : (existing.payeeName || ''),
-      razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
+                  razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
       organizerId: existing.organizerId || currentUser?.id,
     };
 
@@ -1073,9 +1059,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...payload,
       id,
       learningOutcomes: outcomes,
-      payeeVpa: data.payeeVpa !== undefined ? data.payeeVpa.trim() : (existing.payeeVpa || ''),
-      payeeName: data.payeeName !== undefined ? data.payeeName.trim() : (existing.payeeName || ''),
-      razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
+                  razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
       updatedAt: new Date().toISOString(),
     };
 
@@ -1083,9 +1067,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const creds = JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}');
         creds[id] = {
-          payeeVpa: data.payeeVpa !== undefined ? data.payeeVpa.trim() : (existing.payeeVpa || ''),
-          payeeName: data.payeeName !== undefined ? data.payeeName.trim() : (existing.payeeName || ''),
-          razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
+                              razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
         };
         localStorage.setItem('wh_workshop_creds', JSON.stringify(creds));
       } catch {}
@@ -1228,67 +1210,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!orderRes.ok || !orderData.success) {
           showAlert(orderData.error || 'Failed to initiate paid registration.', 'error');
           return { success: false, message: orderData.error || 'Failed to initiate payment.' };
-        }
-
-        // Handle simulated test mode orders (fallback when Razorpay live API credentials are placeholders)
-        if (orderData.orderId?.startsWith('order_test_')) {
-          showAlert('Processing Razorpay Test Payment (Simulation Mode)...', 'info');
-          const simPaymentId = 'pay_sim_' + Math.random().toString(36).substring(2, 11);
-          const simSignature = 'simulated_test_sig_' + Date.now();
-
-          try {
-            let verifyRes = await apiFetch('/api/payments/verify', {
-              method: 'POST',
-              body: JSON.stringify({
-                paymentAttemptId: orderData.paymentAttemptId,
-                razorpay_order_id: orderData.orderId,
-                razorpay_payment_id: simPaymentId,
-                razorpay_signature: simSignature,
-              }),
-            });
-
-            if (verifyRes.status === 401 && getToken()) {
-              const refreshRes = await apiFetch('/api/auth/refresh-token', { method: 'POST' });
-              if (refreshRes.ok) {
-                const refreshed = await refreshRes.json();
-                if (refreshed.token) {
-                  saveToken(refreshed.token);
-                  verifyRes = await apiFetch('/api/payments/verify', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                      paymentAttemptId: orderData.paymentAttemptId,
-                      razorpay_order_id: orderData.orderId,
-                      razorpay_payment_id: simPaymentId,
-                      razorpay_signature: simSignature,
-                    }),
-                  });
-                }
-              }
-            }
-
-            const verifyData = await verifyRes.json();
-            if (verifyRes.ok && verifyData.success) {
-              showAlert(`Test Payment of ₹${workshop.price} verified! Registration confirmed.`, 'success');
-              await refreshData();
-              return {
-                success: true,
-                message: 'Test payment verified! Registration confirmed.',
-                registration: verifyData.registration,
-              };
-            } else {
-              showAlert(verifyData.error || 'Payment verification failed.', 'error');
-              return {
-                success: false,
-                message: verifyData.error || 'Payment verification failed.',
-              };
-            }
-          } catch (err) {
-            showAlert('Error communicating with payment verification server.', 'error');
-            return {
-              success: false,
-              message: 'Verification server communication error.',
-            };
-          }
         }
 
         // Step 2: Dynamically load Razorpay SDK

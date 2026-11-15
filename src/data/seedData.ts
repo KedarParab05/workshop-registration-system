@@ -302,8 +302,6 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-21',
     pricingType: 'PAID',
     price: 499,
-    payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'PyTorch Tensor Computation & Backprop Graphs',
@@ -337,8 +335,6 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-24',
     pricingType: 'PAID',
     price: 299,
-    payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'VPC Network Architecture, Subnets & Gateways',
@@ -471,8 +467,6 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-07',
     pricingType: 'PAID',
     price: 199,
-    payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'Advanced Analytical Window Functions & CTEs',
@@ -572,8 +566,6 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-12-11',
     pricingType: 'PAID',
     price: 100,
-    payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'Spring Boot 3 Web Layer & Controller Advice',

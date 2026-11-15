@@ -75,10 +75,8 @@ export interface Workshop {
   pricingUpdatedAt?: string;
   pricingUpdatedBy?: string;
 
-  // Organizer Payment Credentials
-  payeeVpa?: string;       // Organizer's UPI VPA e.g. "org@icici"
-  payeeName?: string;      // Organizer display name for UPI
-  razorpayKeyId?: string;  // Organizer's Razorpay Key ID
+  // Razorpay Gateway Configuration
+  razorpayKeyId?: string;  // Organizer's optional Razorpay Key ID override
 
   createdAt: string;
   updatedAt: string;
@@ -171,8 +169,6 @@ export interface WorkshopFormData {
   price: number;
   currency?: string;
 
-  // Organizer Payment Credentials
-  payeeVpa?: string;
-  payeeName?: string;
+  // Razorpay Gateway Configuration
   razorpayKeyId?: string;
 }

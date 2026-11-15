@@ -110,20 +110,34 @@ public class PaymentService {
         // Calculate amount in paise (1 INR = 100 paise)
         long amountInPaise = Math.round(workshop.getPrice() * 100);
 
-        // Create pending reservation registration
-        Registration pendingReg = new Registration(
-                workshopId,
-                participant.getId(),
-                participant.getFullName(),
-                participant.getEmail()
-        );
-        pendingReg.setStatus(RegistrationStatus.PENDING_PAYMENT);
-        pendingReg.setPaymentStatus(PaymentStatus.CREATED);
-        pendingReg.setPricingTypeSnapshot(PricingType.PAID);
-        pendingReg.setAmount(workshop.getPrice());
-        pendingReg.setCurrency("INR");
-        pendingReg.setNotes(notes);
-        pendingReg.setReservationExpiresAt(LocalDateTime.now().plusMinutes(15));
+        // Check if user already has an active pending reservation for this workshop to prevent duplicates
+        Optional<Registration> existingPending = pendingRegs.stream()
+                .filter(r -> r.getParticipantId().equals(participant.getId())
+                        && (r.getReservationExpiresAt() == null || r.getReservationExpiresAt().isAfter(LocalDateTime.now())))
+                .findFirst();
+
+        Registration pendingReg;
+        if (existingPending.isPresent()) {
+            pendingReg = existingPending.get();
+            pendingReg.setReservationExpiresAt(LocalDateTime.now().plusMinutes(15));
+            pendingReg.setNotes(notes);
+            pendingReg.setAmount(workshop.getPrice());
+            pendingReg.setUpdatedAt(LocalDateTime.now());
+        } else {
+            pendingReg = new Registration(
+                    workshopId,
+                    participant.getId(),
+                    participant.getFullName(),
+                    participant.getEmail()
+            );
+            pendingReg.setStatus(RegistrationStatus.PENDING_PAYMENT);
+            pendingReg.setPaymentStatus(PaymentStatus.CREATED);
+            pendingReg.setPricingTypeSnapshot(PricingType.PAID);
+            pendingReg.setAmount(workshop.getPrice());
+            pendingReg.setCurrency("INR");
+            pendingReg.setNotes(notes);
+            pendingReg.setReservationExpiresAt(LocalDateTime.now().plusMinutes(15));
+        }
         Registration savedReg = registrationRepository.save(pendingReg);
 
         // Create internal PaymentAttempt
@@ -486,6 +500,62 @@ public class PaymentService {
         summary.put("currency", "INR");
 
         return summary;
+    }
+
+    /**
+     * Lists all payment records for Administrators, with optional status filter.
+     */
+    public List<Map<String, Object>> getAllPaymentRecordsForAdmin(String statusFilter, User admin) {
+        if (admin == null || (admin.getRole() != UserRole.SUPER_ADMIN && admin.getRole() != UserRole.ORGANIZER)) {
+            throw new SecurityException("Unauthorized: Admin or Organizer access required.");
+        }
+
+        List<PaymentAttempt> attempts;
+        if (statusFilter != null && !statusFilter.isBlank() && !"ALL".equalsIgnoreCase(statusFilter)) {
+            try {
+                PaymentStatus ps = PaymentStatus.valueOf(statusFilter.toUpperCase());
+                attempts = paymentAttemptRepository.findByStatusOrderByCreatedAtDesc(ps);
+            } catch (Exception e) {
+                attempts = paymentAttemptRepository.findAllByOrderByCreatedAtDesc();
+            }
+        } else {
+            attempts = paymentAttemptRepository.findAllByOrderByCreatedAtDesc();
+        }
+
+        List<Map<String, Object>> records = new java.util.ArrayList<>();
+        for (PaymentAttempt pa : attempts) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", pa.getId());
+            map.put("registrationId", pa.getRegistrationId());
+            map.put("workshopId", pa.getWorkshopId());
+            map.put("workshopTitle", pa.getWorkshopTitle());
+            map.put("participantId", pa.getParticipantId());
+            map.put("participantName", pa.getParticipantName());
+            map.put("participantEmail", pa.getParticipantEmail());
+            map.put("razorpayOrderId", pa.getRazorpayOrderId());
+            map.put("razorpayPaymentId", pa.getRazorpayPaymentId());
+            map.put("amount", pa.getAmount());
+            map.put("amountInRupees", pa.getAmountInRupees());
+            map.put("currency", pa.getCurrency());
+            map.put("status", pa.getStatus());
+            map.put("signatureVerified", pa.isSignatureVerified());
+            map.put("webhookVerified", pa.isWebhookVerified());
+            map.put("failureReason", pa.getFailureReason());
+            map.put("createdAt", pa.getCreatedAt());
+            map.put("paidAt", pa.getPaidAt());
+
+            // Associated registration details
+            if (pa.getRegistrationId() != null) {
+                registrationRepository.findById(pa.getRegistrationId()).ifPresent(reg -> {
+                    map.put("ticketCode", reg.getTicketCode());
+                    map.put("registrationStatus", reg.getStatus());
+                    map.put("isAttended", reg.isVerified());
+                });
+            }
+
+            records.add(map);
+        }
+        return records;
     }
 
     /**

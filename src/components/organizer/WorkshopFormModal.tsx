@@ -59,8 +59,6 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
     pricingType: 'FREE',
     price: 0,
     currency: 'INR',
-    payeeVpa: '',
-    payeeName: '',
     razorpayKeyId: '',
   });
 
@@ -97,8 +95,6 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
         pricingType: workshopToEdit.pricingType || 'FREE',
         price: workshopToEdit.price || 0,
         currency: workshopToEdit.currency || 'INR',
-        payeeVpa: workshopToEdit.payeeVpa || cred.payeeVpa || '',
-        payeeName: workshopToEdit.payeeName || cred.payeeName || '',
         razorpayKeyId: workshopToEdit.razorpayKeyId || cred.razorpayKeyId || '',
       });
       const matchesPreset = PRESET_BANNERS.some((b) => b.url === workshopToEdit.bannerImageUrl);
@@ -131,8 +127,6 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
         pricingType: 'FREE',
         price: 0,
         currency: 'INR',
-        payeeVpa: '',
-        payeeName: '',
         razorpayKeyId: '',
       });
       setCustomUrlMode(false);
@@ -676,58 +670,32 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
               )}
             </div>
 
-            {/* ── Payment Credentials (Paid Workshops Only) ── */}
+            {/* ── Payment Gateway Information (Paid Workshops Only) ── */}
             {formData.pricingType === 'PAID' && (
               <div className="p-4 rounded-2xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#16291e] space-y-3">
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
                   <span className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
-                    Payment Destination Credentials
+                    Payment Gateway (Razorpay Exclusive)
                   </span>
                 </div>
                 <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
-                  Set where payments land. Leave blank to use platform defaults.
+                  Paid registrations are processed exclusively via Razorpay. All transactions are verified cryptographically via HMAC-SHA256 signatures on the backend.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1">
-                      Your UPI ID / VPA
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.payeeVpa || ''}
-                      onChange={(e) => setFormData({ ...formData, payeeVpa: e.target.value })}
-                      placeholder="yourorg@icici or name@okhdfc"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-white dark:bg-[#14231b] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] font-mono"
-                    />
-                    <p className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">UPI QR & app payments go here</p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1">
-                      Display Name (Payee)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.payeeName || ''}
-                      onChange={(e) => setFormData({ ...formData, payeeName: e.target.value })}
-                      placeholder="Your Org Name"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-white dark:bg-[#14231b] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D]"
-                    />
-                    <p className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">Shown in UPI app during checkout</p>
-                  </div>
-                </div>
                 <div>
                   <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1">
-                    Razorpay Key ID (for card/netbanking/wallet payments)
+                    Razorpay Key ID (Optional Override)
                   </label>
                   <input
                     type="text"
                     value={formData.razorpayKeyId || ''}
                     onChange={(e) => setFormData({ ...formData, razorpayKeyId: e.target.value })}
-                    placeholder="rzp_live_... or rzp_test_..."
+                    placeholder="rzp_test_... or leave blank for platform default"
                     className="w-full px-3 py-2 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-white dark:bg-[#14231b] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] font-mono"
                   />
-                  <p className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">Get from dashboard.razorpay.com → Settings → API Keys</p>
+                  <p className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">
+                    Leave blank to use the platform Razorpay gateway credentials configured securely on the backend.
+                  </p>
                 </div>
               </div>
             )}

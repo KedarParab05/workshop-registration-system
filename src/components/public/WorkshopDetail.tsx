@@ -458,7 +458,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                     <span className="text-sm text-[#08482D] dark:text-[#9ee2b8]">₹{workshop.price}</span>
                   </div>
                   <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-0.5">
-                    Mode: UPI · QR Code · Razorpay Gateway
+                    Payment Gateway: Razorpay Secure Checkout
                   </div>
                 </div>
               )}
@@ -492,7 +492,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                   {isRegistering
                     ? 'Processing...'
                     : workshop.pricingType === 'PAID'
-                    ? `Choose Payment Method ₹${workshop.price}`
+                    ? `Proceed to Pay ₹${workshop.price} with Razorpay`
                     : 'Complete Registration'}
                 </button>
               </div>
@@ -576,7 +576,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
         />
       )}
 
-      {/* Unified UPI + Razorpay Payment Modal */}
+      {/* Razorpay Exclusive Payment Modal */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
