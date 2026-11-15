@@ -4,13 +4,13 @@
  */
 
 export const getApiBase = (): string => {
-  // When running in the browser, always use relative path '' so all /api calls
-  // go through the Vite reverse proxy (or same-origin server).
-  // This works identically on localhost, LAN IP (192.168.x.x), tunnels, or deployed domains.
-  if (typeof window !== 'undefined') {
-    return '';
+  // If an external production backend URL is specified (e.g. Vercel frontend calling a deployed backend)
+  const envBase = import.meta.env.VITE_API_BASE;
+  if (envBase && typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+    return envBase.replace(/\/+$/, '');
   }
-  return import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+  // When running locally or on same-origin (Docker / Render full-stack), use relative path ''
+  return '';
 };
 
 export const API_BASE = getApiBase();
