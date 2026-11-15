@@ -264,18 +264,52 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
 
   const upiDeepLink = (scheme: string) => {
     const ref = orderData?.paymentAttemptId || orderData?.orderId || 'REF';
-    const q = `pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${price}.00&cu=INR&tn=${encodeURIComponent(workshop.title.substring(0, 30))}&tr=${ref}`;
-    const schemes: Record<string, string> = {
-      gpay: `tez://upi/pay?${q}`,
-      phonepe: `phonepe://pay?${q}`,
-      paytm: `paytmmp://pay?${q}`,
-      bhim: `bhim://pay?${q}`,
-      whatsapp: `whatsapp://pay?${q}`,
+    // Always use standard upi:// base params
+    const params = new URLSearchParams({
+      pa: payeeVpa,
+      pn: payeeName,
+      am: `${price}.00`,
+      cu: 'INR',
+      tn: workshop.title.substring(0, 30),
+      tr: ref,
+    }).toString();
+
+    // App-specific deep link schemes (mobile) with upi:// universal fallback
+    const appSchemes: Record<string, string> = {
+      gpay:     `tez://upi/pay?${params}`,
+      phonepe:  `phonepe://pay?${params}`,
+      paytm:    `paytmmp://pay?${params}`,
+      bhim:     `bhim://pay?${params}`,
+      whatsapp: `upi://pay?${params}&mode=15&purpose=00`, // WhatsApp uses standard UPI scheme
     };
-    return schemes[scheme] || `upi://pay?${q}`;
+    return appSchemes[scheme] || `upi://pay?${params}`;
   };
 
-  const openUpiApp = (scheme: string) => { window.location.href = upiDeepLink(scheme); };
+  // Universal UPI link for all apps (works on mobile, opens chooser dialog)
+  const universalUpiLink = () => {
+    const ref = orderData?.paymentAttemptId || orderData?.orderId || 'REF';
+    const params = new URLSearchParams({
+      pa: payeeVpa, pn: payeeName,
+      am: `${price}.00`, cu: 'INR',
+      tn: workshop.title.substring(0, 30), tr: ref,
+    }).toString();
+    return `upi://pay?${params}`;
+  };
+
+  const openUpiApp = (scheme: string) => {
+    // Use anchor-click approach — doesn't navigate away from page,
+    // OS intercepts custom scheme and opens the installed app
+    const url = upiDeepLink(scheme);
+    const a = document.createElement('a');
+    a.href = url;
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    // Cleanup after small delay
+    setTimeout(() => {
+      if (document.body.contains(a)) document.body.removeChild(a);
+    }, 300);
+  };
 
   const fullCustomUpiId = customUpiId.includes('@') ? customUpiId : `${customUpiId}${customUpiHandle}`;
 
@@ -577,13 +611,26 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                           <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
                             Tap below to open <strong>{upiMethods.find(m => m.id === activeUpiMethod)?.label}</strong> and pay ₹{price} instantly.
                           </p>
-                          <button
-                            onClick={() => openUpiApp(activeUpiMethod)}
-                            className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          {/* Primary deep-link button — rendered as <a> so browser/OS handles scheme */}
+                          <a
+                            href={upiDeepLink(activeUpiMethod)}
+                            onClick={(e) => {
+                              // Let the anchor handle it; prevent default only if deep link might fail
+                              e.stopPropagation();
+                            }}
+                            className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer no-underline"
                           >
                             <ExternalLink className="w-4 h-4 text-[#DAE7C7]" />
                             Open {upiMethods.find(m => m.id === activeUpiMethod)?.label} · ₹{price}
-                          </button>
+                          </a>
+                          {/* Universal UPI fallback — opens OS app-chooser dialog */}
+                          <a
+                            href={universalUpiLink()}
+                            className="w-full py-2 border border-[#08482D]/40 dark:border-[#DAE7C7]/20 text-[#08482D] dark:text-[#DAE7C7] text-[11px] font-heading font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:bg-[#08482D]/5 no-underline"
+                          >
+                            <QrCode className="w-3.5 h-3.5" />
+                            Open any UPI app (universal link)
+                          </a>
                           <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] text-center">After paying in the app, tap the button below</div>
                           <button onClick={() => verify(upiMethods.find(m => m.id === activeUpiMethod)?.label || 'UPI App')} className="w-full py-2 border border-[#08482D] text-[#08482D] dark:text-[#DAE7C7] dark:border-[#DAE7C7]/30 text-xs font-heading font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#08482D]/5">
                             <CheckCircle2 className="w-4 h-4" /> Payment Done — Verify & Get Pass
