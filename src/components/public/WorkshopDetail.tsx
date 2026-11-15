@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRTicketModal } from '../common/QRTicketModal';
+import { PaymentModal } from '../common/PaymentModal';
 import { Registration } from '../../types';
 
 interface WorkshopDetailProps {
@@ -56,6 +57,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
   const [volunteerNote, setVolunteerNote] = useState('');
   const [requestingVolunteer, setRequestingVolunteer] = useState(false);
   const [volunteerSuccessMsg, setVolunteerSuccessMsg] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   React.useEffect(() => {
     refreshData();
@@ -112,15 +114,20 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
   };
 
   const handleRegisterConfirm = async () => {
-    setIsRegistering(true);
     setShowConfirmModal(false);
-    try {
-      const result = await registerForWorkshop(workshop.id, notes);
-      if (result.success && result.registration) {
-        setTicketToShow(result.registration);
+    if (workshop.pricingType === 'PAID') {
+      // Open unified UPI + Razorpay payment modal
+      setShowPaymentModal(true);
+    } else {
+      setIsRegistering(true);
+      try {
+        const result = await registerForWorkshop(workshop.id, notes);
+        if (result.success && result.registration) {
+          setTicketToShow(result.registration);
+        }
+      } finally {
+        setIsRegistering(false);
       }
-    } finally {
-      setIsRegistering(false);
     }
   };
 
@@ -450,7 +457,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                     <span className="text-sm text-[#08482D] dark:text-[#9ee2b8]">₹{workshop.price}</span>
                   </div>
                   <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-0.5">
-                    Mode: Razorpay Test Mode • Use simulated card/UPI
+                    Mode: UPI · QR Code · Razorpay Gateway
                   </div>
                 </div>
               )}
@@ -482,9 +489,9 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                   className="px-5 py-2 text-xs font-heading font-semibold text-[#F5F8EF] bg-[#08482D] hover:bg-[#0c5c3b] rounded-xl shadow-md shadow-[#08482D]/20 transition-all disabled:opacity-60"
                 >
                   {isRegistering
-                    ? 'Launching Checkout...'
+                    ? 'Processing...'
                     : workshop.pricingType === 'PAID'
-                    ? `Proceed to Pay ₹${workshop.price}`
+                    ? `Choose Payment Method ₹${workshop.price}`
                     : 'Complete Registration'}
                 </button>
               </div>
@@ -567,6 +574,18 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
           workshop={workshop}
         />
       )}
+
+      {/* Unified UPI + Razorpay Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        workshop={workshop}
+        notes={notes}
+        onSuccess={(registration) => {
+          setShowPaymentModal(false);
+          setTicketToShow(registration);
+        }}
+      />
     </div>
   );
 };
