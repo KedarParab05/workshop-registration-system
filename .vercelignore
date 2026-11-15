@@ -1,0 +1,6 @@
+target/
+.mvn/
+*.war
+node_modules/
+.git/
+.vs/
