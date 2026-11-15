@@ -4,13 +4,20 @@
  */
 
 export const getApiBase = (): string => {
-  // When running in the browser, always use relative path '' so all /api calls
-  // go through the Vite reverse proxy (or same-origin server).
-  // This works identically on localhost, LAN IP (192.168.x.x), tunnels, or deployed domains.
+  const envBase = (import.meta.env.VITE_API_BASE || '').trim();
+  // If an explicit backend URL (like https://your-backend.onrender.com) is provided, use it
+  if (envBase && !envBase.includes('localhost:8081')) {
+    // If running in development with default localhost, prefer Vite proxy '' unless explicitly configured
+    if (envBase.includes('localhost:8080') && typeof window !== 'undefined') {
+      return '';
+    }
+    return envBase.replace(/\/$/, '');
+  }
+  // When running in the browser with relative routing (Vite proxy or same-domain), use ''
   if (typeof window !== 'undefined') {
     return '';
   }
-  return import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+  return 'http://localhost:8080';
 };
 
 export const API_BASE = getApiBase();
