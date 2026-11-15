@@ -154,6 +154,9 @@ public class WorkshopService {
         existing.setPricingType(updatedData.getPricingType());
         existing.setPrice(updatedData.getPrice());
         existing.setCurrency(updatedData.getCurrency() != null ? updatedData.getCurrency() : "INR");
+        existing.setPayeeVpa(updatedData.getPayeeVpa());
+        existing.setPayeeName(updatedData.getPayeeName());
+        existing.setRazorpayKeyId(updatedData.getRazorpayKeyId());
         existing.setPricingUpdatedAt(LocalDateTime.now());
         existing.setPricingUpdatedBy(currentUser.getFullName());
         existing.setUpdatedAt(LocalDateTime.now());

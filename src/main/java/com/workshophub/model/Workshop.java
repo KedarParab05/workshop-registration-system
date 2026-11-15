@@ -60,6 +60,11 @@ public class Workshop {
     private LocalDateTime pricingUpdatedAt;
     private String pricingUpdatedBy;
 
+    // Organizer Payment Credentials
+    private String payeeVpa;
+    private String payeeName;
+    private String razorpayKeyId;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -160,4 +165,13 @@ public class Workshop {
 
     public String getPricingUpdatedBy() { return pricingUpdatedBy; }
     public void setPricingUpdatedBy(String pricingUpdatedBy) { this.pricingUpdatedBy = pricingUpdatedBy; }
+
+    public String getPayeeVpa() { return payeeVpa; }
+    public void setPayeeVpa(String payeeVpa) { this.payeeVpa = payeeVpa; }
+
+    public String getPayeeName() { return payeeName; }
+    public void setPayeeName(String payeeName) { this.payeeName = payeeName; }
+
+    public String getRazorpayKeyId() { return razorpayKeyId; }
+    public void setRazorpayKeyId(String razorpayKeyId) { this.razorpayKeyId = razorpayKeyId; }
 }

@@ -160,10 +160,15 @@ const PaymentReceipt: React.FC<ReceiptProps> = ({ registration, workshop, paymen
 export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, workshop, notes, onSuccess }) => {
   const { currentUser, refreshData, showAlert } = useApp();
 
-  // Organizer's payment credentials (from workshop or platform defaults)
-  const payeeVpa  = workshop.payeeVpa  || 'kaushalya.skills@icici';
-  const payeeName = workshop.payeeName || 'Kaushalya Workshops';
-  const orgRazorpayKey = workshop.razorpayKeyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_To83ERSVYexa5T';
+  // Organizer's payment credentials (from workshop, saved custom credentials, or platform defaults)
+  const savedCreds = (() => {
+    try { return JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}'); } catch { return {}; }
+  })();
+  const cred = savedCreds[workshop.id] || {};
+
+  const payeeVpa  = workshop.payeeVpa  || cred.payeeVpa  || 'kaushalya.skills@icici';
+  const payeeName = workshop.payeeName || cred.payeeName || 'Kaushalya Workshops';
+  const orgRazorpayKey = workshop.razorpayKeyId || cred.razorpayKeyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_To83ERSVYexa5T';
   const price = workshop.price ?? 0;
 
   // Navigation
@@ -283,17 +288,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
       whatsapp: `upi://pay?${params}&mode=15&purpose=00`, // WhatsApp uses standard UPI scheme
     };
     return appSchemes[scheme] || `upi://pay?${params}`;
-  };
-
-  // Universal UPI link for all apps (works on mobile, opens chooser dialog)
-  const universalUpiLink = () => {
-    const ref = orderData?.paymentAttemptId || orderData?.orderId || 'REF';
-    const params = new URLSearchParams({
-      pa: payeeVpa, pn: payeeName,
-      am: `${price}.00`, cu: 'INR',
-      tn: workshop.title.substring(0, 30), tr: ref,
-    }).toString();
-    return `upi://pay?${params}`;
   };
 
   const openUpiApp = (scheme: string) => {
@@ -622,14 +616,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                           >
                             <ExternalLink className="w-4 h-4 text-[#DAE7C7]" />
                             Open {upiMethods.find(m => m.id === activeUpiMethod)?.label} · ₹{price}
-                          </a>
-                          {/* Universal UPI fallback — opens OS app-chooser dialog */}
-                          <a
-                            href={universalUpiLink()}
-                            className="w-full py-2 border border-[#08482D]/40 dark:border-[#DAE7C7]/20 text-[#08482D] dark:text-[#DAE7C7] text-[11px] font-heading font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:bg-[#08482D]/5 no-underline"
-                          >
-                            <QrCode className="w-3.5 h-3.5" />
-                            Open any UPI app (universal link)
                           </a>
                           <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] text-center">After paying in the app, tap the button below</div>
                           <button onClick={() => verify(upiMethods.find(m => m.id === activeUpiMethod)?.label || 'UPI App')} className="w-full py-2 border border-[#08482D] text-[#08482D] dark:text-[#DAE7C7] dark:border-[#DAE7C7]/30 text-xs font-heading font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#08482D]/5">

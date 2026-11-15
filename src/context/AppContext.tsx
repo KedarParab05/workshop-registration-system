@@ -124,13 +124,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [workshops, setWorkshops] = useState<Workshop[]>(() => {
     const saved = localStorage.getItem('wh_workshops');
+    const savedCreds = (() => {
+      try { return JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}'); } catch { return {}; }
+    })();
     if (saved) {
       try {
         const list: Workshop[] = JSON.parse(saved);
-        return list.map((w) => ({ ...w, bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl) }));
+        return list.map((w) => {
+          const cred = savedCreds[w.id] || {};
+          return {
+            ...w,
+            bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
+            payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'kaushalya.skills@icici' : undefined),
+            payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
+            razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
+          };
+        });
       } catch {}
     }
-    return INITIAL_WORKSHOPS;
+    return INITIAL_WORKSHOPS.map((w) => {
+      const cred = savedCreds[w.id] || {};
+      return {
+        ...w,
+        payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'kaushalya.skills@icici' : undefined),
+        payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
+        razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
+      };
+    });
   });
 
   const [registrations, setRegistrations] = useState<Registration[]>(() => {
@@ -282,10 +302,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (wsRes.status === 'fulfilled' && wsRes.value.ok) {
         const wsData = await wsRes.value.json();
         if (wsData.success && Array.isArray(wsData.data)) {
-          const normalized = wsData.data.map((w: Workshop) => ({
-            ...w,
-            bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
-          }));
+          const savedCreds = (() => {
+            try { return JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}'); } catch { return {}; }
+          })();
+          const normalized = wsData.data.map((w: Workshop) => {
+            const cred = savedCreds[w.id] || {};
+            return {
+              ...w,
+              bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
+              payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'kaushalya.skills@icici' : undefined),
+              payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
+              razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
+            };
+          });
           setWorkshops(normalized);
           localStorage.setItem('wh_workshops', JSON.stringify(normalized));
         }
@@ -914,6 +943,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       pricingType: data.pricingType || 'FREE',
       price: data.pricingType === 'PAID' ? Number(data.price) || 0 : 0,
       currency: data.currency || 'INR',
+      payeeVpa: data.payeeVpa?.trim() || '',
+      payeeName: data.payeeName?.trim() || '',
+      razorpayKeyId: data.razorpayKeyId?.trim() || '',
       organizerId: currentUser?.id,
     };
 
@@ -942,6 +974,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const resData = await res.json();
       if (res.ok && resData.success) {
+        try {
+          const newId = resData.data?.id || resData.id || resData.workshop?.id;
+          if (newId && (data.payeeVpa || data.payeeName || data.razorpayKeyId)) {
+            const creds = JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}');
+            creds[newId] = {
+              payeeVpa: data.payeeVpa?.trim() || '',
+              payeeName: data.payeeName?.trim() || '',
+              razorpayKeyId: data.razorpayKeyId?.trim() || '',
+            };
+            localStorage.setItem('wh_workshop_creds', JSON.stringify(creds));
+          }
+        } catch {}
         showAlert(`Workshop "${payload.title}" created successfully in MongoDB!`, 'success');
         await refreshData();
         return { success: true };
@@ -998,6 +1042,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       pricingType: data.pricingType || existing.pricingType || 'FREE',
       price: (data.pricingType === 'PAID' ? Number(data.price) : (data.pricingType === 'FREE' ? 0 : Number(existing.price || 0))) || 0,
       currency: data.currency || existing.currency || 'INR',
+      payeeVpa: data.payeeVpa !== undefined ? data.payeeVpa.trim() : (existing.payeeVpa || ''),
+      payeeName: data.payeeName !== undefined ? data.payeeName.trim() : (existing.payeeName || ''),
+      razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
       organizerId: existing.organizerId || currentUser?.id,
     };
 
@@ -1025,6 +1072,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const resData = await res.json();
       if (res.ok && resData.success) {
+        try {
+          const creds = JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}');
+          creds[id] = {
+            payeeVpa: data.payeeVpa !== undefined ? data.payeeVpa.trim() : (existing.payeeVpa || ''),
+            payeeName: data.payeeName !== undefined ? data.payeeName.trim() : (existing.payeeName || ''),
+            razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
+          };
+          localStorage.setItem('wh_workshop_creds', JSON.stringify(creds));
+        } catch {}
         showAlert(`Workshop "${payload.title}" updated successfully in MongoDB!`, 'success');
         await refreshData();
         return { success: true };

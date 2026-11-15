@@ -61,6 +61,11 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
 
   useEffect(() => {
     if (workshopToEdit) {
+      const savedCreds = (() => {
+        try { return JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}'); } catch { return {}; }
+      })();
+      const cred = savedCreds[workshopToEdit.id] || {};
+
       setFormData({
         title: workshopToEdit.title,
         summary: workshopToEdit.summary,
@@ -84,9 +89,9 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
         pricingType: workshopToEdit.pricingType || 'FREE',
         price: workshopToEdit.price || 0,
         currency: workshopToEdit.currency || 'INR',
-        payeeVpa: workshopToEdit.payeeVpa || '',
-        payeeName: workshopToEdit.payeeName || '',
-        razorpayKeyId: workshopToEdit.razorpayKeyId || '',
+        payeeVpa: workshopToEdit.payeeVpa || cred.payeeVpa || '',
+        payeeName: workshopToEdit.payeeName || cred.payeeName || '',
+        razorpayKeyId: workshopToEdit.razorpayKeyId || cred.razorpayKeyId || '',
       });
       const matchesPreset = PRESET_BANNERS.some((b) => b.url === workshopToEdit.bannerImageUrl);
       setCustomUrlMode(!matchesPreset);
