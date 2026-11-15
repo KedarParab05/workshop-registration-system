@@ -134,7 +134,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const cred = savedCreds[w.id] || {};
           return {
             ...w,
-            bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
+            bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl, w),
             payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
             payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
             razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
@@ -309,7 +309,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const cred = savedCreds[w.id] || {};
             return {
               ...w,
-              bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
+              bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl, w),
               payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
               payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
               razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,

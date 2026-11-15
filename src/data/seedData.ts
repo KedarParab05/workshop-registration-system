@@ -10,7 +10,55 @@ export const BANNER_DSA_JAVA = '/assets/images/dsa-java-workshop-banner.jpg';
 export const BANNER_DEVOPS_DOCKER = '/assets/images/devops-docker-workshop-banner.jpg';
 export const BANNER_SYSTEM_ARCH = '/assets/images/system-architecture-workshop-banner.jpg';
 
-export const normalizeBannerUrl = (url?: string): string => {
+export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title?: string }): string => {
+  const title = (workshop?.title || '').toLowerCase();
+  const id = (workshop?.id || '').toLowerCase();
+
+  // 1. Spring Boot REST APIs
+  if (id.includes('spring-rest') || title.includes('rest api') || (title.includes('spring boot 3') && !title.includes('react'))) {
+    return BANNER_SPRING_REST;
+  }
+
+  // 2. Data Structures & Competitive Algorithms in Java
+  if (id.includes('dsa') || title.includes('data structure') || title.includes('competitive algorithm')) {
+    return BANNER_DSA_JAVA;
+  }
+
+  // 3. DevOps & Docker Containerization Fundamentals
+  if (id.includes('docker') || (title.includes('devops') && title.includes('docker'))) {
+    return BANNER_DEVOPS_DOCKER;
+  }
+
+  // 4. Cloud Computing & AWS Architecture Fundamentals
+  if (id.includes('cloud') || (title.includes('cloud') && !title.includes('docker')) || title.includes('aws')) {
+    return BANNER_CLOUD;
+  }
+
+  // 5. Full-Stack Web Development with React 19 & Spring Boot
+  if (id.includes('fullstack') || (title.includes('react') && title.includes('spring boot'))) {
+    return BANNER_WEB;
+  }
+
+  // 6. Advanced Java Programming & Enterprise Design Patterns
+  if (id.includes('java-oop') || title.includes('design patterns') || title.includes('enterprise design')) {
+    return BANNER_SYSTEM_ARCH;
+  }
+
+  // 7. Practical AI: Deep Learning
+  if (id.includes('ai') || title.includes('deep learning') || title.includes('neural')) {
+    return BANNER_AI;
+  }
+
+  // 8. Cybersecurity
+  if (id.includes('cyber') || title.includes('cybersecurity') || title.includes('ethical hacking')) {
+    return BANNER_CYBER;
+  }
+
+  // 9. IoT & Embedded Systems
+  if (id.includes('iot') || title.includes('esp32')) {
+    return HERO_IMAGE;
+  }
+
   if (!url) return BANNER_WEB;
   if (url.includes('banner_fullstack_web')) return BANNER_WEB;
   if (url.includes('banner_ai_machine_learning')) return BANNER_AI;
