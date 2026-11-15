@@ -963,7 +963,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
           {/* Modal Footer */}
           <div className="mt-5 flex items-center justify-between border-t border-[#DCE4D6] dark:border-[#203a2c] pt-3">
             <span className="text-[11px] text-[#5E5E61] dark:text-slate-400">
-              Scanned status updates directly to MongoDB Atlas.
+              Scanned status updates directly in real-time.
             </span>
             <button
               onClick={onClose}

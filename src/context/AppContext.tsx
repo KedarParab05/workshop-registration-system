@@ -278,7 +278,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [dismissAlert]);
 
   // ─────────────────────────────────────────────────────────────
-  // Fetch fresh data directly from MongoDB backend in parallel
+  // Fetch fresh data directly from backend in parallel
   // ─────────────────────────────────────────────────────────────
   const refreshData = useCallback(async () => {
     try {
@@ -392,7 +392,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Immediate background fetch from MongoDB Atlas
+    // Immediate background fetch from backend
     refreshData();
   };
 
@@ -414,7 +414,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     refreshData();
 
-    // Continuously fetch from MongoDB Atlas every 5 seconds to keep participant seats and status live
+    // Continuously fetch from backend every 5 seconds to keep participant seats and status live
     const interval = setInterval(() => {
       refreshData();
     }, 5000);
@@ -894,7 +894,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // ─────────────────────────────────────────────────────────────
-  // Workshop Operations (Full MongoDB Persistence)
+  // Workshop Operations (Full Database Persistence)
   // ─────────────────────────────────────────────────────────────
   const createWorkshop = async (data: WorkshopFormData) => {
     if (!currentUser || (currentUser.role !== 'ORGANIZER' && currentUser.role !== 'SUPER_ADMIN')) {
@@ -1159,7 +1159,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // ─────────────────────────────────────────────────────────────
-  // Registration & Payment Operations (Full MongoDB Persistence)
+  // Registration & Payment Operations (Full Database Persistence)
   // ─────────────────────────────────────────────────────────────
   const registerForWorkshop = async (workshopId: string, notes?: string): Promise<{ success: boolean; message: string; registration?: Registration }> => {
     const workshop = workshops.find((w) => w.id === workshopId);
@@ -1456,7 +1456,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          showAlert(data.message || 'User account status updated in database.', 'success');
+          showAlert(data.message || 'User account status updated successfully.', 'success');
           await refreshData();
           return true;
         }
@@ -1484,7 +1484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          showAlert(data.message || 'User role updated in database.', 'success');
+          showAlert(data.message || 'User role updated successfully.', 'success');
           await refreshData();
           return true;
         }
@@ -1505,7 +1505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('wh_current_user_email');
     clearToken();
     refreshData();
-    showAlert('Refreshed data from backend database.', 'info');
+    showAlert('Data refreshed successfully.', 'info');
   };
 
   return (

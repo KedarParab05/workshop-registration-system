@@ -576,7 +576,7 @@ export const VolunteerGatePortal: React.FC = () => {
                 {verifyingAccess ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin text-[#DAE7C7]" />
-                    <span>Verifying Code in Database...</span>
+                    <span>Verifying Pass Code...</span>
                   </>
                 ) : (
                   <>
@@ -606,7 +606,7 @@ export const VolunteerGatePortal: React.FC = () => {
                 <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
                   My Volunteer Applications
                 </h3>
-                <p className="text-xs text-[#5E5E61] dark:text-slate-400">Live status verified against database</p>
+                <p className="text-xs text-[#5E5E61] dark:text-slate-400">Live status verified in real-time</p>
               </div>
               <button
                 onClick={() => {
@@ -629,7 +629,7 @@ export const VolunteerGatePortal: React.FC = () => {
             {loadingRequests ? (
               <div className="py-8 text-center text-xs text-[#5E5E61] dark:text-slate-400 space-y-2">
                 <Loader2 className="w-6 h-6 animate-spin text-[#08482D] dark:text-[#DAE7C7] mx-auto" />
-                <p>Checking database for your applications...</p>
+                <p>Checking status of your applications...</p>
               </div>
             ) : myRequests.length === 0 ? (
               <div className="py-8 text-center text-xs text-[#5E5E61] dark:text-slate-400 space-y-3">

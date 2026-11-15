@@ -680,7 +680,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                   </span>
                 </div>
                 <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
-                  Paid registrations are processed exclusively via Razorpay. All transactions are verified cryptographically via HMAC-SHA256 signatures on the backend.
+                  Paid registrations are processed securely via Razorpay with encrypted payment verification.
                 </p>
                 <div>
                   <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1">
@@ -690,11 +690,11 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                     type="text"
                     value={formData.razorpayKeyId || ''}
                     onChange={(e) => setFormData({ ...formData, razorpayKeyId: e.target.value })}
-                    placeholder="rzp_test_... or leave blank for platform default"
+                    placeholder="rzp_live_... or leave blank for platform default"
                     className="w-full px-3 py-2 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-white dark:bg-[#14231b] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] font-mono"
                   />
                   <p className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] mt-0.5">
-                    Leave blank to use the platform Razorpay gateway credentials configured securely on the backend.
+                    Leave blank to use the platform default Razorpay gateway credentials.
                   </p>
                 </div>
               </div>

@@ -720,7 +720,7 @@ export const SuperAdminDashboard: React.FC = () => {
                     <tr>
                       <td colSpan={7} className="p-8 text-center text-[#5E5E61] dark:text-[#8ba895]">
                         <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#08482D] dark:text-[#DAE7C7]" />
-                        <span>Loading verified payment records from database...</span>
+                        <span>Loading verified payment records...</span>
                       </td>
                     </tr>
                   ) : paymentRecords.length === 0 ? (

@@ -959,7 +959,7 @@ export const OrganizerDashboard: React.FC = () => {
                 Delete Academic Workshop?
               </h3>
               <p className="text-[#5E5E61] dark:text-slate-400 mb-6 leading-relaxed">
-                Are you sure you want to delete <strong>"{workshopToDelete.title}"</strong>? This will remove the session from MongoDB Atlas and cancel existing participant bookings.
+                Are you sure you want to delete <strong>"{workshopToDelete.title}"</strong>? This will permanently remove the session and cancel existing participant bookings.
               </p>
               <div className="flex items-center justify-end gap-3">
                 <button
