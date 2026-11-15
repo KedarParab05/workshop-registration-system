@@ -1,4 +1,4 @@
-﻿import { User, Workshop, Registration, AuditLog } from '../types';
+import { User, Workshop, Registration, AuditLog } from '../types';
 
 export const HERO_IMAGE = '/assets/images/workshop-collaboration-hero.jpg';
 export const BANNER_WEB = '/assets/images/fullstack-web-workshop-banner.jpg';
@@ -206,7 +206,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     pricingType: 'PAID',
     price: 499,
     payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kaushalya Workshops',
+    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'PyTorch Tensor Computation & Backprop Graphs',
@@ -241,7 +241,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     pricingType: 'PAID',
     price: 299,
     payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kaushalya Workshops',
+    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'VPC Network Architecture, Subnets & Gateways',
@@ -375,7 +375,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     pricingType: 'PAID',
     price: 199,
     payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kaushalya Workshops',
+    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'Advanced Analytical Window Functions & CTEs',
@@ -476,7 +476,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     pricingType: 'PAID',
     price: 100,
     payeeVpa: 'organizer@okhdfcbank',
-    payeeName: 'Kaushalya Workshops',
+    payeeName: 'Kedar Parab',
     currency: 'INR',
     learningOutcomes: [
       'Spring Boot 3 Web Layer & Controller Advice',

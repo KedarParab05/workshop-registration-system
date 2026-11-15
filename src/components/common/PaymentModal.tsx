@@ -167,7 +167,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
   const cred = savedCreds[workshop.id] || {};
 
   const payeeVpa  = workshop.payeeVpa  || cred.payeeVpa  || 'organizer@okhdfcbank';
-  const payeeName = workshop.payeeName || cred.payeeName || 'Kaushalya Workshops';
+  const payeeName = workshop.payeeName || cred.payeeName || 'Kedar Parab';
   const orgRazorpayKey = workshop.razorpayKeyId || cred.razorpayKeyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_To83ERSVYexa5T';
   const price = workshop.price ?? 0;
 
@@ -216,7 +216,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
         if (!mounted) return;
         if (res.ok && data.success) {
           setOrderData(data);
-          generateQr(data.paymentAttemptId || data.orderId || 'REF');
+          generateQr();
         } else {
           fallbackOrder(mounted);
         }
@@ -238,7 +238,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
         keyId: orgRazorpayKey,
       };
       setOrderData(fb);
-      generateQr(fb.paymentAttemptId);
+      generateQr();
     };
 
     init();
@@ -252,11 +252,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
     return () => clearInterval(t);
   }, [isOpen, timeLeft]);
 
-  // ── QR generation ──
-  const generateQr = async (refId: string) => {
+  // ── QR generation (Clean P2P standard without merchant tr param to avoid bank risk filters) ──
+  const generateQr = async () => {
     const cleanPayee = encodeURIComponent(payeeName.trim());
-    const cleanNote = encodeURIComponent(workshop.title.substring(0, 30).trim());
-    const uri = `upi://pay?pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${price}.00&cu=INR&tn=${cleanNote}&tr=${refId}`;
+    const cleanNote = encodeURIComponent(workshop.title.replace(/[^a-zA-Z0-9 ]/g, '').substring(0, 25).trim());
+    const formattedPrice = price % 1 === 0 ? price.toString() : price.toFixed(2);
+    const uri = `upi://pay?pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${formattedPrice}&cu=INR&tn=${cleanNote}`;
     try {
       const url = await QRCode.toDataURL(uri, { width: 220, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } });
       setQrCodeUrl(url);
@@ -270,10 +271,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
   };
 
   const getUpiDeepLink = (scheme: UpiMethod) => {
-    const ref = orderData?.paymentAttemptId || orderData?.orderId || 'REF';
     const cleanPayee = encodeURIComponent(payeeName.trim());
-    const cleanNote = encodeURIComponent(workshop.title.substring(0, 30).trim());
-    const q = `pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${price}.00&cu=INR&tn=${cleanNote}&tr=${ref}`;
+    const cleanNote = encodeURIComponent(workshop.title.replace(/[^a-zA-Z0-9 ]/g, '').substring(0, 25).trim());
+    const formattedPrice = price % 1 === 0 ? price.toString() : price.toFixed(2);
+    const q = `pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${formattedPrice}&cu=INR&tn=${cleanNote}`;
 
     const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
     const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);

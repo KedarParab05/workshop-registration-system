@@ -136,7 +136,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...w,
             bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
             payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
-            payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
+            payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
             razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
           };
         });
@@ -147,7 +147,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return {
         ...w,
         payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
-        payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
+        payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
         razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
       };
     });
@@ -311,7 +311,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               ...w,
               bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
               payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
-              payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
+              payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kedar Parab' : undefined),
               razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
             };
           });
