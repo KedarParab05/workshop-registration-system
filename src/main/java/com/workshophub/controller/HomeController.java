@@ -23,7 +23,12 @@ public class HomeController {
     }
 
     @GetMapping({"/", "/home"})
-    public String home(Model model) {
+    public String home() {
+        return "forward:/index.html";
+    }
+
+    @GetMapping("/legacy")
+    public String legacyHome(Model model) {
         List<Workshop> published = workshopService.findAllPublished();
         model.addAttribute("workshops", published);
         model.addAttribute("featuredWorkshops", published.stream().limit(3).toList());
