@@ -144,6 +144,17 @@ public class PaymentRestController {
     }
 
     /**
+     * GET /api/payments/status
+     * Real-time polling endpoint to automatically verify if an order or attempt has been paid.
+     */
+    @GetMapping("/status")
+    public ResponseEntity<?> checkPaymentStatus(@RequestParam(value = "orderId", required = false) String orderId,
+                                                @RequestParam(value = "paymentAttemptId", required = false) String paymentAttemptId) {
+        Map<String, Object> status = paymentService.checkPaymentStatus(orderId, paymentAttemptId);
+        return ResponseEntity.ok(status);
+    }
+
+    /**
      * POST /api/payments/webhook
      * Handles asynchronous webhook events directly from Razorpay.
      * Signature is validated against the raw request body.

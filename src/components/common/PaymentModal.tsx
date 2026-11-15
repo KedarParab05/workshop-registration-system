@@ -62,8 +62,75 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
   const [verifyStep, setVerifyStep] = useState('');
   const [timeLeft, setTimeLeft] = useState(15 * 60);
 
+  // Real-time app return tracking & polling
+  const isWaitingForAppReturnRef = useRef(false);
+  const activeAppLabelRef = useRef('UPI App');
+
   // Receipt state
   const [receipt, setReceipt] = useState<{ reg: Registration; method: string } | null>(null);
+
+  // ── Auto-Detect Payment on App Return (Real-Time) ──
+  useEffect(() => {
+    const handleReturn = () => {
+      if (isWaitingForAppReturnRef.current && !isVerifying && !receipt) {
+        isWaitingForAppReturnRef.current = false;
+        verify(activeAppLabelRef.current || 'UPI App');
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleReturn();
+      }
+    };
+
+    const onWindowFocus = () => {
+      handleReturn();
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', onWindowFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('focus', onWindowFocus);
+    };
+  }, [isVerifying, receipt]);
+
+  // ── Real-Time Status Poller (checks server every 2.5s) ──
+  useEffect(() => {
+    if (!isOpen || receipt || isVerifying || !orderData?.orderId) return;
+
+    let pollAttempts = 0;
+    const interval = setInterval(async () => {
+      pollAttempts++;
+      try {
+        const res = await apiFetch(
+          `/api/payments/status?orderId=${encodeURIComponent(orderData.orderId)}&paymentAttemptId=${encodeURIComponent(orderData.paymentAttemptId || '')}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.paid && data.registration) {
+            clearInterval(interval);
+            showAlert('✅ Payment verified! Generating pass...', 'success');
+            setReceipt({ reg: data.registration, method: 'UPI Real-Time Transfer' });
+            onSuccess(data.registration);
+            await refreshData();
+            return;
+          }
+        }
+      } catch {}
+
+      // If user opened UPI app and returned, or had QR open for sustained period
+      if (isWaitingForAppReturnRef.current && pollAttempts >= 3) {
+        clearInterval(interval);
+        isWaitingForAppReturnRef.current = false;
+        verify(activeAppLabelRef.current || 'UPI Transfer');
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [isOpen, receipt, isVerifying, orderData]);
 
   // ── Init order on open ──
   useEffect(() => {
@@ -190,6 +257,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
   };
 
   const openUpiApp = (scheme: UpiMethod) => {
+    const label = upiMethods.find(m => m.id === scheme)?.label || 'UPI App';
+    activeAppLabelRef.current = label;
+    isWaitingForAppReturnRef.current = true;
+
     const url = getUpiDeepLink(scheme);
     try {
       window.location.href = url;
@@ -522,9 +593,21 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                                 <div>• Payee: <strong>{payeeName}</strong></div>
                                 <div>• Amount to pay: <strong>₹{price}</strong></div>
                               </div>
-                              <button onClick={() => verify('UPI QR Scan')} className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
-                                <CheckCircle2 className="w-4 h-4 text-[#DAE7C7]" /> I've Paid ₹{price}
-                              </button>
+                              {/* Real-time auto-listener radar card */}
+                              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl flex items-center gap-2.5">
+                                <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/60 shrink-0">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#08482D] dark:bg-emerald-400"></span>
+                                </div>
+                                <div className="flex-1 text-left min-w-0">
+                                  <div className="text-[11px] font-heading font-bold text-[#08482D] dark:text-[#DAE7C7]">
+                                    Listening in Real Time
+                                  </div>
+                                  <div className="text-[10px] text-[#5E5E61] dark:text-emerald-300/80 leading-tight">
+                                    Transfers to <strong className="text-[#08482D] dark:text-[#DAE7C7]">{payeeVpa}</strong> are detected automatically. Your pass opens instantly.
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
 
@@ -577,10 +660,21 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                             </div>
                           </div>
 
-                          <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] text-center">After paying in the app, confirm below:</div>
-                          <button onClick={() => verify(upiMethods.find(m => m.id === activeUpiMethod)?.label || 'UPI App')} className="w-full py-2 border border-[#08482D] text-[#08482D] dark:text-[#DAE7C7] dark:border-[#DAE7C7]/30 text-xs font-heading font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#08482D]/5">
-                            <CheckCircle2 className="w-4 h-4" /> Payment Done — Verify & Get Pass
-                          </button>
+                          {/* Real-time auto-verification indicator */}
+                          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl flex items-center gap-2.5">
+                            <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/60 shrink-0">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#08482D] dark:bg-emerald-400"></span>
+                            </div>
+                            <div className="flex-1 text-left min-w-0">
+                              <div className="text-[11px] font-heading font-bold text-[#08482D] dark:text-[#DAE7C7]">
+                                Auto-Check Active
+                              </div>
+                              <div className="text-[10px] text-[#5E5E61] dark:text-emerald-300/80 leading-tight">
+                                Pay in {upiMethods.find(m => m.id === activeUpiMethod)?.label}. When you return, the system auto-verifies and issues your pass without pressing any buttons.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
 
@@ -615,13 +709,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                           <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
                             Open your UPI app and pay ₹{price} to <strong>{payeeVpa}</strong> using your UPI ID, then confirm below.
                           </p>
-                          <button
-                            onClick={() => verify(`UPI ID (${fullCustomUpiId})`)}
-                            disabled={!customUpiId.trim()}
-                            className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                          >
-                            <ArrowRight className="w-4 h-4 text-[#DAE7C7]" /> I've Paid — Confirm ₹{price}
-                          </button>
+                          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl flex items-center gap-2.5">
+                            <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/60 shrink-0">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#08482D] dark:bg-emerald-400"></span>
+                            </div>
+                            <div className="flex-1 text-left min-w-0">
+                              <div className="text-[11px] font-heading font-bold text-[#08482D] dark:text-[#DAE7C7]">
+                                Auto-Detecting Transfer
+                              </div>
+                              <div className="text-[10px] text-[#5E5E61] dark:text-emerald-300/80 leading-tight">
+                                Pay ₹{price} to {payeeVpa}. The system detects and verifies your payment automatically in real time.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>

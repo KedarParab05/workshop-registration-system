@@ -51,6 +51,47 @@ public class RazorpayService {
         return mode;
     }
 
+    public boolean isConfigured() {
+        return keyId != null && !keyId.isBlank() && keySecret != null && !keySecret.isBlank();
+    }
+
+    /**
+     * Queries Razorpay API to fetch all payments for a given order ID.
+     */
+    public java.util.List<Map<String, Object>> fetchOrderPayments(String orderId) {
+        if (!isConfigured() || orderId == null || orderId.isBlank() || orderId.startsWith("order_test_")) {
+            return java.util.Collections.emptyList();
+        }
+        try {
+            String auth = Base64.getEncoder().encodeToString((keyId + ":" + keySecret).getBytes(StandardCharsets.UTF_8));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.razorpay.com/v1/orders/" + orderId + "/payments"))
+                    .header("Authorization", "Basic " + auth)
+                    .GET()
+                    .timeout(Duration.ofSeconds(10))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                JsonNode root = objectMapper.readTree(response.body());
+                if (root.has("items") && root.get("items").isArray()) {
+                    java.util.List<Map<String, Object>> result = new java.util.ArrayList<>();
+                    for (JsonNode item : root.get("items")) {
+                        Map<String, Object> map = new java.util.HashMap<>();
+                        if (item.has("id")) map.put("id", item.get("id").asText());
+                        if (item.has("status")) map.put("status", item.get("status").asText());
+                        if (item.has("amount")) map.put("amount", item.get("amount").asLong());
+                        result.add(map);
+                    }
+                    return result;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[RazorpayService] Error querying payments for order " + orderId + ": " + e.getMessage());
+        }
+        return java.util.Collections.emptyList();
+    }
+
     /**
      * Creates a new Razorpay Order for a paid workshop session.
      *

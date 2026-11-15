@@ -289,6 +289,75 @@ public class PaymentService {
     }
 
     /**
+     * Real-time check to see if an order has been paid.
+     * Checks database record first, then queries Razorpay API directly if order is still pending.
+     */
+    public synchronized Map<String, Object> checkPaymentStatus(String orderId, String paymentAttemptId) {
+        Optional<PaymentAttempt> opt = Optional.empty();
+        if (orderId != null && !orderId.isBlank()) {
+            opt = paymentAttemptRepository.findByRazorpayOrderId(orderId);
+        }
+        if (opt.isEmpty() && paymentAttemptId != null && !paymentAttemptId.isBlank()) {
+            opt = paymentAttemptRepository.findById(paymentAttemptId);
+        }
+
+        if (opt.isEmpty()) {
+            return Map.of("success", true, "paid", false, "status", "NOT_FOUND");
+        }
+
+        PaymentAttempt attempt = opt.get();
+        if (attempt.getStatus() == PaymentStatus.SUCCESS) {
+            Registration reg = registrationRepository.findById(attempt.getRegistrationId()).orElse(null);
+            return Map.of(
+                    "success", true,
+                    "paid", true,
+                    "status", "SUCCESS",
+                    "paymentId", attempt.getRazorpayPaymentId() != null ? attempt.getRazorpayPaymentId() : "",
+                    "registration", reg != null ? reg : Map.of()
+            );
+        }
+
+        // Check directly with Razorpay API for live payment status
+        if (razorpayService.isConfigured() && attempt.getRazorpayOrderId() != null && !attempt.getRazorpayOrderId().isBlank()) {
+            List<Map<String, Object>> payments = razorpayService.fetchOrderPayments(attempt.getRazorpayOrderId());
+            for (Map<String, Object> p : payments) {
+                String pStatus = (String) p.get("status");
+                if ("captured".equalsIgnoreCase(pStatus) || "authorized".equalsIgnoreCase(pStatus)) {
+                    String paymentId = (String) p.get("id");
+                    attempt.setStatus(PaymentStatus.SUCCESS);
+                    attempt.setRazorpayPaymentId(paymentId);
+                    attempt.setPaidAt(LocalDateTime.now());
+                    attempt.setUpdatedAt(LocalDateTime.now());
+                    paymentAttemptRepository.save(attempt);
+
+                    Registration reg = registrationRepository.findById(attempt.getRegistrationId()).orElse(null);
+                    if (reg != null) {
+                        reg.setStatus(RegistrationStatus.CONFIRMED);
+                        reg.setPaymentStatus(PaymentStatus.SUCCESS);
+                        reg.setRazorpayPaymentId(paymentId);
+                        reg.setConfirmedAt(LocalDateTime.now());
+                        reg.setUpdatedAt(LocalDateTime.now());
+                        Registration savedReg = registrationRepository.save(reg);
+                        return Map.of(
+                                "success", true,
+                                "paid", true,
+                                "status", "SUCCESS",
+                                "paymentId", paymentId,
+                                "registration", savedReg
+                        );
+                    }
+                }
+            }
+        }
+
+        return Map.of(
+                "success", true,
+                "paid", false,
+                "status", attempt.getStatus().name()
+        );
+    }
+
+    /**
      * Processes Razorpay Webhook events asynchronously with cryptographic signature validation and idempotency.
      */
     public synchronized Map<String, Object> processWebhook(String rawPayload, String signatureHeader) {
