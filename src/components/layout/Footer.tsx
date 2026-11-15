@@ -42,7 +42,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAuth, onOpenRoleSelector }
 
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0b5c3b]/70 dark:bg-[#12281c] text-[#DAE7C7] text-[11px] font-heading font-medium border border-[#DAE7C7]/20 shadow-xs">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#DAE7C7] shrink-0" />
-              <span>Free &amp; Paid Academic Sessions · Razorpay Test Checkout</span>
+              <span>Free &amp; Paid Academic Sessions · Razorpay Secure Checkout</span>
             </div>
           </div>
 

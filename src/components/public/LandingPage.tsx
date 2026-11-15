@@ -235,7 +235,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
               </h3>
             </div>
             <p className="text-xs text-[#5E5E61] dark:text-slate-400 leading-relaxed font-sans">
-              Register instantly for free sessions or complete quick test checkout for paid sessions. Concurrency controls guarantee accurate capacity decrement.
+              Register instantly for free sessions or complete quick secure checkout for paid sessions. Concurrency controls guarantee accurate capacity decrement.
             </p>
           </div>
 

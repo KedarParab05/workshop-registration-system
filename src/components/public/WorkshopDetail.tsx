@@ -292,7 +292,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
               </h3>
               <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
                 {workshop.pricingType === 'PAID'
-                  ? 'Secure test checkout powered by Razorpay. Verified digital QR pass generated immediately upon payment confirmation.'
+                  ? 'Secure checkout powered by Razorpay. Verified digital QR pass generated immediately upon payment confirmation.'
                   : 'Zero tuition, zero card requirements. Verified digital pass issued upon registration.'}
               </p>
             </div>

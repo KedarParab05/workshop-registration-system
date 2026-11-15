@@ -1224,7 +1224,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           let paymentHandled = false;
 
           const options = {
-            key: orderData.keyId,
+            key: orderData.keyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
             amount: orderData.amount,
             currency: orderData.currency || 'INR',
             name: 'Kaushalya Workshops',
