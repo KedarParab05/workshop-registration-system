@@ -286,7 +286,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
     const cleanPayee = encodeURIComponent(payeeName.trim());
     const cleanNote = encodeURIComponent(workshop.title.replace(/[^a-zA-Z0-9 ]/g, '').substring(0, 25).trim());
     const formattedPrice = price % 1 === 0 ? price.toString() : price.toFixed(2);
-    const q = `pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${formattedPrice}&cu=INR&tn=${cleanNote}`;
+    const q = usePureP2P
+      ? `pa=${payeeVpa.trim()}&pn=${cleanPayee}&cu=INR`
+      : `pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${formattedPrice}&cu=INR&tn=${cleanNote}`;
 
     const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
     const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -574,7 +576,31 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                     <div className="space-y-3">
                       <div>
                         <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">Pay via UPI</h3>
-                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Choose any UPI method below</p>
+                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Official payment gateway or direct P2P transfer</p>
+                      </div>
+
+                      {/* Official Razorpay Gateway Card (No bank limit issues) */}
+                      <div className="p-3 bg-gradient-to-r from-[#08482D] to-[#125838] text-white rounded-2xl flex items-center justify-between shadow-md">
+                        <div className="space-y-0.5">
+                          <div className="text-xs font-heading font-bold flex items-center gap-1.5 text-[#DAE7C7]">
+                            <ShieldCheck className="w-4 h-4 text-[#DAE7C7]" />
+                            Official Gateway Checkout
+                          </div>
+                          <p className="text-[10px] text-white/80">Pay via GPay, PhonePe, Cards or Netbanking with 100% bank success</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => launchRazorpay('Razorpay Official Gateway')}
+                          disabled={launchingRazorpay}
+                          className="px-3 py-2 bg-[#DAE7C7] hover:bg-white text-[#08482D] text-xs font-heading font-extrabold rounded-xl transition-all cursor-pointer shadow shrink-0 flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          {launchingRazorpay ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                          Pay ₹{price}
+                        </button>
+                      </div>
+
+                      <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] pt-1">
+                        Or Pay Directly to Organizer UPI:
                       </div>
 
                       {/* UPI method list */}
