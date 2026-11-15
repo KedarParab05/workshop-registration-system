@@ -198,10 +198,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                 <Sparkles className="w-3 h-3 text-[#08482D] dark:text-[#a8d38d]" />
                 Academic Session Builder
               </span>
-              <span className="font-hand text-sm text-[#08482D] dark:text-[#DAE7C7] -rotate-1 hidden sm:inline">
-                // 100% Free academic seating
-              </span>
-            </div>
+              </div>
             <h2 className="text-xl sm:text-2xl font-heading font-bold text-[#101410] dark:text-white">
               {workshopToEdit ? 'Edit Academic Workshop' : 'Create New Academic Workshop'}
             </h2>
@@ -653,8 +650,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                   <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-xl text-xs text-blue-800 dark:text-blue-300">
                     <CreditCard className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                     <div>
-                      <strong>Razorpay Test Mode</strong>: Participants will complete checkout through Razorpay. Registration is confirmed only after verified payment.
-                      <br /><span className="text-[11px] opacity-80">Test Card: 4111 1111 1111 1111 · Any future exp · Any CVV</span>
+                      <strong>Razorpay Secure Checkout</strong>: Participants will complete checkout through Razorpay. Registration is confirmed only after verified payment.
                     </div>
                   </div>
 

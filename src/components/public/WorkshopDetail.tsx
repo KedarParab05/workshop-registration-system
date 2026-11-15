@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { QRTicketModal } from '../common/QRTicketModal';
 import { PaymentModal } from '../common/PaymentModal';
 import { Registration } from '../../types';
+import { normalizeBannerUrl } from '../../data/seedData';
 
 interface WorkshopDetailProps {
   onOpenAuth: () => void;
@@ -230,13 +231,13 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
           {/* Banner Image */}
           <div className="rounded-3xl overflow-hidden border border-[#DCE4D6] dark:border-[#233d2e] shadow-sm max-h-[360px] sm:max-h-[440px] bg-[#E8F0DF] dark:bg-[#1b3025]">
             <img
-              src={workshop.bannerImageUrl}
+              src={normalizeBannerUrl(workshop.bannerImageUrl, workshop)}
               alt={workshop.title}
               className="w-full h-full max-h-[360px] sm:max-h-[440px] object-cover transition-opacity duration-300"
               loading="eager"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
+                e.currentTarget.src = normalizeBannerUrl('', workshop);
               }}
             />
           </div>

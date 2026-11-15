@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { calculateSeats } from '../../utils/workshopRules';
+import { normalizeBannerUrl } from '../../data/seedData';
 import {
   Search,
   Calendar,
@@ -221,12 +222,12 @@ export const WorkshopList: React.FC = () => {
                 {/* Banner Thumbnail with 16:10 Aspect Ratio */}
                 <div className="relative aspect-[16/10] bg-[#E8F0DF] dark:bg-[#1b3025] overflow-hidden">
                   <img
-                    src={workshop.bannerImageUrl}
+                    src={normalizeBannerUrl(workshop.bannerImageUrl, workshop)}
                     alt={workshop.title}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
+                      e.currentTarget.src = normalizeBannerUrl('', workshop);
                     }}
                   />
                   <div className="absolute top-3 left-3 bg-[#DAE7C7] text-[#08482D] text-[10px] font-heading font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap">

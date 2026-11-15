@@ -10,6 +10,7 @@ import { Workshop, Registration } from '../../types';
 import { apiFetch, saveToken, getToken } from '../../utils/api';
 import { loadRazorpayScript } from '../../utils/razorpay';
 import { useApp } from '../../context/AppContext';
+import { PaymentReceipt } from './PaymentReceipt';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -21,140 +22,6 @@ interface PaymentModalProps {
 
 type PaymentSection = 'upi' | 'cards' | 'wallets' | 'paylater' | 'netbanking';
 type UpiMethod = 'qr' | 'gpay' | 'phonepe' | 'paytm' | 'bhim' | 'whatsapp' | 'custom';
-
-// ─────────────────────────── Receipt Component ───────────────────────────────
-interface ReceiptProps {
-  registration: Registration;
-  workshop: Workshop;
-  paymentMethod: string;
-  onClose: () => void;
-}
-
-const PaymentReceipt: React.FC<ReceiptProps> = ({ registration, workshop, paymentMethod, onClose }) => {
-  const receiptRef = useRef<HTMLDivElement>(null);
-  const [qrUrl, setQrUrl] = useState('');
-
-  useEffect(() => {
-    QRCode.toDataURL(
-      `TICKET:${registration.ticketCode || registration.id}|WORKSHOP:${workshop.id}|AMT:${registration.amount}`,
-      { width: 120, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } }
-    ).then(setQrUrl).catch(() => {});
-  }, [registration, workshop]);
-
-  const handlePrint = () => window.print();
-
-  const handleDownload = () => {
-    if (!receiptRef.current) return;
-    const html = `<!DOCTYPE html><html><head><title>Receipt - ${registration.ticketCode}</title>
-    <style>
-      body{font-family:Arial,sans-serif;margin:0;padding:20px;background:#fff;color:#101410;}
-      .receipt{max-width:420px;margin:auto;border:2px solid #08482D;border-radius:16px;overflow:hidden;}
-      .header{background:#08482D;color:#DAE7C7;padding:20px;text-align:center;}
-      .body{padding:20px;space-y:12px;}
-      .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;}
-      .label{color:#5E5E61;} .value{font-weight:bold;}
-      .amount{font-size:28px;font-weight:900;color:#08482D;text-align:center;padding:16px 0;}
-      .footer{background:#F5F8EF;padding:12px;text-align:center;font-size:11px;color:#5E5E61;}
-      .ticket{font-size:18px;font-weight:900;letter-spacing:2px;color:#08482D;text-align:center;padding:8px 0;}
-      .qr{text-align:center;padding:12px 0;}
-    </style></head><body>
-    ${receiptRef.current.innerHTML}
-    </body></html>`;
-    const blob = new Blob([html], { type: 'text/html' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `receipt-${registration.ticketCode || registration.id}.html`;
-    a.click();
-  };
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 bg-black/70 backdrop-blur-md overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-[#121f17] rounded-3xl w-full max-w-sm border border-[#DCE4D6] dark:border-[#233d2e] shadow-2xl overflow-hidden my-auto"
-      >
-        {/* Receipt Header */}
-        <div className="bg-[#08482D] p-5 text-center">
-          <div className="w-12 h-12 bg-[#DAE7C7]/20 rounded-full flex items-center justify-center mx-auto mb-2">
-            <CheckCircle2 className="w-7 h-7 text-[#DAE7C7]" />
-          </div>
-          <div className="text-[#DAE7C7] text-xs font-heading font-bold uppercase tracking-wider">Payment Successful</div>
-          <div className="text-white text-lg font-heading font-extrabold mt-1 line-clamp-2">{workshop.title}</div>
-        </div>
-
-        {/* Printable Area */}
-        <div ref={receiptRef} className="p-5 space-y-4 print:p-8">
-          {/* Amount */}
-          <div className="text-center">
-            <div className="text-3xl font-heading font-black text-[#08482D] dark:text-[#DAE7C7]">₹{registration.amount}</div>
-            <div className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Amount Paid • {registration.currency || 'INR'}</div>
-          </div>
-
-          {/* Ticket Code */}
-          <div className="text-center bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl p-3">
-            <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] uppercase tracking-wider mb-1">Ticket Code</div>
-            <div className="text-xl font-mono font-black text-[#08482D] dark:text-[#DAE7C7] tracking-widest">
-              {registration.ticketCode || registration.id?.slice(-8).toUpperCase()}
-            </div>
-          </div>
-
-          {/* QR */}
-          {qrUrl && (
-            <div className="flex justify-center">
-              <img src={qrUrl} alt="Ticket QR" className="w-24 h-24 rounded-xl border-2 border-[#DCE4D6] dark:border-[#233d2e]" />
-            </div>
-          )}
-
-          {/* Details */}
-          <div className="space-y-2 text-xs">
-            {[
-              { label: 'Participant', value: registration.participantName },
-              { label: 'Email', value: registration.participantEmail },
-              { label: 'Workshop', value: workshop.title },
-              { label: 'Date', value: new Date(workshop.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) },
-              { label: 'Venue', value: workshop.onlineMode ? 'Online (Meeting link in email)' : workshop.venue },
-              { label: 'Payment Via', value: paymentMethod },
-              { label: 'Status', value: '✅ CONFIRMED' },
-              { label: 'Receipt Date', value: new Date().toLocaleString('en-IN') },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between gap-2 py-1.5 border-b border-[#DCE4D6] dark:border-[#1e3528]">
-                <span className="text-[#5E5E61] dark:text-[#8ba895]">{label}</span>
-                <span className="font-semibold text-[#101410] dark:text-[#f0f5ee] text-right max-w-[55%] break-words">{value}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-1">
-            Show this QR at the venue for entry • Kaushalya WorkshopHub
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="p-4 border-t border-[#DCE4D6] dark:border-[#233d2e] flex gap-2">
-          <button
-            onClick={handlePrint}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-heading font-bold bg-[#08482D] text-[#F5F8EF] rounded-xl hover:bg-[#0c5c3b] transition-all"
-          >
-            <Printer className="w-3.5 h-3.5" /> Print
-          </button>
-          <button
-            onClick={handleDownload}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-heading font-bold border border-[#DCE4D6] dark:border-[#233d2e] text-[#08482D] dark:text-[#DAE7C7] rounded-xl hover:bg-[#F5F8EF] dark:hover:bg-[#16291e] transition-all"
-          >
-            <Download className="w-3.5 h-3.5" /> Save
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-heading font-bold border border-[#DCE4D6] dark:border-[#233d2e] text-[#5E5E61] dark:text-[#8ba895] rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-          >
-            Close
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
 
 // ─────────────────────────── Main PaymentModal ────────────────────────────────
 export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, workshop, notes, onSuccess }) => {

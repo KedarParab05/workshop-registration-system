@@ -133,10 +133,7 @@ export const WorkshopRegistrations: React.FC = () => {
               <Scan className="w-3.5 h-3.5 text-[#08482D]" />
               <span>Gate Verification Console</span>
             </span>
-            <span className="font-hand text-sm text-[#DAE7C7] -rotate-2 hidden sm:inline">
-              // scan passes at arrival
-            </span>
-          </div>
+            </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-white">
             Official Gate Scanner & Attendee Roster
           </h1>

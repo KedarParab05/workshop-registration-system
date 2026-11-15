@@ -110,10 +110,7 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
                     <UserCheck className="w-3.5 h-3.5 text-[#08482D]" />
                     <span>Appoint Gate Volunteer</span>
                   </span>
-                  <span className="font-hand text-sm text-[#08482D] dark:text-[#DAE7C7] -rotate-1 hidden sm:inline">
-                    // gate passcodes
-                  </span>
-                </div>
+                  </div>
                 <h3 className="text-xl font-heading font-bold text-[#101410] dark:text-white">
                   Assign Gate Volunteer
                 </h3>

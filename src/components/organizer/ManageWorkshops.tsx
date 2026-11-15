@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Workshop } from '../../types';
 import { calculateSeats } from '../../utils/workshopRules';
+import { normalizeBannerUrl } from '../../data/seedData';
 import { WorkshopFormModal } from './WorkshopFormModal';
 import { QRVerifierModal } from './QRVerifierModal';
 import {
@@ -79,10 +80,7 @@ export const ManageWorkshops: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5 text-[#08482D] dark:text-[#a8d38d]" />
               Faculty Management Console
             </span>
-            <span className="font-hand text-sm text-[#08482D] dark:text-[#DAE7C7] -rotate-1 hidden sm:inline">
-              // syllabus & schedules
-            </span>
-          </div>
+            </div>
           <h1 className="text-3xl font-heading font-bold text-[#101410] dark:text-white tracking-tight">
             Manage My Workshops
           </h1>
@@ -179,13 +177,13 @@ export const ManageWorkshops: React.FC = () => {
                       <td className="py-4 px-4 max-w-sm">
                         <div className="flex items-center gap-3">
                           <img
-                            src={ws.bannerImageUrl}
+                            src={normalizeBannerUrl(ws.bannerImageUrl, ws)}
                             alt={ws.title}
                             className="w-12 h-12 rounded-xl object-cover shrink-0 bg-[#E8F0DF] dark:bg-slate-800"
                             referrerPolicy="no-referrer"
                             onError={(e) => {
                               e.currentTarget.onerror = null;
-                              e.currentTarget.src = '/assets/images/fullstack-web-workshop-banner.jpg';
+                              e.currentTarget.src = normalizeBannerUrl('', ws);
                             }}
                           />
                           <div>

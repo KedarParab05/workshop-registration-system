@@ -13,59 +13,104 @@ export const BANNER_SYSTEM_ARCH = '/assets/images/system-architecture-workshop-b
 export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title?: string }): string => {
   const title = (workshop?.title || '').toLowerCase();
   const id = (workshop?.id || '').toLowerCase();
+  const u = (url || '').toLowerCase();
 
   // 1. Spring Boot REST APIs
-  if (id.includes('spring-rest') || title.includes('rest api') || (title.includes('spring boot 3') && !title.includes('react'))) {
+  if (
+    id.includes('spring-rest') ||
+    title.includes('rest api') ||
+    title.includes('spring boot 3') ||
+    u.includes('spring-boot-rest') ||
+    u.includes('rest-api')
+  ) {
     return BANNER_SPRING_REST;
   }
 
   // 2. Data Structures & Competitive Algorithms in Java
-  if (id.includes('dsa') || title.includes('data structure') || title.includes('competitive algorithm')) {
+  if (
+    id.includes('dsa') ||
+    title.includes('data structure') ||
+    title.includes('competitive algorithm') ||
+    u.includes('dsa') ||
+    u.includes('competitive')
+  ) {
     return BANNER_DSA_JAVA;
   }
 
   // 3. DevOps & Docker Containerization Fundamentals
-  if (id.includes('docker') || (title.includes('devops') && title.includes('docker'))) {
+  if (
+    id.includes('docker') ||
+    (title.includes('devops') && title.includes('docker')) ||
+    u.includes('devops-docker') ||
+    u.includes('docker')
+  ) {
     return BANNER_DEVOPS_DOCKER;
   }
 
   // 4. Cloud Computing & AWS Architecture Fundamentals
-  if (id.includes('cloud') || (title.includes('cloud') && !title.includes('docker')) || title.includes('aws')) {
+  if (
+    id.includes('cloud') ||
+    (title.includes('cloud') && !title.includes('docker')) ||
+    title.includes('aws') ||
+    u.includes('cloud-devops') ||
+    u.includes('aws')
+  ) {
     return BANNER_CLOUD;
   }
 
   // 5. Full-Stack Web Development with React 19 & Spring Boot
-  if (id.includes('fullstack') || (title.includes('react') && title.includes('spring boot'))) {
+  if (
+    id.includes('fullstack') ||
+    (title.includes('react') && title.includes('spring boot')) ||
+    u.includes('fullstack-web') ||
+    u.includes('react-19')
+  ) {
     return BANNER_WEB;
   }
 
-  // 6. Advanced Java Programming & Enterprise Design Patterns
-  if (id.includes('java-oop') || title.includes('design patterns') || title.includes('enterprise design')) {
+  // 6. Advanced Java Programming & Enterprise Design Patterns / System Architecture
+  if (
+    id.includes('java-oop') ||
+    title.includes('design pattern') ||
+    title.includes('enterprise design') ||
+    title.includes('architectural visualization') ||
+    u.includes('system-architecture') ||
+    u.includes('java-oop')
+  ) {
     return BANNER_SYSTEM_ARCH;
   }
 
   // 7. Practical AI: Deep Learning
-  if (id.includes('ai') || title.includes('deep learning') || title.includes('neural')) {
+  if (
+    id.includes('ai') ||
+    title.includes('deep learning') ||
+    title.includes('neural') ||
+    u.includes('ai-machine') ||
+    u.includes('neural')
+  ) {
     return BANNER_AI;
   }
 
   // 8. Cybersecurity
-  if (id.includes('cyber') || title.includes('cybersecurity') || title.includes('ethical hacking')) {
+  if (
+    id.includes('cyber') ||
+    title.includes('cybersecurity') ||
+    title.includes('ethical hacking') ||
+    u.includes('cybersecurity')
+  ) {
     return BANNER_CYBER;
   }
 
   // 9. IoT & Embedded Systems
-  if (id.includes('iot') || title.includes('esp32')) {
+  if (id.includes('iot') || title.includes('esp32') || u.includes('iot') || u.includes('esp32')) {
     return HERO_IMAGE;
   }
 
-  if (!url) return BANNER_WEB;
-  if (url.includes('banner_fullstack_web')) return BANNER_WEB;
-  if (url.includes('banner_ai_machine_learning')) return BANNER_AI;
-  if (url.includes('banner_cloud_devops')) return BANNER_CLOUD;
-  if (url.includes('banner_cybersecurity')) return BANNER_CYBER;
-  if (url.includes('hero_workshop_collab')) return HERO_IMAGE;
-  return url;
+  if (url && (url.startsWith('/assets/images/') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:'))) {
+    return url;
+  }
+
+  return BANNER_WEB;
 };
 
 export const INITIAL_USERS: User[] = [

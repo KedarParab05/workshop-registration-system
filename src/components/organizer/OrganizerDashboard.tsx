@@ -213,10 +213,7 @@ export const OrganizerDashboard: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5 text-[#08482D]" />
               <span>Faculty Organizer Studio</span>
             </span>
-            <span className="font-hand text-sm text-[#DAE7C7] rotate-2 hidden sm:inline">
-              // campus session control
-            </span>
-          </div>
+            </div>
           <h1 className="text-xl sm:text-3xl font-heading font-bold tracking-tight text-white">
             Organizer Studio: {currentUser?.fullName}
           </h1>

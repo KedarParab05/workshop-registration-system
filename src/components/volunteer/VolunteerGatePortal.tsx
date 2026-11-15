@@ -731,10 +731,7 @@ export const VolunteerGatePortal: React.FC = () => {
               <ShieldCheck className="w-3.5 h-3.5 text-[#08482D]" />
               <span>Authorized Gate Attendant Station</span>
             </span>
-            <span className="font-hand text-sm text-[#DAE7C7] -rotate-2 hidden sm:inline">
-              // laser verify on entrance
-            </span>
-          </div>
+            </div>
           <h1 className="text-xl sm:text-3xl font-heading font-bold tracking-tight text-white">
             Gate Scanner: {currentVolunteer?.name || 'Volunteer Attendant'}
           </h1>
