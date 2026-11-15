@@ -523,7 +523,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
                 Frequently Asked Questions
               </h2>
               <p className="text-sm text-[#5E5E61] dark:text-slate-300 leading-relaxed font-sans">
-                Everything you need to know about seat capacity, free vs paid workshops, Razorpay Test Mode checkout, and digital QR ticket passes.
+                Everything you need to know about seat capacity, free vs paid workshops, instant digital checkout, and verified QR ticket passes.
               </p>
             </div>
 
@@ -550,7 +550,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
             {[
               {
                 q: 'How does workshop pricing work on Kaushalya?',
-                a: 'Organizers can designate workshops as either Free or Paid. Free sessions require zero payment and confirm in one click. Paid masterclasses are powered by Razorpay Test Mode with full cryptographic signature verification, seat reservation holds, and instant QR ticket generation upon verified payment.',
+                a: 'Organizers can designate workshops as either Free or Paid. Free sessions require zero payment and confirm in one click. Paid masterclasses are powered by official encrypted payment gateways with cryptographic signature verification, seat reservation holds, and instant QR ticket generation upon verified payment.',
               },
               {
                 q: 'How do I receive and present my QR ticket pass?',

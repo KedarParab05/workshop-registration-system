@@ -277,23 +277,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (res.ok && data.success && data.user) {
         if (data.token) saveToken(data.token);
         applyBackendUser(data.user);
-        showAlert(`Signed in as demo persona: ${data.user.fullName}`, 'success');
+        showAlert(`Welcome back, ${data.user.fullName}!`, 'success');
         onClose();
       } else {
         const localMatched = users.find((u) => u.email?.toLowerCase() === demoEmail.toLowerCase());
         if (localMatched) {
           applyBackendUser(localMatched);
-          showAlert(`Signed in as demo persona: ${localMatched.fullName}`, 'success');
+          showAlert(`Welcome back, ${localMatched.fullName}!`, 'success');
           onClose();
           return;
         }
-        setErrorMsg(data.error || 'Unable to connect to demo account.');
+        setErrorMsg(data.error || 'Unable to connect to account.');
       }
     } catch {
       const localMatched = users.find((u) => u.email?.toLowerCase() === demoEmail.toLowerCase());
       if (localMatched) {
         applyBackendUser(localMatched);
-        showAlert(`Signed in as demo persona: ${localMatched.fullName}`, 'success');
+        showAlert(`Welcome back, ${localMatched.fullName}!`, 'success');
         onClose();
         return;
       }
@@ -643,18 +643,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {/* Instant Evaluation Demo Personas */}
+          {/* Instant Campus Access */}
           <div className="mt-5 pt-4 border-t border-[#DCE4D6] dark:border-[#233d2e] space-y-2.5">
             <div className="flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
               <span className="font-heading font-semibold flex items-center gap-1.5 text-[#08482D] dark:text-[#DAE7C7]">
                 <KeyRound className="w-3.5 h-3.5" />
-                <span>Instant Demo Login</span>
+                <span>Quick Access Accounts</span>
               </span>
-              <span className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">1-Click Evaluation</span>
+              <span className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Institutional Access</span>
             </div>
 
             <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] leading-relaxed">
-              Explore Kaushalya using our preconfigured demo accounts.
+              Sign in instantly with your verified campus role profile.
             </p>
 
             {/* Primary 3 Demo Cards */}
@@ -760,7 +760,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 onClick={() => setShowAllStudents((prev) => !prev)}
                 className="w-full py-1 px-2 text-[10px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] hover:text-[#08482D] dark:hover:text-[#DAE7C7] flex items-center justify-center gap-1 transition-colors cursor-pointer"
               >
-                <span>{showAllStudents ? 'Hide additional demo personas' : 'More demo personas (Omkar, Kedar, Vaibhavi, Sonal…)'}</span>
+                <span>{showAllStudents ? 'Hide additional campus accounts' : 'More campus accounts (Omkar, Kedar, Vaibhavi, Sonal…)'}</span>
                 {showAllStudents ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               </button>
 

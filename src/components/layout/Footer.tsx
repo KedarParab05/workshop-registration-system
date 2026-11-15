@@ -246,17 +246,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAuth, onOpenRoleSelector }
                 </button>
               </div>
             </div>
-
-            <div className="pt-1">
-              <button
-                onClick={resetToDemoData}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#DAE7C7]/30 bg-[#0b5c3b]/60 dark:bg-[#12281c] hover:bg-[#0c6b45] text-white text-[11px] font-heading font-medium transition-colors cursor-pointer"
-                title="Reset application to seed demo workshops"
-              >
-                <RefreshCw className="w-3 h-3 text-[#DAE7C7]" />
-                <span>Reset Demo Records</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -268,7 +257,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAuth, onOpenRoleSelector }
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-3 text-center sm:text-right">
             <span>Production Academic Platform</span>
             <span>·</span>
-            <span>Razorpay Test Mode</span>
+            <span>256-Bit Encrypted Payments</span>
             <span>·</span>
             <span className="flex items-center gap-1 text-white font-semibold">
               <ShieldCheck className="w-3.5 h-3.5 text-[#DAE7C7]" />

@@ -363,7 +363,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 </button>
                 <p className="text-[11px] text-center text-[#5E5E61] dark:text-[#8ba895]">
                   {workshop.pricingType === 'PAID'
-                    ? 'Secured with Razorpay Test Mode checkout.'
+                    ? 'Secured with encrypted instant checkout.'
                     : 'Instant confirmation with cryptographic QR ticket.'}
                 </p>
               </div>

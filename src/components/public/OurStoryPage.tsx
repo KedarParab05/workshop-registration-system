@@ -32,7 +32,7 @@ export const OurStoryPage: React.FC = () => {
       badge: 'Economic Clarity',
       icon: DollarSign,
       description:
-        'We believe student upskilling should never be gated behind predatory fees. Faculty can host 100% free community sessions with instant zero-cost enrollment or subsidized paid bootcamps with Razorpay Test Mode checkout.',
+        'We believe student upskilling should never be gated behind predatory fees. Faculty can host 100% free community sessions with instant zero-cost enrollment or subsidized paid bootcamps with seamless instant checkout.',
     },
     {
       title: 'Seat Capacity Governance',
@@ -59,7 +59,7 @@ export const OurStoryPage: React.FC = () => {
     {
       label: 'Free & Paid Event Formats',
       detail:
-        'One-click direct registration for community workshops, plus transparent Razorpay Test Mode checkout for premium masterclasses.',
+        'One-click direct registration for community workshops, plus transparent encrypted digital checkout for premium masterclasses.',
     },
     {
       label: 'Cryptographic QR Gate Passes',

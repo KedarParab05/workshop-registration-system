@@ -1307,7 +1307,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             amount: orderData.amount,
             currency: orderData.currency || 'INR',
             name: 'Kaushalya Workshops',
-            description: `${workshop.title} (Test Mode)`,
+            description: `${workshop.title} Seat Registration`,
             order_id: orderData.orderId,
             prefill: {
               name: currentUser?.fullName || orderData.participantName || '',

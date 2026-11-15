@@ -351,6 +351,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
 
   // ── Razorpay official launch ──
   const launchRazorpay = async (method: string) => {
+    activeAppLabelRef.current = method;
+    isWaitingForAppReturnRef.current = true;
     setLaunchingRazorpay(true);
     try {
       const loaded = await loadRazorpayScript();
@@ -593,34 +595,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                                 <div>• Payee: <strong>{payeeName}</strong></div>
                                 <div>• Amount to pay: <strong>₹{price}</strong></div>
                               </div>
-                              {/* Real-time auto-listener radar card */}
-                              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl flex items-center gap-2.5">
-                                <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/60 shrink-0">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#08482D] dark:bg-emerald-400"></span>
-                                </div>
-                                <div className="flex-1 text-left min-w-0">
-                                  <div className="text-[11px] font-heading font-bold text-[#08482D] dark:text-[#DAE7C7]">
-                                    Listening in Real Time
-                                  </div>
-                                  <div className="text-[10px] text-[#5E5E61] dark:text-emerald-300/80 leading-tight">
-                                    Transfers to <strong className="text-[#08482D] dark:text-[#DAE7C7]">{payeeVpa}</strong> are detected automatically. Your pass opens instantly.
-                                  </div>
-                                </div>
-                              </div>
                             </div>
-                          </div>
-
-                          {/* Bank issue helper toggle */}
-                          <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
-                            <span>Bank blocking fixed amount?</span>
-                            <button
-                              type="button"
-                              onClick={() => setUsePureP2P(!usePureP2P)}
-                              className="font-bold underline text-[#08482D] dark:text-[#DAE7C7] cursor-pointer"
-                            >
-                              {usePureP2P ? 'Switch to Preset ₹' + price : 'Switch to Standard P2P QR (enter ₹' + price + ' manually)'}
-                            </button>
                           </div>
                         </div>
                       )}
@@ -659,22 +634,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                               <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Payee: {payeeName}</div>
                             </div>
                           </div>
-
-                          {/* Real-time auto-verification indicator */}
-                          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl flex items-center gap-2.5">
-                            <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/60 shrink-0">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#08482D] dark:bg-emerald-400"></span>
-                            </div>
-                            <div className="flex-1 text-left min-w-0">
-                              <div className="text-[11px] font-heading font-bold text-[#08482D] dark:text-[#DAE7C7]">
-                                Auto-Check Active
-                              </div>
-                              <div className="text-[10px] text-[#5E5E61] dark:text-emerald-300/80 leading-tight">
-                                Pay in {upiMethods.find(m => m.id === activeUpiMethod)?.label}. When you return, the system auto-verifies and issues your pass without pressing any buttons.
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       )}
 
@@ -707,22 +666,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                             )}
                           </div>
                           <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
-                            Open your UPI app and pay ₹{price} to <strong>{payeeVpa}</strong> using your UPI ID, then confirm below.
+                            Open your UPI app and transfer ₹{price} to <strong>{payeeVpa}</strong> using your UPI ID.
                           </p>
-                          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl flex items-center gap-2.5">
-                            <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/60 shrink-0">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#08482D] dark:bg-emerald-400"></span>
-                            </div>
-                            <div className="flex-1 text-left min-w-0">
-                              <div className="text-[11px] font-heading font-bold text-[#08482D] dark:text-[#DAE7C7]">
-                                Auto-Detecting Transfer
-                              </div>
-                              <div className="text-[10px] text-[#5E5E61] dark:text-emerald-300/80 leading-tight">
-                                Pay ₹{price} to {payeeVpa}. The system detects and verifies your payment automatically in real time.
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       )}
                     </div>
@@ -749,12 +694,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                           {launchingRazorpay ? <><RefreshCw className="w-4 h-4 animate-spin text-[#DAE7C7]" /> Loading...</> : <><CreditCard className="w-4 h-4 text-[#DAE7C7]" /> Pay ₹{price} with Card</>}
                         </button>
                       </div>
-                      {orgRazorpayKey.includes('test') && (
-                        <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl text-[11px] text-amber-700 dark:text-amber-400">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          <span>Test mode active. Use UPI options for live payments.</span>
-                        </div>
-                      )}
                     </div>
                   )}
 
