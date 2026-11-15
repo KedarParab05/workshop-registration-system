@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -42,6 +43,23 @@ public class RazorpayService {
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
+
+    @PostConstruct
+    public void init() {
+        if (keyId == null || keyId.isBlank() || "rzp_test_placeholder".equals(keyId)) {
+            keyId = "rzp_test_placeholder";
+        }
+        if (keySecret == null || keySecret.isBlank() || "razorpay_secret_placeholder".equals(keySecret)) {
+            keySecret = "[REDACTED_SECRET]";
+        }
+        if (webhookSecret == null || webhookSecret.isBlank() || "kaushalya_whsec_test2026".equals(webhookSecret)) {
+            webhookSecret = "[REDACTED_WEBHOOK_SECRET]";
+        }
+        if (mode == null || mode.isBlank() || "test".equalsIgnoreCase(mode)) {
+            mode = "live";
+        }
+        System.out.println("[RazorpayService] Initialized with Key: " + keyId + " | Mode: " + mode);
+    }
 
     public String getKeyId() {
         return keyId;
