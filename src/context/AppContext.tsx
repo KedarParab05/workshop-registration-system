@@ -1129,6 +1129,67 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return { success: false, message: orderData.error || 'Failed to initiate payment.' };
         }
 
+        // Handle simulated test mode orders (fallback when Razorpay live API credentials are placeholders)
+        if (orderData.orderId?.startsWith('order_test_')) {
+          showAlert('Processing Razorpay Test Payment (Simulation Mode)...', 'info');
+          const simPaymentId = 'pay_sim_' + Math.random().toString(36).substring(2, 11);
+          const simSignature = 'simulated_test_sig_' + Date.now();
+
+          try {
+            let verifyRes = await apiFetch('/api/payments/verify', {
+              method: 'POST',
+              body: JSON.stringify({
+                paymentAttemptId: orderData.paymentAttemptId,
+                razorpay_order_id: orderData.orderId,
+                razorpay_payment_id: simPaymentId,
+                razorpay_signature: simSignature,
+              }),
+            });
+
+            if (verifyRes.status === 401 && getToken()) {
+              const refreshRes = await apiFetch('/api/auth/refresh-token', { method: 'POST' });
+              if (refreshRes.ok) {
+                const refreshed = await refreshRes.json();
+                if (refreshed.token) {
+                  saveToken(refreshed.token);
+                  verifyRes = await apiFetch('/api/payments/verify', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                      paymentAttemptId: orderData.paymentAttemptId,
+                      razorpay_order_id: orderData.orderId,
+                      razorpay_payment_id: simPaymentId,
+                      razorpay_signature: simSignature,
+                    }),
+                  });
+                }
+              }
+            }
+
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.success) {
+              showAlert(`Test Payment of ₹${workshop.price} verified! Registration confirmed.`, 'success');
+              await refreshData();
+              return {
+                success: true,
+                message: 'Test payment verified! Registration confirmed.',
+                registration: verifyData.registration,
+              };
+            } else {
+              showAlert(verifyData.error || 'Payment verification failed.', 'error');
+              return {
+                success: false,
+                message: verifyData.error || 'Payment verification failed.',
+              };
+            }
+          } catch (err) {
+            showAlert('Error communicating with payment verification server.', 'error');
+            return {
+              success: false,
+              message: 'Verification server communication error.',
+            };
+          }
+        }
+
         // Step 2: Dynamically load Razorpay SDK
         const scriptLoaded = await loadRazorpayScript();
         if (!scriptLoaded || !window.Razorpay) {
