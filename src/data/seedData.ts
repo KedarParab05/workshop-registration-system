@@ -5,6 +5,10 @@ export const BANNER_WEB = '/assets/images/fullstack-web-workshop-banner.jpg';
 export const BANNER_AI = '/assets/images/ai-machine-learning-workshop-banner.jpg';
 export const BANNER_CLOUD = '/assets/images/cloud-devops-workshop-banner.jpg';
 export const BANNER_CYBER = '/assets/images/cybersecurity-workshop-banner.jpg';
+export const BANNER_SPRING_REST = '/assets/images/spring-boot-rest-apis-banner.jpg';
+export const BANNER_DSA_JAVA = '/assets/images/dsa-java-workshop-banner.jpg';
+export const BANNER_DEVOPS_DOCKER = '/assets/images/devops-docker-workshop-banner.jpg';
+export const BANNER_SYSTEM_ARCH = '/assets/images/system-architecture-workshop-banner.jpg';
 
 export const normalizeBannerUrl = (url?: string): string => {
   if (!url) return BANNER_WEB;
@@ -292,7 +296,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     summary: 'Deep dive into OOP idioms, memory management, concurrency primitives, and Gang-of-Four enterprise design patterns.',
     description: 'Hands-on mastery of JVM architecture, modern Java 21 features (virtual threads, pattern matching), garbage collection tuning, factory and observer patterns, and multithreaded synchronization.\n\nPrerequisites: Core Java knowledge.',
     category: 'Software Engineering',
-    bannerImageUrl: '/assets/images/fullstack-web-workshop-banner.jpg',
+    bannerImageUrl: '/assets/images/system-architecture-workshop-banner.jpg',
     organizerId: 'usr-org-1',
     organizerNameSnapshot: 'Dr. Sarah Lin',
     date: '2026-11-05',
@@ -393,7 +397,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     summary: 'Containerize multi-service applications, author Dockerfiles, manage volumes, networks, and Docker Compose stacks.',
     description: 'From localhost code to containerized microservices. Build lean multi-stage Docker images, set up continuous integration pipelines, manage container volumes and networks, and deploy container stacks.\n\nPrerequisites: Basic command line usage.',
     category: 'Cloud Computing',
-    bannerImageUrl: '/assets/images/cloud-devops-workshop-banner.jpg',
+    bannerImageUrl: '/assets/images/devops-docker-workshop-banner.jpg',
     organizerId: 'usr-org-1',
     organizerNameSnapshot: 'Dr. Sarah Lin',
     date: '2026-12-06',
@@ -426,7 +430,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     summary: 'Solve complex tree, graph, dynamic programming, and greedy algorithmic challenges with optimal time and space complexity.',
     description: 'Accelerate algorithmic problem solving. Practice BFS/DFS traversals, Dijkstra shortest path, knapsack DP patterns, segment trees, and asymptotic runtime optimizations in Java.\n\nPrerequisites: Intermediate programming experience.',
     category: 'Software Engineering',
-    bannerImageUrl: '/assets/images/fullstack-web-workshop-banner.jpg',
+    bannerImageUrl: '/assets/images/dsa-java-workshop-banner.jpg',
     organizerId: 'usr-org-omkar',
     organizerNameSnapshot: 'Omkar Parelkar',
     date: '2026-12-09',
@@ -459,7 +463,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     summary: 'Architect enterprise Spring Boot 3 microservices with JPA/Hibernate, validation, security filters, and Swagger OpenAPI.',
     description: 'Learn best practices for building production-ready RESTful web services with Spring Boot 3, Java 21, Spring Data MongoDB/JPA, Bean Validation, exception handling, and OpenAPI documentation.\n\nPrerequisites: Java and basic HTTP fundamentals.',
     category: 'Web Development',
-    bannerImageUrl: '/assets/images/fullstack-web-workshop-banner.jpg',
+    bannerImageUrl: '/assets/images/spring-boot-rest-apis-banner.jpg',
     organizerId: 'usr-org-1',
     organizerNameSnapshot: 'Dr. Sarah Lin',
     date: '2026-12-12',

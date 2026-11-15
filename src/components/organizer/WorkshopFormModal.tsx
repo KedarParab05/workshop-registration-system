@@ -6,6 +6,10 @@ import {
   BANNER_AI,
   BANNER_CLOUD,
   BANNER_CYBER,
+  BANNER_SPRING_REST,
+  BANNER_DSA_JAVA,
+  BANNER_DEVOPS_DOCKER,
+  BANNER_SYSTEM_ARCH,
   HERO_IMAGE,
 } from '../../data/seedData';
 import { X, Image as ImageIcon, Calendar, Clock, MapPin, Check, Navigation, Sparkles, CreditCard, Lock, AlertCircle, Info, Tag } from 'lucide-react';
@@ -18,9 +22,13 @@ interface WorkshopFormModalProps {
 }
 
 const PRESET_BANNERS = [
-  { id: 'web', label: 'Web Architecture', url: BANNER_WEB },
+  { id: 'web', label: 'Full Stack React & Spring', url: BANNER_WEB },
+  { id: 'spring-rest', label: 'Spring Boot 3 APIs', url: BANNER_SPRING_REST },
+  { id: 'dsa', label: 'Java DSA & Algorithms', url: BANNER_DSA_JAVA },
+  { id: 'devops-pipe', label: 'DevOps & Docker CI/CD', url: BANNER_DEVOPS_DOCKER },
+  { id: 'cloud-aws', label: 'Cloud & Kubernetes', url: BANNER_CLOUD },
+  { id: 'sys-arch', label: 'System Flow Architecture', url: BANNER_SYSTEM_ARCH },
   { id: 'ai', label: 'Artificial Intelligence', url: BANNER_AI },
-  { id: 'cloud', label: 'Cloud & DevOps', url: BANNER_CLOUD },
   { id: 'cyber', label: 'Cybersecurity', url: BANNER_CYBER },
   { id: 'collab', label: 'Innovation Lab', url: HERO_IMAGE },
 ];
