@@ -1,4 +1,4 @@
-import { User, Workshop, Registration, AuditLog } from '../types';
+﻿import { User, Workshop, Registration, AuditLog } from '../types';
 
 export const HERO_IMAGE = '/assets/images/workshop-collaboration-hero.jpg';
 export const BANNER_WEB = '/assets/images/fullstack-web-workshop-banner.jpg';
@@ -205,6 +205,8 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-21',
     pricingType: 'PAID',
     price: 499,
+    payeeVpa: 'kaushalya.skills@icici',
+    payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [
       'PyTorch Tensor Computation & Backprop Graphs',
@@ -238,6 +240,8 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-24',
     pricingType: 'PAID',
     price: 299,
+    payeeVpa: 'kaushalya.skills@icici',
+    payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [
       'VPC Network Architecture, Subnets & Gateways',
@@ -370,6 +374,8 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-07',
     pricingType: 'PAID',
     price: 199,
+    payeeVpa: 'kaushalya.skills@icici',
+    payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [
       'Advanced Analytical Window Functions & CTEs',
@@ -468,7 +474,9 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     capacity: 40,
     registrationDeadline: '2026-12-11',
     pricingType: 'PAID',
-    price: 399,
+    price: 100,
+    payeeVpa: 'kaushalya.skills@icici',
+    payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [
       'Spring Boot 3 Web Layer & Controller Advice',
@@ -924,7 +932,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'WORKSHOP_CREATED',
     entityType: 'WORKSHOP',
     entityId: 'ws-ai-deeplearning',
-    shortDescription: 'Created studio: Practical AI: Deep Learning & Neural Architecture Studio (₹499).',
+    shortDescription: 'Created studio: Practical AI: Deep Learning & Neural Architecture Studio (â‚¹499).',
     createdAt: '2026-11-03T14:00:00.000Z',
   },
   {
@@ -934,7 +942,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'WORKSHOP_CREATED',
     entityType: 'WORKSHOP',
     entityId: 'ws-cloud-devops',
-    shortDescription: 'Created workshop: Cloud Computing & AWS Architecture Fundamentals (₹299).',
+    shortDescription: 'Created workshop: Cloud Computing & AWS Architecture Fundamentals (â‚¹299).',
     createdAt: '2026-11-04T10:00:00.000Z',
   },
   {
@@ -964,7 +972,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'REGISTRATION_PAID_CONFIRMED',
     entityType: 'REGISTRATION',
     entityId: 'reg-aary-2',
-    shortDescription: 'Completed test payment (₹499) for Practical AI: Deep Learning Studio.',
+    shortDescription: 'Completed test payment (â‚¹499) for Practical AI: Deep Learning Studio.',
     createdAt: '2026-11-10T14:30:00.000Z',
   },
   {
@@ -974,7 +982,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'REGISTRATION_PAID_CONFIRMED',
     entityType: 'REGISTRATION',
     entityId: 'reg-kedar-1',
-    shortDescription: 'Completed test payment (₹299) for Cloud Computing & AWS Architecture.',
+    shortDescription: 'Completed test payment (â‚¹299) for Cloud Computing & AWS Architecture.',
     createdAt: '2026-11-08T09:15:00.000Z',
   },
   {
@@ -998,3 +1006,4 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     createdAt: '2026-11-05T09:20:00.000Z',
   },
 ];
+

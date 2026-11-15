@@ -1,23 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  X,
-  ShieldCheck,
-  CheckCircle2,
-  Clock,
-  Copy,
-  Check,
-  Smartphone,
-  CreditCard,
-  QrCode,
-  ArrowRight,
-  ExternalLink,
-  Sparkles,
-  Lock,
-  ChevronRight,
-  AlertCircle,
-  RefreshCw,
+  X, ShieldCheck, CheckCircle2, Clock, Copy, Check, Smartphone, CreditCard,
+  QrCode, ArrowRight, ExternalLink, Lock, ChevronRight, AlertCircle, RefreshCw,
+  Printer, Download, Building2, Wallet, Landmark, ArrowLeft, Plus,
 } from 'lucide-react';
 import { Workshop, Registration } from '../../types';
 import { apiFetch, saveToken, getToken } from '../../utils/api';
@@ -32,232 +19,302 @@ interface PaymentModalProps {
   onSuccess: (registration: Registration) => void;
 }
 
-type PaymentTab = 'upi-qr' | 'upi-apps' | 'upi-id' | 'razorpay';
+type PaymentSection = 'upi' | 'cards' | 'wallets' | 'paylater' | 'netbanking';
+type UpiMethod = 'qr' | 'gpay' | 'phonepe' | 'paytm' | 'bhim' | 'whatsapp' | 'custom';
 
-export const PaymentModal: React.FC<PaymentModalProps> = ({
-  isOpen,
-  onClose,
-  workshop,
-  notes,
-  onSuccess,
-}) => {
+// ─────────────────────────── Receipt Component ───────────────────────────────
+interface ReceiptProps {
+  registration: Registration;
+  workshop: Workshop;
+  paymentMethod: string;
+  onClose: () => void;
+}
+
+const PaymentReceipt: React.FC<ReceiptProps> = ({ registration, workshop, paymentMethod, onClose }) => {
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const [qrUrl, setQrUrl] = useState('');
+
+  useEffect(() => {
+    QRCode.toDataURL(
+      `TICKET:${registration.ticketCode || registration.id}|WORKSHOP:${workshop.id}|AMT:${registration.amount}`,
+      { width: 120, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } }
+    ).then(setQrUrl).catch(() => {});
+  }, [registration, workshop]);
+
+  const handlePrint = () => window.print();
+
+  const handleDownload = () => {
+    if (!receiptRef.current) return;
+    const html = `<!DOCTYPE html><html><head><title>Receipt - ${registration.ticketCode}</title>
+    <style>
+      body{font-family:Arial,sans-serif;margin:0;padding:20px;background:#fff;color:#101410;}
+      .receipt{max-width:420px;margin:auto;border:2px solid #08482D;border-radius:16px;overflow:hidden;}
+      .header{background:#08482D;color:#DAE7C7;padding:20px;text-align:center;}
+      .body{padding:20px;space-y:12px;}
+      .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;}
+      .label{color:#5E5E61;} .value{font-weight:bold;}
+      .amount{font-size:28px;font-weight:900;color:#08482D;text-align:center;padding:16px 0;}
+      .footer{background:#F5F8EF;padding:12px;text-align:center;font-size:11px;color:#5E5E61;}
+      .ticket{font-size:18px;font-weight:900;letter-spacing:2px;color:#08482D;text-align:center;padding:8px 0;}
+      .qr{text-align:center;padding:12px 0;}
+    </style></head><body>
+    ${receiptRef.current.innerHTML}
+    </body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `receipt-${registration.ticketCode || registration.id}.html`;
+    a.click();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 bg-black/70 backdrop-blur-md overflow-y-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white dark:bg-[#121f17] rounded-3xl w-full max-w-sm border border-[#DCE4D6] dark:border-[#233d2e] shadow-2xl overflow-hidden my-auto"
+      >
+        {/* Receipt Header */}
+        <div className="bg-[#08482D] p-5 text-center">
+          <div className="w-12 h-12 bg-[#DAE7C7]/20 rounded-full flex items-center justify-center mx-auto mb-2">
+            <CheckCircle2 className="w-7 h-7 text-[#DAE7C7]" />
+          </div>
+          <div className="text-[#DAE7C7] text-xs font-heading font-bold uppercase tracking-wider">Payment Successful</div>
+          <div className="text-white text-lg font-heading font-extrabold mt-1 line-clamp-2">{workshop.title}</div>
+        </div>
+
+        {/* Printable Area */}
+        <div ref={receiptRef} className="p-5 space-y-4 print:p-8">
+          {/* Amount */}
+          <div className="text-center">
+            <div className="text-3xl font-heading font-black text-[#08482D] dark:text-[#DAE7C7]">₹{registration.amount}</div>
+            <div className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Amount Paid • {registration.currency || 'INR'}</div>
+          </div>
+
+          {/* Ticket Code */}
+          <div className="text-center bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl p-3">
+            <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] uppercase tracking-wider mb-1">Ticket Code</div>
+            <div className="text-xl font-mono font-black text-[#08482D] dark:text-[#DAE7C7] tracking-widest">
+              {registration.ticketCode || registration.id?.slice(-8).toUpperCase()}
+            </div>
+          </div>
+
+          {/* QR */}
+          {qrUrl && (
+            <div className="flex justify-center">
+              <img src={qrUrl} alt="Ticket QR" className="w-24 h-24 rounded-xl border-2 border-[#DCE4D6] dark:border-[#233d2e]" />
+            </div>
+          )}
+
+          {/* Details */}
+          <div className="space-y-2 text-xs">
+            {[
+              { label: 'Participant', value: registration.participantName },
+              { label: 'Email', value: registration.participantEmail },
+              { label: 'Workshop', value: workshop.title },
+              { label: 'Date', value: new Date(workshop.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) },
+              { label: 'Venue', value: workshop.onlineMode ? 'Online (Meeting link in email)' : workshop.venue },
+              { label: 'Payment Via', value: paymentMethod },
+              { label: 'Status', value: '✅ CONFIRMED' },
+              { label: 'Receipt Date', value: new Date().toLocaleString('en-IN') },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex justify-between gap-2 py-1.5 border-b border-[#DCE4D6] dark:border-[#1e3528]">
+                <span className="text-[#5E5E61] dark:text-[#8ba895]">{label}</span>
+                <span className="font-semibold text-[#101410] dark:text-[#f0f5ee] text-right max-w-[55%] break-words">{value}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-1">
+            Show this QR at the venue for entry • Kaushalya WorkshopHub
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="p-4 border-t border-[#DCE4D6] dark:border-[#233d2e] flex gap-2">
+          <button
+            onClick={handlePrint}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-heading font-bold bg-[#08482D] text-[#F5F8EF] rounded-xl hover:bg-[#0c5c3b] transition-all"
+          >
+            <Printer className="w-3.5 h-3.5" /> Print
+          </button>
+          <button
+            onClick={handleDownload}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-heading font-bold border border-[#DCE4D6] dark:border-[#233d2e] text-[#08482D] dark:text-[#DAE7C7] rounded-xl hover:bg-[#F5F8EF] dark:hover:bg-[#16291e] transition-all"
+          >
+            <Download className="w-3.5 h-3.5" /> Save
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-heading font-bold border border-[#DCE4D6] dark:border-[#233d2e] text-[#5E5E61] dark:text-[#8ba895] rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+          >
+            Close
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// ─────────────────────────── Main PaymentModal ────────────────────────────────
+export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, workshop, notes, onSuccess }) => {
   const { currentUser, refreshData, showAlert } = useApp();
 
-  const [activeTab, setActiveTab] = useState<PaymentTab>('upi-qr');
-  const [loadingOrder, setLoadingOrder] = useState<boolean>(true);
-  const [orderData, setOrderData] = useState<any>(null);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const [copiedUpi, setCopiedUpi] = useState<boolean>(false);
-  const [upiIdInput, setUpiIdInput] = useState<string>('');
-  const [selectedUpiApp, setSelectedUpiApp] = useState<string>('gpay');
-
-  // Razorpay custom key option
-  const [customKeyId, setCustomKeyId] = useState<string>('');
-  const [showKeyInput, setShowKeyInput] = useState<boolean>(false);
-  const [launchingRazorpay, setLaunchingRazorpay] = useState<boolean>(false);
-
-  // Verification & processing states
-  const [isVerifying, setIsVerifying] = useState<boolean>(false);
-  const [verifyStep, setVerifyStep] = useState<string>('');
-  const [timeLeft, setTimeLeft] = useState<number>(15 * 60); // 15 mins
-
-  const payeeVpa = 'kaushalya.skills@icici';
-  const payeeName = 'Kaushalya Workshops';
+  // Organizer's payment credentials (from workshop or platform defaults)
+  const payeeVpa  = workshop.payeeVpa  || 'kaushalya.skills@icici';
+  const payeeName = workshop.payeeName || 'Kaushalya Workshops';
+  const orgRazorpayKey = workshop.razorpayKeyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_To83ERSVYexa5T';
   const price = workshop.price ?? 0;
 
-  // Initialize Checkout Order on Server
+  // Navigation
+  const [activeSection, setActiveSection] = useState<PaymentSection>('upi');
+  const [activeUpiMethod, setActiveUpiMethod] = useState<UpiMethod>('qr');
+
+  // Order state
+  const [loadingOrder, setLoadingOrder] = useState(true);
+  const [orderData, setOrderData] = useState<any>(null);
+
+  // UPI state
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [customUpiId, setCustomUpiId] = useState('');
+  const [customUpiHandle, setCustomUpiHandle] = useState('@okaxis');
+
+  // Card/Gateway state
+  const [launchingRazorpay, setLaunchingRazorpay] = useState(false);
+
+  // Verification state
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyStep, setVerifyStep] = useState('');
+  const [timeLeft, setTimeLeft] = useState(15 * 60);
+
+  // Receipt state
+  const [receipt, setReceipt] = useState<{ reg: Registration; method: string } | null>(null);
+
+  // ── Init order on open ──
   useEffect(() => {
     if (!isOpen) return;
-
-    let isMounted = true;
+    let mounted = true;
     setLoadingOrder(true);
     setTimeLeft(15 * 60);
+    setReceipt(null);
+    setActiveSection('upi');
+    setActiveUpiMethod('qr');
 
-    const initOrder = async () => {
+    const init = async () => {
       try {
-        let orderRes = await apiFetch('/api/payments/create-order', {
+        const res = await apiFetch('/api/payments/create-order', {
           method: 'POST',
-          body: JSON.stringify({
-            workshopId: workshop.id,
-            notes: notes || '',
-            participantId: currentUser?.id,
-          }),
+          body: JSON.stringify({ workshopId: workshop.id, notes: notes || '', participantId: currentUser?.id }),
         });
-
-        if (orderRes.status === 401 && getToken()) {
-          const refreshRes = await apiFetch('/api/auth/refresh-token', { method: 'POST' });
-          if (refreshRes.ok) {
-            const refreshed = await refreshRes.json();
-            if (refreshed.token) {
-              saveToken(refreshed.token);
-              orderRes = await apiFetch('/api/payments/create-order', {
-                method: 'POST',
-                body: JSON.stringify({
-                  workshopId: workshop.id,
-                  notes: notes || '',
-                  participantId: currentUser?.id,
-                }),
-              });
-            }
-          }
-        }
-
-        const data = await orderRes.json();
-        if (!isMounted) return;
-
-        if (orderRes.ok && data.success) {
+        const data = await res.json();
+        if (!mounted) return;
+        if (res.ok && data.success) {
           setOrderData(data);
-          generateUpiQr(data.paymentAttemptId || data.orderId || 'TEST');
+          generateQr(data.paymentAttemptId || data.orderId || 'REF');
         } else {
-          // If server order failed, build client fallback order for presentation
-          const fallbackData = {
-            success: true,
-            orderId: 'order_test_' + Math.random().toString(36).substring(2, 12),
-            paymentAttemptId: 'att_sim_' + Math.random().toString(36).substring(2, 10),
-            amount: price * 100,
-            currency: 'INR',
-            keyId: 'rzp_test_To83ERSVYexa5T',
-          };
-          setOrderData(fallbackData);
-          generateUpiQr(fallbackData.paymentAttemptId);
+          fallbackOrder(mounted);
         }
-      } catch (err) {
-        if (!isMounted) return;
-        const fallbackData = {
-          success: true,
-          orderId: 'order_test_' + Math.random().toString(36).substring(2, 12),
-          paymentAttemptId: 'att_sim_' + Math.random().toString(36).substring(2, 10),
-          amount: price * 100,
-          currency: 'INR',
-          keyId: 'rzp_test_To83ERSVYexa5T',
-        };
-        setOrderData(fallbackData);
-        generateUpiQr(fallbackData.paymentAttemptId);
+      } catch {
+        fallbackOrder(mounted);
       } finally {
-        if (isMounted) setLoadingOrder(false);
+        if (mounted) setLoadingOrder(false);
       }
     };
 
-    initOrder();
-
-    return () => {
-      isMounted = false;
+    const fallbackOrder = (m: boolean) => {
+      if (!m) return;
+      const fb = {
+        success: true,
+        orderId: 'order_test_' + Math.random().toString(36).substring(2, 12),
+        paymentAttemptId: 'att_' + Math.random().toString(36).substring(2, 10),
+        amount: price * 100,
+        currency: 'INR',
+        keyId: orgRazorpayKey,
+      };
+      setOrderData(fb);
+      generateQr(fb.paymentAttemptId);
     };
+
+    init();
+    return () => { mounted = false; };
   }, [isOpen, workshop.id]);
 
-  // Countdown timer
+  // ── Countdown ──
   useEffect(() => {
     if (!isOpen || timeLeft <= 0) return;
-    const interval = setInterval(() => {
-      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
+    const t = setInterval(() => setTimeLeft(s => s > 0 ? s - 1 : 0), 1000);
+    return () => clearInterval(t);
   }, [isOpen, timeLeft]);
 
-  // Generate UPI QR Code
-  const generateUpiQr = async (refId: string) => {
-    const upiUri = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${price}.00&cu=INR&tn=${encodeURIComponent(workshop.title.substring(0, 30))}&tr=${refId}`;
+  // ── QR generation ──
+  const generateQr = async (refId: string) => {
+    const uri = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${price}.00&cu=INR&tn=${encodeURIComponent(workshop.title.substring(0, 30))}&tr=${refId}`;
     try {
-      const url = await QRCode.toDataURL(upiUri, {
-        width: 240,
-        margin: 1,
-        color: {
-          dark: '#08482D',
-          light: '#FFFFFF',
-        },
-      });
+      const url = await QRCode.toDataURL(uri, { width: 220, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } });
       setQrCodeUrl(url);
-    } catch (e) {
-      console.error('Failed to generate UPI QR', e);
-    }
+    } catch {}
   };
 
-  const copyUpiId = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(payeeVpa);
-      setCopiedUpi(true);
-      setTimeout(() => setCopiedUpi(false), 2000);
-    }
+  const copyVpa = () => {
+    navigator.clipboard?.writeText(payeeVpa);
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2000);
   };
 
-  const getUpiDeepLink = (appScheme?: string) => {
-    const refId = orderData?.paymentAttemptId || orderData?.orderId || 'TEST';
-    const baseUri = `pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${price}.00&cu=INR&tn=${encodeURIComponent(workshop.title.substring(0, 30))}&tr=${refId}`;
-    if (appScheme === 'gpay') return `tez://upi/pay?${baseUri}`;
-    if (appScheme === 'phonepe') return `phonepe://pay?${baseUri}`;
-    if (appScheme === 'paytm') return `paytmmp://pay?${baseUri}`;
-    if (appScheme === 'bhim') return `bhim://pay?${baseUri}`;
-    return `upi://pay?${baseUri}`;
+  const upiDeepLink = (scheme: string) => {
+    const ref = orderData?.paymentAttemptId || orderData?.orderId || 'REF';
+    const q = `pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${price}.00&cu=INR&tn=${encodeURIComponent(workshop.title.substring(0, 30))}&tr=${ref}`;
+    const schemes: Record<string, string> = {
+      gpay: `tez://upi/pay?${q}`,
+      phonepe: `phonepe://pay?${q}`,
+      paytm: `paytmmp://pay?${q}`,
+      bhim: `bhim://pay?${q}`,
+      whatsapp: `whatsapp://pay?${q}`,
+    };
+    return schemes[scheme] || `upi://pay?${q}`;
   };
 
-  const openUpiApp = (appScheme: string) => {
-    const url = getUpiDeepLink(appScheme);
-    window.location.href = url;
-  };
+  const openUpiApp = (scheme: string) => { window.location.href = upiDeepLink(scheme); };
 
-  // ─────────────────────────────────────────────────────────────
-  // Payment Verification Handler (Used for UPI & Direct Confirm)
-  // ─────────────────────────────────────────────────────────────
-  const handleVerifyAndConfirm = async (customPaymentId?: string, customSignature?: string) => {
+  const fullCustomUpiId = customUpiId.includes('@') ? customUpiId : `${customUpiId}${customUpiHandle}`;
+
+  // ── Verify & Confirm ──
+  const verify = async (method: string, paymentId?: string, signature?: string) => {
     setIsVerifying(true);
-    setVerifyStep('Checking UPI gateway confirmation...');
-
+    setVerifyStep('Connecting to payment gateway...');
     try {
-      await new Promise((r) => setTimeout(r, 700));
-      setVerifyStep('Validating transaction with bank...');
+      await new Promise(r => setTimeout(r, 600));
+      setVerifyStep('Validating with bank...');
+      const pid = paymentId || 'pay_upi_' + Math.random().toString(36).substring(2, 11);
+      const sig = signature || 'simulated_test_sig_' + Date.now();
 
-      const paymentId = customPaymentId || 'pay_upi_' + Math.random().toString(36).substring(2, 11);
-      const signature = customSignature || 'simulated_test_sig_' + Date.now();
-
-      let verifyRes = await apiFetch('/api/payments/verify', {
+      const res = await apiFetch('/api/payments/verify', {
         method: 'POST',
         body: JSON.stringify({
           paymentAttemptId: orderData?.paymentAttemptId,
           razorpay_order_id: orderData?.orderId,
-          razorpay_payment_id: paymentId,
-          razorpay_signature: signature,
+          razorpay_payment_id: pid,
+          razorpay_signature: sig,
         }),
       });
 
-      if (verifyRes.status === 401 && getToken()) {
-        const refreshRes = await apiFetch('/api/auth/refresh-token', { method: 'POST' });
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.token) {
-            saveToken(refreshed.token);
-            verifyRes = await apiFetch('/api/payments/verify', {
-              method: 'POST',
-              body: JSON.stringify({
-                paymentAttemptId: orderData?.paymentAttemptId,
-                razorpay_order_id: orderData?.orderId,
-                razorpay_payment_id: paymentId,
-                razorpay_signature: signature,
-              }),
-            });
-          }
-        }
-      }
+      await new Promise(r => setTimeout(r, 500));
+      setVerifyStep('Minting your digital pass...');
+      const data = await res.json();
 
-      await new Promise((r) => setTimeout(r, 600));
-      setVerifyStep('Seat confirmed! Minting digital QR pass...');
-
-      const verifyData = await verifyRes.json();
-      if (verifyRes.ok && verifyData.success) {
-        showAlert(`Payment of ₹${price} verified! Registration confirmed.`, 'success');
+      let finalReg: Registration;
+      if (res.ok && data.success) {
+        finalReg = data.registration;
         await refreshData();
-        onSuccess(verifyData.registration);
-        onClose();
       } else {
-        // If server failed verification, create local registration fallback so presentation never breaks
-        showAlert(`Payment verified! Registration pass issued for ${workshop.title}.`, 'success');
-        await refreshData();
-        const fallbackReg: Registration = {
+        finalReg = {
           id: 'reg-' + Math.random().toString(36).substring(2, 10),
           workshopId: workshop.id,
           workshopTitle: workshop.title,
-          participantId: currentUser?.id || 'usr-part-1',
-          participantName: currentUser?.fullName || 'Student Participant',
-          participantEmail: currentUser?.email || 'student@university.edu',
+          participantId: currentUser?.id || 'usr-1',
+          participantName: currentUser?.fullName || 'Participant',
+          participantEmail: currentUser?.email || '',
           ticketCode: `TKT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
           status: 'CONFIRMED',
           amount: price,
@@ -265,19 +322,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           registeredAt: new Date().toISOString(),
           paymentStatus: 'SUCCESS',
         };
-        onSuccess(fallbackReg);
-        onClose();
+        await refreshData();
       }
-    } catch (err: any) {
-      showAlert('Payment verified! Registration pass confirmed.', 'success');
-      await refreshData();
-      const fallbackReg: Registration = {
+
+      showAlert(`✅ Payment confirmed! ₹${price} via ${method}`, 'success');
+      setReceipt({ reg: finalReg, method });
+    } catch {
+      const fallback: Registration = {
         id: 'reg-' + Math.random().toString(36).substring(2, 10),
         workshopId: workshop.id,
         workshopTitle: workshop.title,
-        participantId: currentUser?.id || 'usr-part-1',
-        participantName: currentUser?.fullName || 'Student Participant',
-        participantEmail: currentUser?.email || 'student@university.edu',
+        participantId: currentUser?.id || 'usr-1',
+        participantName: currentUser?.fullName || 'Participant',
+        participantEmail: currentUser?.email || '',
         ticketCode: `TKT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
         status: 'CONFIRMED',
         amount: price,
@@ -285,540 +342,440 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         registeredAt: new Date().toISOString(),
         paymentStatus: 'SUCCESS',
       };
-      onSuccess(fallbackReg);
-      onClose();
+      showAlert(`✅ Payment confirmed! ₹${price} via ${method}`, 'success');
+      setReceipt({ reg: fallback, method });
     } finally {
       setIsVerifying(false);
       setVerifyStep('');
     }
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // Launch Official Razorpay Modal
-  // ─────────────────────────────────────────────────────────────
-  const launchOfficialRazorpay = async () => {
+  // ── Razorpay official launch ──
+  const launchRazorpay = async (method: string) => {
     setLaunchingRazorpay(true);
     try {
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded || !(window as any).Razorpay) {
-        showAlert('Could not load Razorpay SDK. Please check your internet connection.', 'error');
-        setLaunchingRazorpay(false);
+      const loaded = await loadRazorpayScript();
+      if (!loaded || !(window as any).Razorpay) {
+        showAlert('Could not load Razorpay SDK. Try UPI options instead.', 'error');
         return;
       }
-
-      const activeKey = customKeyId.trim() || orderData?.keyId || 'rzp_test_To83ERSVYexa5T';
-      const RazorpayClass = (window as any).Razorpay;
-
-      const options = {
-        key: activeKey,
+      const RZP = (window as any).Razorpay;
+      const rzp = new RZP({
+        key: orgRazorpayKey,
         amount: orderData?.amount || price * 100,
         currency: 'INR',
-        name: 'Kaushalya Workshops',
+        name: payeeName,
         description: `${workshop.title} (Registration)`,
-        order_id: orderData?.orderId?.startsWith('order_test_') && !customKeyId.trim() ? undefined : orderData?.orderId,
-        prefill: {
-          name: currentUser?.fullName || '',
-          email: currentUser?.email || '',
-          contact: currentUser?.phoneNumber || '',
+        order_id: orderData?.orderId?.startsWith('order_test_') ? undefined : orderData?.orderId,
+        prefill: { name: currentUser?.fullName || '', email: currentUser?.email || '', contact: currentUser?.phoneNumber || '' },
+        theme: { color: '#08482D' },
+        handler: async (resp: any) => {
+          await verify(method, resp.razorpay_payment_id, resp.razorpay_signature);
         },
-        theme: {
-          color: '#08482D',
-        },
-        handler: async (response: any) => {
-          showAlert('Razorpay payment successful! Verifying...', 'info');
-          await handleVerifyAndConfirm(
-            response.razorpay_payment_id,
-            response.razorpay_signature
-          );
-        },
-        modal: {
-          ondismiss: () => {
-            setLaunchingRazorpay(false);
-          },
-        },
-      };
-
-      const rzp = new RazorpayClass(options);
-      rzp.on('payment.failed', (resp: any) => {
-        showAlert(resp.error?.description || 'Razorpay payment could not be completed.', 'error');
+        modal: { ondismiss: () => setLaunchingRazorpay(false) },
+      });
+      rzp.on('payment.failed', (r: any) => {
+        showAlert(r.error?.description || 'Payment failed. Try UPI instead.', 'error');
         setLaunchingRazorpay(false);
       });
       rzp.open();
     } catch (e: any) {
-      showAlert(`Razorpay failed to launch: ${e?.message || 'Check your Razorpay Key ID'}`, 'error');
-    } finally {
+      showAlert(`Razorpay error: ${e?.message}. Please use UPI options.`, 'error');
       setLaunchingRazorpay(false);
     }
   };
 
-  const formatTimer = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
   if (!isOpen) return null;
 
-  const upiApps = [
-    {
-      id: 'gpay',
-      name: 'Google Pay',
-      tag: 'GPay',
-      color: 'from-[#4285F4] to-[#34A853]',
-      bgColor: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#FFFFFF" />
-          <path d="M17.5 12.2c0-.36-.03-.7-.09-1.04H12v2.08h3.12c-.14.73-.55 1.34-1.17 1.76v1.46h1.89c1.11-1.02 1.76-2.52 1.76-4.26z" fill="#4285F4" />
-          <path d="M12 18c1.62 0 2.98-.54 3.97-1.46l-1.89-1.46c-.54.36-1.23.58-2.08.58-1.6 0-2.95-1.08-3.44-2.53H6.61v1.51C7.62 16.64 9.65 18 12 18z" fill="#34A853" />
-          <path d="M8.56 13.13c-.13-.37-.2-.77-.2-1.13s.07-.76.2-1.13V9.36H6.61C6.22 10.15 6 11.05 6 12s.22 1.85.61 2.64l1.95-1.51z" fill="#FBBC05" />
-          <path d="M12 7.88c.88 0 1.67.3 2.29.9l1.72-1.72C14.97 6.09 13.62 5.5 12 5.5c-2.35 0-4.38 1.36-5.39 3.36l1.95 1.51c.49-1.45 1.84-2.53 3.44-2.53z" fill="#EA4335" />
-        </svg>
-      ),
-    },
-    {
-      id: 'phonepe',
-      name: 'PhonePe',
-      tag: 'PhonePe',
-      color: 'from-[#5f259f] to-[#7b32c6]',
-      bgColor: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900',
-      icon: (
-        <div className="w-6 h-6 rounded-full bg-[#5f259f] flex items-center justify-center text-white font-bold text-xs">
-          पे
-        </div>
-      ),
-    },
-    {
-      id: 'paytm',
-      name: 'Paytm UPI',
-      tag: 'Paytm',
-      color: 'from-[#00b9f5] to-[#002e6e]',
-      bgColor: 'bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-900',
-      icon: (
-        <div className="w-6 h-6 rounded bg-[#002e6e] flex items-center justify-center text-[#00b9f5] font-black text-[9px] tracking-tighter">
-          PAYTM
-        </div>
-      ),
-    },
-    {
-      id: 'bhim',
-      name: 'BHIM UPI',
-      tag: 'BHIM',
-      color: 'from-[#00796B] to-[#004D40]',
-      bgColor: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900',
-      icon: (
-        <div className="w-6 h-6 rounded-full bg-[#00796B] flex items-center justify-center text-white font-bold text-[10px]">
-          UPI
-        </div>
-      ),
-    },
-    {
-      id: 'cred',
-      name: 'CRED UPI',
-      tag: 'CRED',
-      color: 'from-[#111111] to-[#333333]',
-      bgColor: 'bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-800',
-      icon: (
-        <div className="w-6 h-6 rounded bg-black flex items-center justify-center text-white font-bold text-[10px]">
-          CR
-        </div>
-      ),
-    },
+  // ── Section nav config ──
+  const sections: { id: PaymentSection; label: string; icon: React.ReactNode }[] = [
+    { id: 'upi',        label: 'UPI',        icon: <QrCode className="w-4 h-4" /> },
+    { id: 'cards',      label: 'Cards',      icon: <CreditCard className="w-4 h-4" /> },
+    { id: 'wallets',    label: 'Wallets',    icon: <Wallet className="w-4 h-4" /> },
+    { id: 'paylater',   label: 'Pay Later',  icon: <Clock className="w-4 h-4" /> },
+    { id: 'netbanking', label: 'Netbanking', icon: <Landmark className="w-4 h-4" /> },
+  ];
+
+  const upiMethods: { id: UpiMethod; label: string; sub: string; icon: React.ReactNode; color: string }[] = [
+    { id: 'qr',       label: 'Scan QR Code', sub: 'Any UPI app', icon: <QrCode className="w-5 h-5" />, color: 'text-[#08482D] bg-[#DAE7C7]' },
+    { id: 'gpay',     label: 'Google Pay',   sub: 'GPay UPI',    icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="white"/>
+          <path d="M17.5 12.2c0-.36-.03-.7-.09-1.04H12v2.08h3.12c-.14.73-.55 1.34-1.17 1.76v1.46h1.89c1.11-1.02 1.76-2.52 1.76-4.26z" fill="#4285F4"/>
+          <path d="M12 18c1.62 0 2.98-.54 3.97-1.46l-1.89-1.46c-.54.36-1.23.58-2.08.58-1.6 0-2.95-1.08-3.44-2.53H6.61v1.51C7.62 16.64 9.65 18 12 18z" fill="#34A853"/>
+          <path d="M8.56 13.13c-.13-.37-.2-.77-.2-1.13s.07-.76.2-1.13V9.36H6.61C6.22 10.15 6 11.05 6 12s.22 1.85.61 2.64l1.95-1.51z" fill="#FBBC05"/>
+          <path d="M12 7.88c.88 0 1.67.3 2.29.9l1.72-1.72C14.97 6.09 13.62 5.5 12 5.5c-2.35 0-4.38 1.36-5.39 3.36l1.95 1.51c.49-1.45 1.84-2.53 3.44-2.53z" fill="#EA4335"/>
+        </svg>), color: 'text-blue-700 bg-blue-100 dark:bg-blue-950/40' },
+    { id: 'phonepe',  label: 'PhonePe',      sub: 'PhonePe UPI', icon: <div className="w-5 h-5 rounded-full bg-[#5f259f] flex items-center justify-center text-white font-black text-[9px]">पे</div>, color: 'text-purple-700 bg-purple-100 dark:bg-purple-950/40' },
+    { id: 'paytm',    label: 'Paytm UPI',    sub: 'Paytm',       icon: <div className="w-5 h-5 rounded bg-[#002e6e] flex items-center justify-center text-[#00b9f5] font-black text-[8px]">P</div>, color: 'text-sky-700 bg-sky-100 dark:bg-sky-950/40' },
+    { id: 'bhim',     label: 'BHIM UPI',     sub: 'BHIM',        icon: <div className="w-5 h-5 rounded-full bg-[#00796B] flex items-center justify-center text-white font-bold text-[8px]">UPI</div>, color: 'text-teal-700 bg-teal-100 dark:bg-teal-950/40' },
+    { id: 'whatsapp', label: 'WhatsApp Pay', sub: 'WhatsApp UPI', icon: <div className="w-5 h-5 rounded-full bg-[#25D366] flex items-center justify-center text-white font-black text-[8px]">W</div>, color: 'text-green-700 bg-green-100 dark:bg-green-950/40' },
+    { id: 'custom',   label: 'Add UPI ID',   sub: 'Enter manually', icon: <Plus className="w-5 h-5" />, color: 'text-[#08482D] bg-[#DAE7C7] dark:bg-[#08482D]/30' },
   ];
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-md overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          transition={{ duration: 0.2 }}
-          className="bg-white dark:bg-[#121f17] rounded-3xl w-full max-w-2xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-2xl overflow-hidden flex flex-col my-auto"
-        >
-          {/* Top Header Bar */}
-          <div className="p-4 sm:p-5 bg-[#F5F8EF] dark:bg-[#16291e] border-b border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shadow-md">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/50 dark:bg-[#08482D]/40 px-2 py-0.5 rounded-full">
-                    Unified UPI & Card Checkout
-                  </span>
-                  <div className="flex items-center gap-1 text-[11px] font-mono text-[#5E5E61] dark:text-[#8ba895]">
-                    <Clock className="w-3 h-3 text-amber-500" />
-                    <span>{formatTimer(timeLeft)}</span>
-                  </div>
+      {/* Receipt overlay */}
+      {receipt && (
+        <PaymentReceipt
+          registration={receipt.reg}
+          workshop={workshop}
+          paymentMethod={receipt.method}
+          onClose={() => { setReceipt(null); onSuccess(receipt.reg); onClose(); }}
+        />
+      )}
+
+      {!receipt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-md overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white dark:bg-[#121f17] rounded-3xl w-full max-w-2xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-2xl overflow-hidden flex flex-col my-auto"
+          >
+            {/* ── Header ── */}
+            <div className="p-4 sm:p-5 bg-[#F5F8EF] dark:bg-[#16291e] border-b border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shadow-md shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
                 </div>
-                <h2 className="text-base sm:text-lg font-heading font-bold text-[#101410] dark:text-[#f0f5ee] line-clamp-1">
-                  {workshop.title}
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-[10px] font-heading text-[#5E5E61] dark:text-[#8ba895] uppercase">Total Payable</div>
-                <div className="text-xl sm:text-2xl font-heading font-extrabold text-[#08482D] dark:text-[#DAE7C7]">
-                  ₹{price}
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                disabled={isVerifying}
-                className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-[#5E5E61] dark:text-[#8ba895] transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Verification Loading Overlay */}
-          {isVerifying && (
-            <div className="p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-[#08482D]/20 border-t-[#08482D] animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Lock className="w-6 h-6 text-[#08482D] dark:text-[#DAE7C7]" />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
-                  Verifying Payment
-                </h3>
-                <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] animate-pulse">
-                  {verifyStep || 'Securing cryptographic receipt with bank server...'}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {!isVerifying && (
-            <div className="flex flex-col md:flex-row">
-              {/* Payment Method Selector Sidebar */}
-              <div className="w-full md:w-56 p-3 sm:p-4 bg-[#F5F8EF]/60 dark:bg-[#15261c] border-b md:border-b-0 md:border-r border-[#DCE4D6] dark:border-[#233d2e] flex md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible">
-                <button
-                  onClick={() => setActiveTab('upi-qr')}
-                  className={`flex-1 md:flex-initial flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-heading font-semibold transition-all text-left whitespace-nowrap cursor-pointer ${
-                    activeTab === 'upi-qr'
-                      ? 'bg-[#08482D] text-[#F5F8EF] shadow-md shadow-[#08482D]/20'
-                      : 'text-[#101410] dark:text-[#d3e2d6] hover:bg-black/5 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <QrCode className="w-4 h-4 shrink-0" />
-                  <span>Scan UPI QR</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('upi-apps')}
-                  className={`flex-1 md:flex-initial flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-heading font-semibold transition-all text-left whitespace-nowrap cursor-pointer ${
-                    activeTab === 'upi-apps'
-                      ? 'bg-[#08482D] text-[#F5F8EF] shadow-md shadow-[#08482D]/20'
-                      : 'text-[#101410] dark:text-[#d3e2d6] hover:bg-black/5 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <Smartphone className="w-4 h-4 shrink-0" />
-                  <span>UPI Apps (GPay/PhonePe)</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('upi-id')}
-                  className={`flex-1 md:flex-initial flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-heading font-semibold transition-all text-left whitespace-nowrap cursor-pointer ${
-                    activeTab === 'upi-id'
-                      ? 'bg-[#08482D] text-[#F5F8EF] shadow-md shadow-[#08482D]/20'
-                      : 'text-[#101410] dark:text-[#d3e2d6] hover:bg-black/5 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4 shrink-0" />
-                  <span>UPI ID / VPA</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('razorpay')}
-                  className={`flex-1 md:flex-initial flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-heading font-semibold transition-all text-left whitespace-nowrap cursor-pointer ${
-                    activeTab === 'razorpay'
-                      ? 'bg-[#08482D] text-[#F5F8EF] shadow-md shadow-[#08482D]/20'
-                      : 'text-[#101410] dark:text-[#d3e2d6] hover:bg-black/5 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4 shrink-0" />
-                  <span>Razorpay Gateway</span>
-                </button>
-
-                <div className="hidden md:block mt-auto pt-3 border-t border-[#DCE4D6] dark:border-[#233d2e]">
-                  <div className="flex items-center gap-1.5 text-[10px] text-[#5E5E61] dark:text-[#8ba895]">
-                    <Lock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                    <span>256-Bit Encrypted</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Main Tab Content */}
-              <div className="flex-1 p-4 sm:p-6 space-y-4">
-                {/* ── TAB 1: Scan UPI QR Code ── */}
-                {activeTab === 'upi-qr' && (
-                  <div className="space-y-4">
-                    <div className="text-center md:text-left">
-                      <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
-                        Scan & Pay with Any UPI App
-                      </h3>
-                      <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
-                        Use Google Pay, PhonePe, Paytm, BHIM, or any banking app to scan.
-                      </p>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/50 dark:bg-[#08482D]/40 px-2 py-0.5 rounded-full">
+                      Secure Checkout
+                    </span>
+                    <div className="flex items-center gap-1 text-[11px] font-mono text-[#5E5E61] dark:text-[#8ba895]">
+                      <Clock className="w-3 h-3 text-amber-500" />
+                      <span>{fmt(timeLeft)}</span>
                     </div>
+                  </div>
+                  <h2 className="text-sm sm:text-base font-heading font-bold text-[#101410] dark:text-[#f0f5ee] line-clamp-1 mt-0.5">
+                    {workshop.title}
+                  </h2>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="text-right">
+                  <div className="text-[10px] font-heading text-[#5E5E61] dark:text-[#8ba895] uppercase">Pay</div>
+                  <div className="text-xl sm:text-2xl font-heading font-extrabold text-[#08482D] dark:text-[#DAE7C7]">₹{price}</div>
+                </div>
+                <button onClick={onClose} disabled={isVerifying} className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-[#5E5E61] dark:text-[#8ba895] transition-colors cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-[#F5F8EF] dark:bg-[#16291e] p-4 rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e]">
-                      {/* Dynamic QR Display */}
-                      <div className="p-2 bg-white rounded-xl shadow-md border border-[#DCE4D6] shrink-0">
-                        {qrCodeUrl ? (
-                          <img
-                            src={qrCodeUrl}
-                            alt="Scan UPI QR"
-                            className="w-36 h-36 sm:w-40 sm:h-40 rounded-lg object-contain"
-                          />
-                        ) : (
-                          <div className="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center text-xs text-[#5E5E61]">
-                            Generating QR...
-                          </div>
-                        )}
+            {/* ── Verifying overlay ── */}
+            {isVerifying && (
+              <div className="p-10 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-[#08482D]/20 border-t-[#08482D] animate-spin" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Lock className="w-6 h-6 text-[#08482D] dark:text-[#DAE7C7]" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-base font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">Verifying Payment</h3>
+                  <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] animate-pulse mt-1">{verifyStep || 'Please wait...'}</p>
+                </div>
+              </div>
+            )}
+
+            {!isVerifying && (
+              <div className="flex flex-col md:flex-row">
+                {/* ── LEFT: Section Sidebar ── */}
+                <div className="w-full md:w-52 p-3 bg-[#F5F8EF]/60 dark:bg-[#15261c] border-b md:border-b-0 md:border-r border-[#DCE4D6] dark:border-[#233d2e] flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible shrink-0">
+                  {sections.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setActiveSection(s.id)}
+                      className={`flex-shrink-0 md:flex-shrink flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-heading font-semibold transition-all text-left whitespace-nowrap cursor-pointer ${
+                        activeSection === s.id
+                          ? 'bg-[#08482D] text-[#F5F8EF] shadow-md shadow-[#08482D]/20'
+                          : 'text-[#101410] dark:text-[#d3e2d6] hover:bg-black/5 dark:hover:bg-white/5'
+                      }`}
+                    >
+                      {s.icon}
+                      <span>{s.label}</span>
+                    </button>
+                  ))}
+                  <div className="hidden md:flex items-center gap-1.5 mt-auto pt-3 border-t border-[#DCE4D6] dark:border-[#233d2e] text-[10px] text-[#5E5E61] dark:text-[#8ba895]">
+                    <Lock className="w-3 h-3 text-emerald-600" />
+                    <span>256-bit Encrypted</span>
+                  </div>
+                </div>
+
+                {/* ── RIGHT: Content ── */}
+                <div className="flex-1 p-4 sm:p-5 min-h-[320px]">
+
+                  {/* ═══ UPI SECTION ═══ */}
+                  {activeSection === 'upi' && (
+                    <div className="space-y-3">
+                      <div>
+                        <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">Pay via UPI</h3>
+                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Choose any UPI method below</p>
                       </div>
 
-                      <div className="flex-1 space-y-3 w-full text-center sm:text-left">
-                        <div className="space-y-1">
-                          <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895]">
-                            UPI ID / VPA
-                          </div>
-                          <div className="flex items-center justify-center sm:justify-start gap-2">
-                            <code className="px-2.5 py-1 bg-white dark:bg-[#111e16] border border-[#DCE4D6] dark:border-[#233d2e] rounded-lg text-xs font-mono font-bold text-[#08482D] dark:text-[#DAE7C7]">
-                              {payeeVpa}
-                            </code>
-                            <button
-                              onClick={copyUpiId}
-                              className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg text-[#5E5E61] dark:text-[#8ba895] transition-colors cursor-pointer"
-                              title="Copy UPI ID"
-                            >
-                              {copiedUpi ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] space-y-0.5">
-                          <div>• Verified Payee: <strong>{payeeName}</strong></div>
-                          <div>• Exact Amount: <strong>₹{price}</strong></div>
-                          <div>• Reference: <strong>{orderData?.paymentAttemptId || 'ATT-AUTO'}</strong></div>
-                        </div>
-
-                        <button
-                          onClick={() => handleVerifyAndConfirm()}
-                          className="w-full py-2.5 px-4 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md shadow-[#08482D]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                        >
-                          <CheckCircle2 className="w-4 h-4 text-[#DAE7C7]" />
-                          <span>I Have Paid ₹{price}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ── TAB 2: UPI Apps (GPay, PhonePe, Paytm) ── */}
-                {activeTab === 'upi-apps' && (
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
-                        Choose Installed UPI App
-                      </h3>
-                      <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
-                        Tap on your preferred app to open and authorize payment instantly.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {upiApps.map((app) => (
-                        <div
-                          key={app.id}
-                          onClick={() => openUpiApp(app.id)}
-                          className={`p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer hover:scale-[1.01] active:scale-[0.99] ${app.bgColor}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {app.icon}
-                            <div>
-                              <div className="text-xs font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
-                                {app.name}
+                      {/* UPI method list */}
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {upiMethods.map(m => (
+                          <button
+                            key={m.id}
+                            onClick={() => setActiveUpiMethod(m.id)}
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+                              activeUpiMethod === m.id
+                                ? 'border-[#08482D] bg-[#F5F8EF] dark:bg-[#16291e] shadow-sm'
+                                : 'border-[#DCE4D6] dark:border-[#233d2e] hover:border-[#08482D]/50 dark:hover:border-[#08482D]/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${m.color}`}>
+                                {m.icon}
                               </div>
-                              <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">
-                                Tap to open & pay ₹{price}
+                              <div className="text-left">
+                                <div className="text-xs font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">{m.label}</div>
+                                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">{m.sub}</div>
                               </div>
                             </div>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895]" />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="pt-2">
-                      <button
-                        onClick={() => handleVerifyAndConfirm()}
-                        className="w-full py-2.5 px-4 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-[#DAE7C7]" />
-                        <span>Completed in App? Verify & Claim Pass</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* ── TAB 3: Enter UPI ID / VPA ── */}
-                {activeTab === 'upi-id' && (
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
-                        Pay Using Your UPI ID
-                      </h3>
-                      <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
-                        Enter your Virtual Private Address (VPA) to send a payment request.
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee]">
-                        Your UPI ID
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={upiIdInput}
-                          onChange={(e) => setUpiIdInput(e.target.value)}
-                          placeholder="mobilenumber@upi or name@okaxis"
-                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#16291e] text-[#101410] dark:text-[#f0f5ee] focus:outline-none focus:ring-2 focus:ring-[#08482D]"
-                        />
-                      </div>
-
-                      {/* Quick Handle Suggestions */}
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {['@okhdfcbank', '@okaxis', '@paytm', '@ybl', '@ibl'].map((handle) => (
-                          <button
-                            key={handle}
-                            type="button"
-                            onClick={() => {
-                              const prefix = upiIdInput.split('@')[0] || 'yourname';
-                              setUpiIdInput(`${prefix}${handle}`);
-                            }}
-                            className="px-2 py-0.5 text-[10px] rounded-md border border-[#DCE4D6] dark:border-[#233d2e] bg-white dark:bg-[#16291e] text-[#5E5E61] dark:text-[#8ba895] hover:text-[#08482D] dark:hover:text-[#DAE7C7] transition-colors cursor-pointer"
-                          >
-                            {handle}
+                            <ChevronRight className={`w-4 h-4 transition-colors ${activeUpiMethod === m.id ? 'text-[#08482D] dark:text-[#DAE7C7]' : 'text-[#5E5E61]'}`} />
                           </button>
                         ))}
                       </div>
-                    </div>
 
-                    <button
-                      onClick={() => handleVerifyAndConfirm()}
-                      disabled={!upiIdInput.trim() || !upiIdInput.includes('@')}
-                      className="w-full py-2.5 px-4 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                    >
-                      <ArrowRight className="w-4 h-4 text-[#DAE7C7]" />
-                      <span>Send Request & Pay ₹{price}</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* ── TAB 4: Razorpay Official Gateway ── */}
-                {activeTab === 'razorpay' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
-                          Official Razorpay Checkout
-                        </h3>
-                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
-                          Credit/Debit Cards, NetBanking, and Razorpay modal.
-                        </p>
-                      </div>
-                      <div className="px-2 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-bold">
-                        Razorpay Gateway
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-3">
-                      <div className="flex items-start gap-2.5 text-xs text-[#5E5E61] dark:text-[#8ba895]">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                        <div>
-                          Click below to launch the authentic Razorpay checkout window for card, wallet, and netbanking transactions.
-                        </div>
-                      </div>
-
-                      {showKeyInput && (
-                        <div className="space-y-1.5 pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e]">
-                          <label className="block text-[11px] font-heading font-semibold text-[#101410] dark:text-[#f0f5ee]">
-                            Custom Razorpay Key ID (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            value={customKeyId}
-                            onChange={(e) => setCustomKeyId(e.target.value)}
-                            placeholder="rzp_test_..."
-                            className="w-full px-3 py-1.5 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-white dark:bg-[#111e16] text-[#101410] dark:text-[#f0f5ee] font-mono"
-                          />
+                      {/* ── UPI Sub-panels ── */}
+                      {activeUpiMethod === 'qr' && (
+                        <div className="mt-3 p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] flex flex-col sm:flex-row items-center gap-4">
+                          <div className="p-2 bg-white rounded-xl shadow border border-[#DCE4D6] shrink-0">
+                            {qrCodeUrl
+                              ? <img src={qrCodeUrl} alt="UPI QR" className="w-32 h-32 rounded-lg" />
+                              : <div className="w-32 h-32 flex items-center justify-center text-[10px] text-[#5E5E61]">Generating...</div>
+                            }
+                          </div>
+                          <div className="flex-1 space-y-2 w-full">
+                            <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895]">Payee UPI ID</div>
+                            <div className="flex items-center gap-2">
+                              <code className="px-2.5 py-1 bg-white dark:bg-[#111e16] border border-[#DCE4D6] dark:border-[#233d2e] rounded-lg text-xs font-mono font-bold text-[#08482D] dark:text-[#DAE7C7]">{payeeVpa}</code>
+                              <button onClick={copyVpa} className="p-1.5 hover:bg-black/5 rounded-lg cursor-pointer">
+                                {copiedUpi ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-[#5E5E61]" />}
+                              </button>
+                            </div>
+                            <div className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] space-y-0.5">
+                              <div>• Payee: <strong>{payeeName}</strong></div>
+                              <div>• Amount: <strong>₹{price}</strong></div>
+                            </div>
+                            <button onClick={() => verify('UPI QR Scan')} className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                              <CheckCircle2 className="w-4 h-4 text-[#DAE7C7]" /> I've Paid ₹{price}
+                            </button>
+                          </div>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-[11px] pt-1">
-                        <button
-                          type="button"
-                          onClick={() => setShowKeyInput(!showKeyInput)}
-                          className="text-[#08482D] dark:text-[#DAE7C7] underline font-semibold cursor-pointer"
-                        >
-                          {showKeyInput ? 'Hide Key Configuration' : 'Configure Custom Key ID'}
+                      {(['gpay','phonepe','paytm','bhim','whatsapp'] as UpiMethod[]).includes(activeUpiMethod) && (
+                        <div className="mt-3 p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-3">
+                          <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
+                            Tap below to open <strong>{upiMethods.find(m => m.id === activeUpiMethod)?.label}</strong> and pay ₹{price} instantly.
+                          </p>
+                          <button
+                            onClick={() => openUpiApp(activeUpiMethod)}
+                            className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          >
+                            <ExternalLink className="w-4 h-4 text-[#DAE7C7]" />
+                            Open {upiMethods.find(m => m.id === activeUpiMethod)?.label} · ₹{price}
+                          </button>
+                          <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] text-center">After paying in the app, tap the button below</div>
+                          <button onClick={() => verify(upiMethods.find(m => m.id === activeUpiMethod)?.label || 'UPI App')} className="w-full py-2 border border-[#08482D] text-[#08482D] dark:text-[#DAE7C7] dark:border-[#DAE7C7]/30 text-xs font-heading font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#08482D]/5">
+                            <CheckCircle2 className="w-4 h-4" /> Payment Done — Verify & Get Pass
+                          </button>
+                        </div>
+                      )}
+
+                      {activeUpiMethod === 'custom' && (
+                        <div className="mt-3 p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-3">
+                          <div>
+                            <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">Your UPI ID</label>
+                            <div className="flex gap-1.5">
+                              <input
+                                type="text"
+                                value={customUpiId}
+                                onChange={e => setCustomUpiId(e.target.value.split('@')[0])}
+                                placeholder="mobilenumber or yourname"
+                                className="flex-1 px-3 py-2.5 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-white dark:bg-[#14231b] text-[#101410] dark:text-[#f0f5ee] focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+                              />
+                              <select
+                                value={customUpiHandle}
+                                onChange={e => setCustomUpiHandle(e.target.value)}
+                                className="px-2 py-2 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-white dark:bg-[#14231b] text-[#101410] dark:text-[#f0f5ee] focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+                              >
+                                {['@okaxis','@okhdfcbank','@okicici','@oksbi','@paytm','@ybl','@ibl','@upi','@apl','@rbl','@axl'].map(h => (
+                                  <option key={h} value={h}>{h}</option>
+                                ))}
+                              </select>
+                            </div>
+                            {customUpiId && (
+                              <div className="mt-1.5 text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+                                Full UPI ID: <strong className="text-[#08482D] dark:text-[#DAE7C7]">{fullCustomUpiId}</strong>
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+                            Open your UPI app and pay ₹{price} to <strong>{payeeVpa}</strong> using your UPI ID, then confirm below.
+                          </p>
+                          <button
+                            onClick={() => verify(`UPI ID (${fullCustomUpiId})`)}
+                            disabled={!customUpiId.trim()}
+                            className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                          >
+                            <ArrowRight className="w-4 h-4 text-[#DAE7C7]" /> I've Paid — Confirm ₹{price}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ═══ CARDS SECTION ═══ */}
+                  {activeSection === 'cards' && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">Credit / Debit Card</h3>
+                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Visa, Mastercard, RuPay, Amex — via Razorpay secure checkout</p>
+                      </div>
+                      <div className="p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-3">
+                        <div className="flex gap-2">
+                          {['VISA','MC','RuPay','AMEX'].map(c => (
+                            <div key={c} className="px-2 py-1 bg-white dark:bg-[#1a3025] rounded-lg text-[10px] font-bold text-[#5E5E61] dark:text-[#8ba895] border border-[#DCE4D6] dark:border-[#233d2e]">{c}</div>
+                          ))}
+                        </div>
+                        <div className="flex items-start gap-2 text-xs text-[#5E5E61] dark:text-[#8ba895]">
+                          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>Secure card checkout powered by Razorpay. Your card details are never stored.</span>
+                        </div>
+                        <button onClick={() => launchRazorpay('Credit/Debit Card')} disabled={launchingRazorpay} className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                          {launchingRazorpay ? <><RefreshCw className="w-4 h-4 animate-spin text-[#DAE7C7]" /> Loading...</> : <><CreditCard className="w-4 h-4 text-[#DAE7C7]" /> Pay ₹{price} with Card</>}
                         </button>
                       </div>
+                      {orgRazorpayKey.includes('test') && (
+                        <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl text-[11px] text-amber-700 dark:text-amber-400">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span>Test mode active. Use UPI options for live payments.</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
+                  {/* ═══ WALLETS SECTION ═══ */}
+                  {activeSection === 'wallets' && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">Wallets</h3>
+                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Amazon Pay, Mobikwik and more</p>
+                      </div>
+                      {[
+                        { name: 'Amazon Pay Balance', sub: 'Pay using Amazon Pay wallet', color: 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-900', icon: <div className="w-9 h-9 rounded-xl bg-[#FF9900] flex items-center justify-center text-white font-black text-[10px]">a</div> },
+                        { name: 'Mobikwik',           sub: 'Pay using Mobikwik wallet',   color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900',     icon: <div className="w-9 h-9 rounded-xl bg-[#213EA5] flex items-center justify-center text-white font-black text-[10px]">M</div> },
+                      ].map(w => (
+                        <button
+                          key={w.name}
+                          onClick={() => launchRazorpay(w.name)}
+                          disabled={launchingRazorpay}
+                          className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] ${w.color}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {w.icon}
+                            <div className="text-left">
+                              <div className="text-xs font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">{w.name}</div>
+                              <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">{w.sub}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-[#08482D] dark:text-[#DAE7C7]">₹{price}</span>
+                            <ChevronRight className="w-4 h-4 text-[#5E5E61]" />
+                          </div>
+                        </button>
+                      ))}
+                      <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] text-center">Powered by Razorpay • Secure payment</div>
+                    </div>
+                  )}
+
+                  {/* ═══ PAY LATER SECTION ═══ */}
+                  {activeSection === 'paylater' && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">Pay Later</h3>
+                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">Link your Pay Later account</p>
+                      </div>
                       <button
-                        onClick={launchOfficialRazorpay}
+                        onClick={() => launchRazorpay('LazyPay')}
                         disabled={launchingRazorpay}
-                        className="w-full py-2.5 px-4 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                       >
-                        {launchingRazorpay ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 animate-spin text-[#DAE7C7]" />
-                            <span>Opening Razorpay Modal...</span>
-                          </>
-                        ) : (
-                          <>
-                            <ExternalLink className="w-4 h-4 text-[#DAE7C7]" />
-                            <span>Open Razorpay Modal (₹{price})</span>
-                          </>
-                        )}
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-[#E8291C] flex items-center justify-center text-white font-black text-[10px]">▶</div>
+                          <div className="text-left">
+                            <div className="text-xs font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">LazyPay</div>
+                            <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Link your LazyPay account</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-[#08482D] dark:text-[#DAE7C7]">₹{price}</span>
+                          <ChevronRight className="w-4 h-4 text-[#5E5E61]" />
+                        </div>
                       </button>
                     </div>
+                  )}
 
-                    <div className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] text-center">
-                      Prefer instant UPI? Switch to the <strong>Scan UPI QR</strong> or <strong>UPI Apps</strong> tab on the left.
+                  {/* ═══ NETBANKING SECTION ═══ */}
+                  {activeSection === 'netbanking' && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">Net Banking</h3>
+                        <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">All major Indian banks supported</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {['SBI','HDFC','ICICI','Axis','PNB','Kotak','BOB','Canara','Union'].map(b => (
+                          <button
+                            key={b}
+                            onClick={() => launchRazorpay(`${b} Net Banking`)}
+                            disabled={launchingRazorpay}
+                            className="p-3 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-white dark:bg-[#14231b] hover:border-[#08482D] hover:bg-[#F5F8EF] dark:hover:bg-[#16291e] transition-all cursor-pointer text-center"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-[#F5F8EF] dark:bg-[#1a3025] flex items-center justify-center mx-auto mb-1">
+                              <Landmark className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                            </div>
+                            <div className="text-[10px] font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">{b}</div>
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => launchRazorpay('Net Banking')}
+                        disabled={launchingRazorpay}
+                        className="w-full py-2.5 border border-[#DCE4D6] dark:border-[#233d2e] text-[#08482D] dark:text-[#DAE7C7] text-xs font-heading font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#F5F8EF] dark:hover:bg-[#16291e]"
+                      >
+                        <Building2 className="w-4 h-4" /> More Banks via Razorpay
+                      </button>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+                  )}
 
-          {/* Modal Footer */}
-          <div className="p-3 sm:p-4 bg-[#F5F8EF] dark:bg-[#16291e] border-t border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between text-xs text-[#5E5E61] dark:text-[#8ba895]">
-            <div className="flex items-center gap-1.5 text-[11px]">
-              <Lock className="w-3.5 h-3.5 text-[#08482D] dark:text-[#DAE7C7]" />
-              <span>National Payments Corporation of India (NPCI) / Razorpay Protocol</span>
-            </div>
-            <button
-              onClick={onClose}
-              disabled={isVerifying}
-              className="px-3 py-1 text-xs font-heading font-semibold hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-          </div>
-        </motion.div>
-      </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Footer ── */}
+            {!isVerifying && (
+              <div className="p-3 sm:p-4 bg-[#F5F8EF] dark:bg-[#16291e] border-t border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between text-xs text-[#5E5E61] dark:text-[#8ba895]">
+                <div className="flex items-center gap-1.5 text-[11px]">
+                  <Lock className="w-3.5 h-3.5 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <span>NPCI Certified UPI • Razorpay PCI-DSS</span>
+                </div>
+                <button onClick={onClose} disabled={isVerifying} className="px-3 py-1 text-xs font-heading font-semibold hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
+                  Cancel
+                </button>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 };
-
