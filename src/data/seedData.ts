@@ -205,7 +205,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-21',
     pricingType: 'PAID',
     price: 499,
-    payeeVpa: 'kaushalya.skills@icici',
+    payeeVpa: 'organizer@okhdfcbank',
     payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [
@@ -240,7 +240,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-24',
     pricingType: 'PAID',
     price: 299,
-    payeeVpa: 'kaushalya.skills@icici',
+    payeeVpa: 'organizer@okhdfcbank',
     payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [
@@ -374,7 +374,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-11-07',
     pricingType: 'PAID',
     price: 199,
-    payeeVpa: 'kaushalya.skills@icici',
+    payeeVpa: 'organizer@okhdfcbank',
     payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [
@@ -475,7 +475,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     registrationDeadline: '2026-12-11',
     pricingType: 'PAID',
     price: 100,
-    payeeVpa: 'kaushalya.skills@icici',
+    payeeVpa: 'organizer@okhdfcbank',
     payeeName: 'Kaushalya Workshops',
     currency: 'INR',
     learningOutcomes: [

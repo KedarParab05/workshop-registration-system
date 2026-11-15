@@ -135,7 +135,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return {
             ...w,
             bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
-            payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'kaushalya.skills@icici' : undefined),
+            payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
             payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
             razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
           };
@@ -146,7 +146,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const cred = savedCreds[w.id] || {};
       return {
         ...w,
-        payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'kaushalya.skills@icici' : undefined),
+        payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
         payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
         razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
       };
@@ -310,7 +310,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...w,
               bannerImageUrl: normalizeBannerUrl(w.bannerImageUrl),
-              payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'kaushalya.skills@icici' : undefined),
+              payeeVpa: w.payeeVpa || cred.payeeVpa || (w.pricingType === 'PAID' ? 'organizer@okhdfcbank' : undefined),
               payeeName: w.payeeName || cred.payeeName || (w.pricingType === 'PAID' ? 'Kaushalya Workshops' : undefined),
               razorpayKeyId: w.razorpayKeyId || cred.razorpayKeyId || undefined,
             };

@@ -166,7 +166,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
   })();
   const cred = savedCreds[workshop.id] || {};
 
-  const payeeVpa  = workshop.payeeVpa  || cred.payeeVpa  || 'kaushalya.skills@icici';
+  const payeeVpa  = workshop.payeeVpa  || cred.payeeVpa  || 'organizer@okhdfcbank';
   const payeeName = workshop.payeeName || cred.payeeName || 'Kaushalya Workshops';
   const orgRazorpayKey = workshop.razorpayKeyId || cred.razorpayKeyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_To83ERSVYexa5T';
   const price = workshop.price ?? 0;
@@ -254,7 +254,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
 
   // ── QR generation ──
   const generateQr = async (refId: string) => {
-    const uri = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${price}.00&cu=INR&tn=${encodeURIComponent(workshop.title.substring(0, 30))}&tr=${refId}`;
+    const cleanPayee = encodeURIComponent(payeeName.trim());
+    const cleanNote = encodeURIComponent(workshop.title.substring(0, 30).trim());
+    const uri = `upi://pay?pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${price}.00&cu=INR&tn=${cleanNote}&tr=${refId}`;
     try {
       const url = await QRCode.toDataURL(uri, { width: 220, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } });
       setQrCodeUrl(url);
@@ -267,42 +269,58 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
     setTimeout(() => setCopiedUpi(false), 2000);
   };
 
-  const upiDeepLink = (scheme: string) => {
+  const getUpiDeepLink = (scheme: UpiMethod) => {
     const ref = orderData?.paymentAttemptId || orderData?.orderId || 'REF';
-    // Always use standard upi:// base params
-    const params = new URLSearchParams({
-      pa: payeeVpa,
-      pn: payeeName,
-      am: `${price}.00`,
-      cu: 'INR',
-      tn: workshop.title.substring(0, 30),
-      tr: ref,
-    }).toString();
+    const cleanPayee = encodeURIComponent(payeeName.trim());
+    const cleanNote = encodeURIComponent(workshop.title.substring(0, 30).trim());
+    const q = `pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${price}.00&cu=INR&tn=${cleanNote}&tr=${ref}`;
 
-    // App-specific deep link schemes (mobile) with upi:// universal fallback
-    const appSchemes: Record<string, string> = {
-      gpay:     `tez://upi/pay?${params}`,
-      phonepe:  `phonepe://pay?${params}`,
-      paytm:    `paytmmp://pay?${params}`,
-      bhim:     `bhim://pay?${params}`,
-      whatsapp: `upi://pay?${params}&mode=15&purpose=00`, // WhatsApp uses standard UPI scheme
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+    const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    const androidPackages: Record<string, string> = {
+      gpay: 'com.google.android.apps.nbu.paisa.user',
+      phonepe: 'com.phonepe.app',
+      paytm: 'net.one97.paytm',
+      bhim: 'in.org.npci.upiapp',
+      whatsapp: 'com.whatsapp',
     };
-    return appSchemes[scheme] || `upi://pay?${params}`;
+
+    if (isAndroid && androidPackages[scheme]) {
+      return `intent://pay?${q}#Intent;scheme=upi;package=${androidPackages[scheme]};end`;
+    }
+
+    if (isIOS) {
+      if (scheme === 'gpay') return `gpay://upi/pay?${q}`;
+      if (scheme === 'phonepe') return `phonepe://pay?${q}`;
+      if (scheme === 'paytm') return `paytmmp://pay?${q}`;
+      return `upi://pay?${q}`;
+    }
+
+    const appSchemes: Record<string, string> = {
+      gpay:     `tez://upi/pay?${q}`,
+      phonepe:  `phonepe://pay?${q}`,
+      paytm:    `paytmmp://pay?${q}`,
+      bhim:     `bhim://pay?${q}`,
+      whatsapp: `upi://pay?${q}&mode=15&purpose=00`,
+    };
+    return appSchemes[scheme] || `upi://pay?${q}`;
   };
 
-  const openUpiApp = (scheme: string) => {
-    // Use anchor-click approach — doesn't navigate away from page,
-    // OS intercepts custom scheme and opens the installed app
-    const url = upiDeepLink(scheme);
-    const a = document.createElement('a');
-    a.href = url;
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    // Cleanup after small delay
-    setTimeout(() => {
-      if (document.body.contains(a)) document.body.removeChild(a);
-    }, 300);
+  const openUpiApp = (scheme: UpiMethod) => {
+    const url = getUpiDeepLink(scheme);
+    try {
+      window.location.href = url;
+    } catch {
+      const a = document.createElement('a');
+      a.href = url;
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (document.body.contains(a)) document.body.removeChild(a);
+      }, 300);
+    }
   };
 
   const fullCustomUpiId = customUpiId.includes('@') ? customUpiId : `${customUpiId}${customUpiHandle}`;
@@ -603,21 +621,39 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
                       {(['gpay','phonepe','paytm','bhim','whatsapp'] as UpiMethod[]).includes(activeUpiMethod) && (
                         <div className="mt-3 p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-3">
                           <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
-                            Tap below to open <strong>{upiMethods.find(m => m.id === activeUpiMethod)?.label}</strong> and pay ₹{price} instantly.
+                            Tap below to open <strong>{upiMethods.find(m => m.id === activeUpiMethod)?.label}</strong> and pay ₹{price} directly.
                           </p>
-                          {/* Primary deep-link button — rendered as <a> so browser/OS handles scheme */}
-                          <a
-                            href={upiDeepLink(activeUpiMethod)}
-                            onClick={(e) => {
-                              // Let the anchor handle it; prevent default only if deep link might fail
-                              e.stopPropagation();
-                            }}
-                            className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer no-underline"
+
+                          {/* Primary open app button */}
+                          <button
+                            type="button"
+                            onClick={() => openUpiApp(activeUpiMethod)}
+                            className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                           >
                             <ExternalLink className="w-4 h-4 text-[#DAE7C7]" />
                             Open {upiMethods.find(m => m.id === activeUpiMethod)?.label} · ₹{price}
-                          </a>
-                          <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] text-center">After paying in the app, tap the button below</div>
+                          </button>
+
+                          {/* QR Code and Payee info fallback (for desktop or direct scan) */}
+                          <div className="p-3 bg-white dark:bg-[#111e16] rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] flex items-center gap-3">
+                            {qrCodeUrl ? (
+                              <img src={qrCodeUrl} alt="UPI QR" className="w-20 h-20 rounded-lg shrink-0 border border-[#DCE4D6]" />
+                            ) : (
+                              <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 shrink-0">Loading...</div>
+                            )}
+                            <div className="flex-1 space-y-1 text-left min-w-0">
+                              <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] font-semibold uppercase tracking-wider">Or scan with {upiMethods.find(m => m.id === activeUpiMethod)?.label}</div>
+                              <div className="flex items-center gap-1.5">
+                                <code className="text-xs font-mono font-bold text-[#08482D] dark:text-[#DAE7C7] truncate">{payeeVpa}</code>
+                                <button type="button" onClick={copyVpa} className="p-1 hover:bg-black/5 rounded cursor-pointer shrink-0">
+                                  {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-[#5E5E61]" />}
+                                </button>
+                              </div>
+                              <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Payee: {payeeName}</div>
+                            </div>
+                          </div>
+
+                          <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] text-center">After paying in the app, confirm below:</div>
                           <button onClick={() => verify(upiMethods.find(m => m.id === activeUpiMethod)?.label || 'UPI App')} className="w-full py-2 border border-[#08482D] text-[#08482D] dark:text-[#DAE7C7] dark:border-[#DAE7C7]/30 text-xs font-heading font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-[#08482D]/5">
                             <CheckCircle2 className="w-4 h-4" /> Payment Done — Verify & Get Pass
                           </button>

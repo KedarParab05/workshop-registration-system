@@ -197,8 +197,10 @@ public class WorkshopRestController {
      * Toggles between PUBLISHED and DRAFT.
      */
     @PatchMapping("/{id}/toggle-status")
-    public ResponseEntity<?> togglePublishStatus(@PathVariable("id") String id, Principal principal) {
-        User user = getAuthenticatedUser(principal, null);
+    public ResponseEntity<?> togglePublishStatus(@PathVariable("id") String id,
+                                                  @RequestHeader(value = "Authorization", required = false) String authHeader,
+                                                  Principal principal) {
+        User user = getAuthenticatedUser(principal, null, authHeader);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("success", false, "error", "Authentication required."));
@@ -238,9 +240,10 @@ public class WorkshopRestController {
     @PostMapping("/{id}/registrations")
     public ResponseEntity<?> registerParticipant(@PathVariable("id") String workshopId,
             @RequestBody(required = false) Map<String, String> body,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             Principal principal) {
         String fallbackParticipantId = body != null ? body.get("participantId") : null;
-        User participant = getAuthenticatedUser(principal, fallbackParticipantId);
+        User participant = getAuthenticatedUser(principal, fallbackParticipantId, authHeader);
         if (participant == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("success", false, "error", "Please sign in to register for workshops."));
