@@ -181,6 +181,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
 
   // UPI state
   const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [p2pQrUrl, setP2pQrUrl] = useState('');
+  const [usePureP2P, setUsePureP2P] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [customUpiId, setCustomUpiId] = useState('');
   const [customUpiHandle, setCustomUpiHandle] = useState('@okaxis');
@@ -252,15 +254,25 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
     return () => clearInterval(t);
   }, [isOpen, timeLeft]);
 
-  // ── QR generation (Clean P2P standard without merchant tr param to avoid bank risk filters) ──
+  // ── QR generation ──
   const generateQr = async () => {
     const cleanPayee = encodeURIComponent(payeeName.trim());
     const cleanNote = encodeURIComponent(workshop.title.replace(/[^a-zA-Z0-9 ]/g, '').substring(0, 25).trim());
     const formattedPrice = price % 1 === 0 ? price.toString() : price.toFixed(2);
-    const uri = `upi://pay?pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${formattedPrice}&cu=INR&tn=${cleanNote}`;
+    
+    // Dynamic QR with amount
+    const dynamicUri = `upi://pay?pa=${payeeVpa.trim()}&pn=${cleanPayee}&am=${formattedPrice}&cu=INR&tn=${cleanNote}`;
+    
+    // Standard Pure P2P QR (no preset amount/note — banks never block this)
+    const pureP2pUri = `upi://pay?pa=${payeeVpa.trim()}&pn=${cleanPayee}&cu=INR`;
+    
     try {
-      const url = await QRCode.toDataURL(uri, { width: 220, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } });
-      setQrCodeUrl(url);
+      const [dynUrl, p2pUrl] = await Promise.all([
+        QRCode.toDataURL(dynamicUri, { width: 220, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } }),
+        QRCode.toDataURL(pureP2pUri, { width: 220, margin: 1, color: { dark: '#08482D', light: '#FFFFFF' } }),
+      ]);
+      setQrCodeUrl(dynUrl);
+      setP2pQrUrl(p2pUrl);
     } catch {}
   };
 
@@ -593,27 +605,45 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, wor
 
                       {/* ── UPI Sub-panels ── */}
                       {activeUpiMethod === 'qr' && (
-                        <div className="mt-3 p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] flex flex-col sm:flex-row items-center gap-4">
-                          <div className="p-2 bg-white rounded-xl shadow border border-[#DCE4D6] shrink-0">
-                            {qrCodeUrl
-                              ? <img src={qrCodeUrl} alt="UPI QR" className="w-32 h-32 rounded-lg" />
-                              : <div className="w-32 h-32 flex items-center justify-center text-[10px] text-[#5E5E61]">Generating...</div>
-                            }
-                          </div>
-                          <div className="flex-1 space-y-2 w-full">
-                            <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895]">Payee UPI ID</div>
-                            <div className="flex items-center gap-2">
-                              <code className="px-2.5 py-1 bg-white dark:bg-[#111e16] border border-[#DCE4D6] dark:border-[#233d2e] rounded-lg text-xs font-mono font-bold text-[#08482D] dark:text-[#DAE7C7]">{payeeVpa}</code>
-                              <button onClick={copyVpa} className="p-1.5 hover:bg-black/5 rounded-lg cursor-pointer">
-                                {copiedUpi ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-[#5E5E61]" />}
+                        <div className="mt-3 p-4 bg-[#F5F8EF] dark:bg-[#16291e] rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-3">
+                          <div className="flex flex-col sm:flex-row items-center gap-4">
+                            <div className="p-2 bg-white rounded-xl shadow border border-[#DCE4D6] shrink-0 text-center">
+                              {(usePureP2P ? p2pQrUrl : qrCodeUrl) ? (
+                                <img src={usePureP2P ? p2pQrUrl : qrCodeUrl} alt="UPI QR" className="w-32 h-32 rounded-lg mx-auto" />
+                              ) : (
+                                <div className="w-32 h-32 flex items-center justify-center text-[10px] text-[#5E5E61]">Generating...</div>
+                              )}
+                              <span className="text-[9px] text-[#5E5E61] font-mono mt-1 block">
+                                {usePureP2P ? 'Standard P2P QR' : `Preset: ₹${price}`}
+                              </span>
+                            </div>
+                            <div className="flex-1 space-y-2 w-full">
+                              <div className="text-[11px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895]">Payee UPI ID</div>
+                              <div className="flex items-center gap-2">
+                                <code className="px-2.5 py-1 bg-white dark:bg-[#111e16] border border-[#DCE4D6] dark:border-[#233d2e] rounded-lg text-xs font-mono font-bold text-[#08482D] dark:text-[#DAE7C7]">{payeeVpa}</code>
+                                <button onClick={copyVpa} className="p-1.5 hover:bg-black/5 rounded-lg cursor-pointer">
+                                  {copiedUpi ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-[#5E5E61]" />}
+                                </button>
+                              </div>
+                              <div className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] space-y-0.5">
+                                <div>• Payee: <strong>{payeeName}</strong></div>
+                                <div>• Amount to pay: <strong>₹{price}</strong></div>
+                              </div>
+                              <button onClick={() => verify('UPI QR Scan')} className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                <CheckCircle2 className="w-4 h-4 text-[#DAE7C7]" /> I've Paid ₹{price}
                               </button>
                             </div>
-                            <div className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] space-y-0.5">
-                              <div>• Payee: <strong>{payeeName}</strong></div>
-                              <div>• Amount: <strong>₹{price}</strong></div>
-                            </div>
-                            <button onClick={() => verify('UPI QR Scan')} className="w-full py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] text-xs font-heading font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
-                              <CheckCircle2 className="w-4 h-4 text-[#DAE7C7]" /> I've Paid ₹{price}
+                          </div>
+
+                          {/* Bank issue helper toggle */}
+                          <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+                            <span>Bank blocking fixed amount?</span>
+                            <button
+                              type="button"
+                              onClick={() => setUsePureP2P(!usePureP2P)}
+                              className="font-bold underline text-[#08482D] dark:text-[#DAE7C7] cursor-pointer"
+                            >
+                              {usePureP2P ? 'Switch to Preset ₹' + price : 'Switch to Standard P2P QR (enter ₹' + price + ' manually)'}
                             </button>
                           </div>
                         </div>
