@@ -60,6 +60,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Keep track of active order ID for background polling
   const activeOrderIdRef = useRef<string | null>(null);
+  const orderPromiseRef = useRef<Promise<any> | null>(null);
 
   // ── Reservation Timer ──
   useEffect(() => {
@@ -82,57 +83,66 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // ── Create Razorpay Order on Mount ──
-  const initOrder = async () => {
+  // ── Create Razorpay Order in Background ──
+  const initOrder = async (): Promise<any> => {
     setLoadingOrder(true);
     setOrderError(null);
     setPaymentError(null);
 
-    try {
-      let res = await apiFetch('/api/payments/create-order', {
-        method: 'POST',
-        body: JSON.stringify({
-          workshopId: workshop.id,
-          notes: notes?.trim() || '',
-          participantId: currentUser?.id,
-        }),
-      });
+    const promise = (async () => {
+      try {
+        let res = await apiFetch('/api/payments/create-order', {
+          method: 'POST',
+          body: JSON.stringify({
+            workshopId: workshop.id,
+            notes: notes?.trim() || '',
+            participantId: currentUser?.id,
+          }),
+        });
 
-      if (res.status === 401 && getToken()) {
-        const refreshRes = await apiFetch('/api/auth/refresh-token', { method: 'POST' });
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.token) {
-            saveToken(refreshed.token);
-            res = await apiFetch('/api/payments/create-order', {
-              method: 'POST',
-              body: JSON.stringify({
-                workshopId: workshop.id,
-                notes: notes?.trim() || '',
-                participantId: currentUser?.id,
-              }),
-            });
+        if (res.status === 401 && getToken()) {
+          const refreshRes = await apiFetch('/api/auth/refresh-token', { method: 'POST' });
+          if (refreshRes.ok) {
+            const refreshed = await refreshRes.json();
+            if (refreshed.token) {
+              saveToken(refreshed.token);
+              res = await apiFetch('/api/payments/create-order', {
+                method: 'POST',
+                body: JSON.stringify({
+                  workshopId: workshop.id,
+                  notes: notes?.trim() || '',
+                  participantId: currentUser?.id,
+                }),
+              });
+            }
           }
         }
-      }
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setOrderError(data.error || 'Failed to initialize payment gateway.');
-        return;
-      }
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setOrderError(data.error || 'Failed to initialize payment gateway.');
+          return null;
+        }
 
-      setOrderData(data);
-      activeOrderIdRef.current = data.orderId;
-    } catch (err: any) {
-      setOrderError(err.message || 'Network error connecting to payment gateway.');
-    } finally {
-      setLoadingOrder(false);
-    }
+        setOrderData(data);
+        activeOrderIdRef.current = data.orderId;
+        return data;
+      } catch (err: any) {
+        setOrderError(err.message || 'Network error connecting to payment gateway.');
+        return null;
+      } finally {
+        setLoadingOrder(false);
+      }
+    })();
+
+    orderPromiseRef.current = promise;
+    return promise;
   };
 
   useEffect(() => {
     if (isOpen && !receipt) {
+      // Pre-load Razorpay checkout script in parallel
+      loadRazorpayScript().catch(() => {});
       initOrder();
     }
   }, [isOpen, workshop.id]);
@@ -164,10 +174,24 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // ── Launch Official Razorpay Checkout ──
   const handlePayNow = async () => {
-    if (!orderData || launchingRazorpay || isVerifying) return;
+    if (launchingRazorpay || isVerifying) return;
 
     setLaunchingRazorpay(true);
     setPaymentError(null);
+
+    // If order data is still initializing in the background, wait for it smoothly
+    let activeOrder = orderData;
+    if (!activeOrder && orderPromiseRef.current) {
+      activeOrder = await orderPromiseRef.current;
+    }
+    if (!activeOrder) {
+      activeOrder = await initOrder();
+    }
+
+    if (!activeOrder || !activeOrder.orderId) {
+      setLaunchingRazorpay(false);
+      return;
+    }
 
     // 1. Ensure official Razorpay script is loaded
     const loaded = await loadRazorpayScript();
@@ -182,21 +206,21 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     // 2. Build official Razorpay Checkout options
     const options = {
-      key: orderData.keyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-      amount: orderData.amount,
-      currency: orderData.currency || 'INR',
+      key: activeOrder.keyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+      amount: activeOrder.amount,
+      currency: activeOrder.currency || 'INR',
       name: 'Kaushalya Workshops',
       description: `${workshop.title} Registration`,
-      order_id: orderData.orderId,
+      order_id: activeOrder.orderId,
       prefill: {
-        name: currentUser?.fullName || orderData.participantName || '',
-        email: currentUser?.email || orderData.participantEmail || '',
+        name: currentUser?.fullName || activeOrder.participantName || '',
+        email: currentUser?.email || activeOrder.participantEmail || '',
         contact: currentUser?.phoneNumber || '',
       },
       notes: {
         workshopId: workshop.id,
-        paymentAttemptId: orderData.paymentAttemptId,
-        registrationId: orderData.registrationId,
+        paymentAttemptId: activeOrder.paymentAttemptId,
+        registrationId: activeOrder.registrationId,
       },
       theme: {
         color: '#08482D', // Kaushalya primary forest green
@@ -214,7 +238,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           let verifyRes = await apiFetch('/api/payments/verify', {
             method: 'POST',
             body: JSON.stringify({
-              paymentAttemptId: orderData.paymentAttemptId,
+              paymentAttemptId: activeOrder.paymentAttemptId,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
@@ -230,7 +254,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 verifyRes = await apiFetch('/api/payments/verify', {
                   method: 'POST',
                   body: JSON.stringify({
-                    paymentAttemptId: orderData.paymentAttemptId,
+                    paymentAttemptId: activeOrder.paymentAttemptId,
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_signature: response.razorpay_signature,
@@ -479,7 +503,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 <div className="pt-2 space-y-2">
                   <button
                     onClick={orderError ? initOrder : handlePayNow}
-                    disabled={loadingOrder || launchingRazorpay || isVerifying}
+                    disabled={launchingRazorpay || isVerifying}
                     className="w-full py-3.5 bg-[#08482D] hover:bg-[#0c5c3b] disabled:bg-[#08482D]/60 text-[#F5F8EF] font-heading font-bold text-sm rounded-2xl shadow-lg shadow-[#08482D]/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {loadingOrder ? (
