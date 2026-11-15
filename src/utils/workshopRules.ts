@@ -185,6 +185,7 @@ export function validateWorkshopInput(
  */
 export function canEditWorkshop(user: User | null, workshop: Workshop): boolean {
   if (!user) return false;
-  if (user.role === 'ORGANIZER' && workshop.organizerId === user.id) return true;
+  if (user.role === 'SUPER_ADMIN') return true;
+  if (user.role === 'ORGANIZER') return true;
   return false;
 }
