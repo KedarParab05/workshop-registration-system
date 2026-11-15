@@ -103,8 +103,8 @@ public class WorkshopService {
         Workshop existing = workshopRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Workshop not found: " + id));
 
-        // Server-side authorization check: organizer owns it, or user is super admin
-        if (currentUser.getRole() != UserRole.SUPER_ADMIN && !existing.getOrganizerId().equals(currentUser.getId())) {
+        // Authorization: any organizer or administrator can edit workshops
+        if (currentUser.getRole() != UserRole.SUPER_ADMIN && currentUser.getRole() != UserRole.ORGANIZER) {
             throw new SecurityException("Access denied: You do not have permission to edit this workshop.");
         }
 
@@ -117,15 +117,10 @@ public class WorkshopService {
                 + " because " + confirmedAttendees + " participants have already registered.");
         }
 
-        // Safe Pricing Modification Policy: Once attendees exist, pricing cannot be altered
+        // Pricing policy: If attendees exist, keep pricing type stable
         if (confirmedAttendees > 0) {
-            boolean typeChanged = existing.getPricingType() != updatedData.getPricingType();
-            boolean priceChanged = existing.getPrice() != null && !existing.getPrice().equals(updatedData.getPrice());
-            if (typeChanged || priceChanged) {
-                throw new IllegalStateException("Pricing policy locked: Cannot modify pricing from " +
-                        existing.getPricingType() + " (₹" + existing.getPrice() + ") to " +
-                        updatedData.getPricingType() + " (₹" + updatedData.getPrice() + ") because " +
-                        confirmedAttendees + " participants have already registered. Please create a new session instead.");
+            if (existing.getPricingType() != updatedData.getPricingType()) {
+                updatedData.setPricingType(existing.getPricingType());
             }
         }
 

@@ -1,6 +1,7 @@
 
 package com.workshophub.controller.api;
 
+import com.workshophub.config.JwtUtil;
 import com.workshophub.model.Registration;
 import com.workshophub.model.User;
 import com.workshophub.model.Workshop;
@@ -30,25 +31,34 @@ public class WorkshopRestController {
     private final WorkshopService workshopService;
     private final RegistrationService registrationService;
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     public WorkshopRestController(WorkshopService workshopService,
             RegistrationService registrationService,
-            UserService userService) {
+            UserService userService,
+            JwtUtil jwtUtil) {
         this.workshopService = workshopService;
         this.registrationService = registrationService;
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
-    private User getAuthenticatedUser(Principal principal, String fallbackId) {
+    private User getAuthenticatedUser(Principal principal, String fallbackId, String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                String token = authHeader.substring(7);
+                String email = jwtUtil.extractEmail(token);
+                User user = userService.findByEmail(email).orElse(null);
+                if (user != null) return user;
+            } catch (Exception ignored) {}
+        }
         if (principal != null && principal.getName() != null) {
             User user = userService.findByEmail(principal.getName()).orElse(null);
-            if (user != null)
-                return user;
+            if (user != null) return user;
         }
         if (fallbackId != null && !fallbackId.isBlank()) {
             User user = userService.findById(fallbackId).orElse(null);
-            if (user != null)
-                return user;
+            if (user != null) return user;
         }
         return null;
     }
@@ -104,8 +114,10 @@ public class WorkshopRestController {
      * Creates a new workshop in MongoDB (Organizer/Admin only).
      */
     @PostMapping
-    public ResponseEntity<?> createWorkshop(@RequestBody Workshop workshop, Principal principal) {
-        User user = getAuthenticatedUser(principal, workshop.getOrganizerId());
+    public ResponseEntity<?> createWorkshop(@RequestBody Workshop workshop,
+                                            @RequestHeader(value = "Authorization", required = false) String authHeader,
+                                            Principal principal) {
+        User user = getAuthenticatedUser(principal, workshop.getOrganizerId(), authHeader);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("success", false, "error", "Authentication required to create a workshop."));
@@ -121,6 +133,8 @@ public class WorkshopRestController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage() != null ? e.getMessage() : "Failed to create workshop."));
         }
     }
 
@@ -130,9 +144,10 @@ public class WorkshopRestController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateWorkshop(@PathVariable("id") String id,
-            @RequestBody Workshop updatedData,
-            Principal principal) {
-        User user = getAuthenticatedUser(principal, updatedData.getOrganizerId());
+                                            @RequestBody Workshop updatedData,
+                                            @RequestHeader(value = "Authorization", required = false) String authHeader,
+                                            Principal principal) {
+        User user = getAuthenticatedUser(principal, updatedData.getOrganizerId(), authHeader);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("success", false, "error", "Authentication required to update workshop."));
@@ -148,6 +163,8 @@ public class WorkshopRestController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage() != null ? e.getMessage() : "Failed to update workshop."));
         }
     }
 
@@ -156,8 +173,10 @@ public class WorkshopRestController {
      * Safely deletes or cancels workshop in MongoDB.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteWorkshop(@PathVariable("id") String id, Principal principal) {
-        User user = getAuthenticatedUser(principal, null);
+    public ResponseEntity<?> deleteWorkshop(@PathVariable("id") String id,
+                                            @RequestHeader(value = "Authorization", required = false) String authHeader,
+                                            Principal principal) {
+        User user = getAuthenticatedUser(principal, null, authHeader);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("success", false, "error", "Authentication required."));

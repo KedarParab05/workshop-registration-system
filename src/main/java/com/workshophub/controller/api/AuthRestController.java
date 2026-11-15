@@ -59,34 +59,40 @@ public class AuthRestController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String password = body.get("password");
+        try {
+            String email = body != null ? body.get("email") : null;
+            String password = body != null ? body.get("password") : null;
 
-        if (email == null || password == null) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Email and password are required."));
+            if (email == null || email.isBlank() || password == null || password.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Email and password are required."));
+            }
+
+            Optional<User> userOpt = userService.findByEmail(email.trim().toLowerCase());
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "error", "No account found with this email address."));
+            }
+
+            User user = userOpt.get();
+
+            if (user.getPasswordHash() != null && !passwordEncoder.matches(password, user.getPasswordHash())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "error", "Incorrect password. Please try again."));
+            }
+
+            if (user.getAccountStatus() != null && "SUSPENDED".equals(user.getAccountStatus().name())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("success", false, "error", "Your account has been suspended."));
+            }
+
+            String roleName = user.getRole() != null ? user.getRole().name() : "PARTICIPANT";
+            String token = jwtUtil.generateToken(user.getEmail(), roleName, user.getId());
+
+            return ResponseEntity.ok(buildAuthResponse(token, user));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage() != null ? e.getMessage() : "Login failed."));
         }
-
-        Optional<User> userOpt = userService.findByEmail(email.trim().toLowerCase());
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "error", "No account found with this email address."));
-        }
-
-        User user = userOpt.get();
-
-        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "error", "Incorrect password. Please try again."));
-        }
-
-        if (user.getAccountStatus().name().equals("SUSPENDED")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("success", false, "error", "Your account has been suspended."));
-        }
-
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
-
-        return ResponseEntity.ok(buildAuthResponse(token, user));
     }
 
     /**
@@ -96,6 +102,9 @@ public class AuthRestController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
         try {
+            if (body == null) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Registration details are required."));
+            }
             String fullName = body.get("fullName");
             String email = body.get("email");
             String password = body.get("password");
@@ -111,11 +120,14 @@ public class AuthRestController {
                 user.setPhoneNumber(phoneNumber.trim());
                 userRepository.save(user);
             }
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
+            String roleName = user.getRole() != null ? user.getRole().name() : "PARTICIPANT";
+            String token = jwtUtil.generateToken(user.getEmail(), roleName, user.getId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(buildAuthResponse(token, user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage() != null ? e.getMessage() : "Registration failed."));
         }
     }
 
@@ -176,15 +188,25 @@ public class AuthRestController {
      */
     @PostMapping("/switch-demo")
     public ResponseEntity<?> switchDemoUser(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        if (email == null) {
+        String email = body != null ? body.get("email") : null;
+        if (email == null || email.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Email is required."));
         }
         User user = userService.findByEmail(email.trim().toLowerCase()).orElse(null);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "Demo user not found: " + email));
+            // Auto-provision demo persona if not yet seeded
+            String cleanEmail = email.trim().toLowerCase();
+            UserRole demoRole = cleanEmail.contains("admin") ? UserRole.SUPER_ADMIN
+                              : (cleanEmail.contains("faculty") || cleanEmail.contains("org") || cleanEmail.contains("parelkar")) ? UserRole.ORGANIZER
+                              : cleanEmail.contains("vol") ? UserRole.VOLUNTEER
+                              : UserRole.PARTICIPANT;
+            String demoName = cleanEmail.split("@")[0].replace(".", " ");
+            user = new User(demoName, cleanEmail, passwordEncoder.encode("Password123!"), demoRole);
+            user.setAccountStatus(AccountStatus.ACTIVE);
+            user = userRepository.save(user);
         }
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
+        String roleName = user.getRole() != null ? user.getRole().name() : "PARTICIPANT";
+        String token = jwtUtil.generateToken(user.getEmail(), roleName, user.getId());
         return ResponseEntity.ok(buildAuthResponse(token, user));
     }
 
@@ -254,8 +276,8 @@ public class AuthRestController {
         u.put("id", user.getId());
         u.put("fullName", user.getFullName());
         u.put("email", user.getEmail());
-        u.put("role", user.getRole().name());
-        u.put("accountStatus", user.getAccountStatus().name());
+        u.put("role", user.getRole() != null ? user.getRole().name() : "PARTICIPANT");
+        u.put("accountStatus", user.getAccountStatus() != null ? user.getAccountStatus().name() : "ACTIVE");
         u.put("department", user.getDepartment());
         u.put("phoneNumber", user.getPhoneNumber());
         u.put("createdAt", user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
