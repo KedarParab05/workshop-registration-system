@@ -585,7 +585,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('wh_user', JSON.stringify(data.user));
         localStorage.setItem('wh_current_user_email', data.user.email);
         localStorage.setItem('wh_role_selected', role);
-        showAlert(`Account created successfully as ${role.toLowerCase()} in MongoDB!`, 'success');
+        showAlert(`Account created successfully as ${role.toLowerCase()}!`, 'success');
         if (role === 'ORGANIZER') navigateTo('organizer-dashboard');
         else if (role === 'VOLUNTEER') navigateTo('volunteer-portal');
         else navigateTo('workshops');
@@ -624,7 +624,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const data = await res.json();
       if (res.ok && data.success) {
         setCurrentUser(data.user);
-        showAlert('Profile updated successfully in MongoDB.', 'success');
+        showAlert('Profile updated successfully.', 'success');
         await refreshData();
       } else {
         showAlert(data.error || 'Failed to update profile.', 'error');
@@ -1148,7 +1148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       const resData = await res.json();
       if (res.ok && resData.success) {
-        showAlert(`Workshop status changed to ${resData.workshop.status} in MongoDB.`, 'success');
+        showAlert(`Workshop status updated to ${resData.workshop.status}.`, 'success');
         await refreshData();
       } else {
         showAlert(resData.error || 'Failed to change status.', 'error');
@@ -1366,7 +1366,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const resData = await res.json();
       if (res.ok && resData.success) {
-        showAlert(`Registration confirmed for "${workshop.title}"! Saved to MongoDB.`, 'success');
+        showAlert(`Registration confirmed for "${workshop.title}"!`, 'success');
         await refreshData();
         return { success: true, message: 'Registration confirmed!', registration: resData.registration };
       } else {
@@ -1424,7 +1424,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       const resData = await res.json();
       if (res.ok && resData.success) {
-        showAlert('Registration cancelled successfully. Seat has been restored in MongoDB.', 'info');
+        showAlert('Registration cancelled successfully. Your seat has been released.', 'info');
         await refreshData();
         return { success: true, message: 'Registration cancelled.' };
       } else {
