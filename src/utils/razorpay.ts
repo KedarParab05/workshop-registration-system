@@ -21,7 +21,7 @@ export function loadRazorpayScript(): Promise<boolean> {
 
 export interface RazorpayOptions {
   key: string;
-  amount: number; // in paise
+  amount: number; // he paisa madhe karnar ig - covert ?
   currency: string;
   name: string;
   description: string;
@@ -39,7 +39,7 @@ export interface RazorpayOptions {
   };
   notes?: Record<string, string>;
   theme?: {
-    color?: string;
+    color?: string; 
   };
   modal?: {
     ondismiss?: () => void;
