@@ -232,8 +232,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAuth, onOpenRoleSelector }
               </div>
               <div className="flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5 text-[#DAE7C7] shrink-0" />
-                <a href="tel:9800000003" className="hover:text-white dark:hover:text-[#DAE7C7] transition-colors">
-                  +91 86577 90811
+                <a href="tel:+912224043928" className="hover:text-white dark:hover:text-[#DAE7C7] transition-colors">
+                  +91 (022) 2404 3928
                 </a>
               </div>
               <div className="flex items-center gap-1.5">

@@ -46,19 +46,17 @@ public class RazorpayService {
 
     @PostConstruct
     public void init() {
-        if (keyId == null || keyId.isBlank() || "rzp_test_placeholder".equals(keyId)) {
-            keyId = "rzp_test_placeholder";
+        if (keyId != null) keyId = keyId.trim();
+        if (keySecret != null) keySecret = keySecret.trim();
+        if (webhookSecret != null) webhookSecret = webhookSecret.trim();
+        if (mode != null) mode = mode.trim();
+
+        if (isConfigured()) {
+            String maskedKey = keyId.length() > 8 ? keyId.substring(0, 8) + "..." : keyId;
+            System.out.println("[RazorpayService] Initialized with Key: " + maskedKey + " | Mode: " + mode);
+        } else {
+            System.out.println("[RazorpayService] Notice: Razorpay credentials not configured via environment variables.");
         }
-        if (keySecret == null || keySecret.isBlank() || "razorpay_secret_placeholder".equals(keySecret)) {
-            keySecret = "[REDACTED_SECRET]";
-        }
-        if (webhookSecret == null || webhookSecret.isBlank() || "kaushalya_whsec_test2026".equals(webhookSecret)) {
-            webhookSecret = "[REDACTED_WEBHOOK_SECRET]";
-        }
-        if (mode == null || mode.isBlank() || "test".equalsIgnoreCase(mode)) {
-            mode = "live";
-        }
-        System.out.println("[RazorpayService] Initialized with Key: " + keyId + " | Mode: " + mode);
     }
 
     public String getKeyId() {

@@ -193,13 +193,17 @@ public class AuthRestController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Email is required."));
         }
         User user = userService.findByEmail(email.trim().toLowerCase()).orElse(null);
+        if (user != null && user.getRole() == UserRole.SUPER_ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("success", false, "error", "Administrative accounts must sign in using verified credentials."));
+        }
         if (user == null) {
-            // Auto-provision demo persona if not yet seeded
+            // Auto-provision demo persona if not yet seeded (never auto-provision super admin)
             String cleanEmail = email.trim().toLowerCase();
-            UserRole demoRole = cleanEmail.contains("admin") ? UserRole.SUPER_ADMIN
-                              : (cleanEmail.contains("faculty") || cleanEmail.contains("org") || cleanEmail.contains("parelkar")) ? UserRole.ORGANIZER
-                              : cleanEmail.contains("vol") ? UserRole.VOLUNTEER
-                              : UserRole.PARTICIPANT;
+            UserRole demoRole = (cleanEmail.contains("faculty") || cleanEmail.contains("org") || cleanEmail.contains("organizer"))
+                ? UserRole.ORGANIZER
+                : cleanEmail.contains("vol") ? UserRole.VOLUNTEER
+                : UserRole.PARTICIPANT;
             String demoName = cleanEmail.split("@")[0].replace(".", " ");
             user = new User(demoName, cleanEmail, passwordEncoder.encode("Password123!"), demoRole);
             user.setAccountStatus(AccountStatus.ACTIVE);

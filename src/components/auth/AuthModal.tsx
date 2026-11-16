@@ -686,7 +686,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   Aary Nikam
                 </div>
                 <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
-                  GNIMS MCA (9800000001)
+                  GNIMS MCA (Verified Student)
                 </div>
               </button>
 
@@ -773,7 +773,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000003)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
                   </button>
 
                   <button
@@ -783,7 +783,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Kedar Parab</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000002)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
                   </button>
 
                   <button
@@ -793,7 +793,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Vaibhavi Parmar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000004)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
                   </button>
 
                   <button
@@ -803,7 +803,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Sonal Sharma</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (9800000005)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
                   </button>
 
                   <button
@@ -813,7 +813,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
                   >
                     <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Host (GNIMS • 9800000003)</div>
+                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Host Organizer (Studio Lead)</div>
                   </button>
 
                   <button

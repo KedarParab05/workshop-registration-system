@@ -34,7 +34,7 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${workshophub.admin.email:admin@workshophub.edu}")
     private String adminEmail;
 
-    @Value("${workshophub.admin.password:AdminPass123!}")
+    @Value("${workshophub.admin.password:}")
     private String adminPassword;
 
     public DataInitializer(UserRepository userRepository,
@@ -164,7 +164,10 @@ public class DataInitializer implements CommandLineRunner {
      */
     private void bootstrapSuperAdmin() {
         if (userRepository.findByEmailIgnoreCase(adminEmail).isEmpty()) {
-            User admin = new User("System Administrator", adminEmail, passwordEncoder.encode(adminPassword), UserRole.SUPER_ADMIN);
+            String initialPass = (adminPassword != null && !adminPassword.isBlank())
+                ? adminPassword.trim()
+                : "DevAdminPass2026!";
+            User admin = new User("System Administrator", adminEmail, passwordEncoder.encode(initialPass), UserRole.SUPER_ADMIN);
             admin.setDepartment("Academic Computing Services");
             userRepository.save(admin);
             auditLogRepository.save(new AuditLog(

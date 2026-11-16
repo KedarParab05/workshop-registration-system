@@ -265,10 +265,10 @@ export const ContactPage: React.FC = () => {
                     Direct Contact / Helpline
                   </strong>
                   <span className="text-[#5E5E61] dark:text-slate-300 flex items-center gap-1.5">
-                    <a href="tel:9800000003" className="font-semibold text-[#08482D] dark:text-[#DAE7C7] hover:underline">
-                      +91 86577 90811
+                    <a href="tel:+912224043928" className="font-semibold text-[#08482D] dark:text-[#DAE7C7] hover:underline">
+                      +91 (022) 2404 3928
                     </a>
-                    <span>(Omkar Parelkar)</span>
+                    <span>(Academic Desk)</span>
                   </span>
                 </div>
               </div>

@@ -41,6 +41,16 @@ dist-ssr/
 *.csv
 *.log
 bin/
+*.secret
+*.pem
+*.key
+*.p12
+*.jks
+*.pfx
+*.keystore
+application-local.properties
+application-dev.properties
+application-prod.properties
 
 ### OS Files ###
 .vs/

@@ -16,13 +16,16 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:workshophub-super-secret-key-must-be-at-least-256-bits-long-for-hs256}")
+    @Value("${jwt.secret:}")
     private String secret;
 
     private static final long EXPIRY_MS = 7 * 24 * 60 * 60 * 1000L; // 7 days
 
     private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        String effectiveSecret = (secret != null && secret.trim().length() >= 32)
+                ? secret.trim()
+                : "kaushalya-dev-local-only-jwt-secret-key-minimum-32-chars-ok!";
+        return Keys.hmacShaKeyFor(effectiveSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateToken(String email, String role, String userId) {

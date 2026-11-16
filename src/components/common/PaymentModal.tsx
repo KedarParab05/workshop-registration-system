@@ -206,7 +206,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     // 2. Build official Razorpay Checkout options
     const options = {
-      key: activeOrder.keyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+      key: activeOrder.keyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || '',
       amount: activeOrder.amount,
       currency: activeOrder.currency || 'INR',
       name: 'Kaushalya Workshops',
