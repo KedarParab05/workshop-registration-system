@@ -56,8 +56,8 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
     registrationDeadline: '',
     learningOutcomes: '',
     status: 'PUBLISHED',
-    pricingType: 'FREE',
-    price: 0,
+    pricingType: 'PAID',
+    price: 199,
     currency: 'INR',
     razorpayKeyId: '',
   });
@@ -124,8 +124,8 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
         registrationDeadline: dateStr,
         learningOutcomes: 'Understand core system concepts\nPractical coding exercises\nReview best practices',
         status: 'PUBLISHED',
-        pricingType: 'FREE',
-        price: 0,
+        pricingType: 'PAID',
+        price: 199,
         currency: 'INR',
         razorpayKeyId: '',
       });
@@ -565,41 +565,16 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
 
             {/* ━━━━━ Registration & Pricing Configuration ━━━━━ */}
             <div className="space-y-4 p-4 rounded-2xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF]/60 dark:bg-[#18281f]/40">
-              <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
-                <span className="font-heading font-semibold text-[#101410] dark:text-white text-xs">
-                  Registration & Pricing Model
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <span className="font-heading font-semibold text-[#101410] dark:text-white text-xs">
+                    Registration Fee & Razorpay Gateway
+                  </span>
+                </div>
+                <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/50 dark:bg-[#08482D]/40 px-2.5 py-0.5 rounded-full">
+                  Razorpay Enabled
                 </span>
-              </div>
-
-              {/* Pricing Type Toggle */}
-              <div className="flex items-center gap-2 p-1 bg-white dark:bg-[#14231b] rounded-xl border border-[#DCE4D6] dark:border-[#22392c] w-fit">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, pricingType: 'FREE', price: 0 })}
-                  className={`px-4 py-2 rounded-lg font-heading font-semibold text-xs transition-all flex items-center gap-1.5 ${
-                    formData.pricingType === 'FREE'
-                      ? 'bg-[#08482D] text-white shadow-sm'
-                      : 'text-[#5E5E61] dark:text-slate-400 hover:text-[#101410] dark:hover:text-white'
-                  }`}
-                  disabled={Boolean(workshopToEdit && registrations.some(r => r.workshopId === workshopToEdit.id && (r.status === 'CONFIRMED' || r.status === 'ATTENDED')))}
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Free Workshop</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, pricingType: 'PAID', price: formData.price > 0 ? formData.price : 99 })}
-                  className={`px-4 py-2 rounded-lg font-heading font-semibold text-xs transition-all flex items-center gap-1.5 ${
-                    formData.pricingType === 'PAID'
-                      ? 'bg-[#08482D] text-white shadow-sm'
-                      : 'text-[#5E5E61] dark:text-slate-400 hover:text-[#101410] dark:hover:text-white'
-                  }`}
-                  disabled={Boolean(workshopToEdit && registrations.some(r => r.workshopId === workshopToEdit.id && (r.status === 'CONFIRMED' || r.status === 'ATTENDED')))}
-                >
-                  <CreditCard className="w-3.5 h-3.5" />
-                  <span>Paid Workshop</span>
-                </button>
               </div>
 
               {/* Pricing Lock Warning */}
@@ -610,64 +585,57 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                 </div>
               )}
 
-              {formData.pricingType === 'FREE' ? (
-                <div className="flex items-center gap-2 text-xs text-[#08482D] dark:text-[#DAE7C7] p-3 bg-[#E8F0DF] dark:bg-[#1a3325] rounded-xl">
-                  <Info className="w-3.5 h-3.5 shrink-0" />
-                  <span>Students will register directly without any payment flow. 100% free academic session.</span>
+              <div className="space-y-3">
+                {/* Price Input */}
+                <div>
+                  <label className="block font-heading font-semibold text-[#101410] dark:text-white mb-1 text-xs">
+                    Workshop Registration Fee (₹ INR) *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#08482D] dark:text-[#DAE7C7] font-bold text-sm">₹</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100000"
+                      step="1"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, pricingType: 'PAID', price: parseFloat(e.target.value) || 0 })}
+                      placeholder="199"
+                      className={`w-full pl-8 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#14231b] text-[#101410] dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#08482D] ${
+                        errors.price ? 'border-rose-500' : 'border-[#DCE4D6] dark:border-[#22392c]'
+                      }`}
+                    />
+                  </div>
+                  {errors.price && <p className="text-rose-500 text-[11px] mt-1">{errors.price}</p>}
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {/* Price Input */}
+
+                {/* Razorpay Gateway Notice */}
+                <div className="flex items-start gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-[#DAE7C7] dark:border-[#22392c] rounded-xl text-xs text-[#08482D] dark:text-[#DAE7C7]">
+                  <CreditCard className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                   <div>
-                    <label className="block font-heading font-semibold text-[#101410] dark:text-white mb-1 text-xs">
-                      Workshop Fee (₹ INR) *
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#08482D] dark:text-[#DAE7C7] font-bold text-sm">₹</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max="100000"
-                        step="1"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                        placeholder="499"
-                        className={`w-full pl-8 pr-3.5 py-2.5 rounded-xl border bg-white dark:bg-[#14231b] text-[#101410] dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#08482D] ${
-                          errors.price ? 'border-rose-500' : 'border-[#DCE4D6] dark:border-[#22392c]'
-                        }`}
-                      />
-                    </div>
-                    {errors.price && <p className="text-rose-500 text-[11px] mt-1">{errors.price}</p>}
-                  </div>
-
-                  {/* Razorpay Test Mode Notice */}
-                  <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-xl text-xs text-blue-800 dark:text-blue-300">
-                    <CreditCard className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                    <div>
-                      <strong>Razorpay Secure Checkout</strong>: Participants will complete checkout through Razorpay. Registration is confirmed only after verified payment.
-                    </div>
-                  </div>
-
-                  {/* Quick Price Presets */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-medium">Quick set:</span>
-                    {[10, 50, 100, 199, 299, 499].map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, price: preset })}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border transition-colors ${
-                          formData.price === preset
-                            ? 'bg-[#08482D] text-white border-[#08482D]'
-                            : 'bg-white dark:bg-[#14231b] text-[#08482D] dark:text-[#DAE7C7] border-[#DCE4D6] dark:border-[#22392c] hover:border-[#08482D]'
-                        }`}
-                      >
-                        ₹{preset}
-                      </button>
-                    ))}
+                    <strong>Official Razorpay Gateway Active</strong>: All participant registrations for this workshop will be securely processed and verified via Razorpay Checkout.
                   </div>
                 </div>
-              )}
+
+                {/* Quick Price Presets */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-medium">Quick set:</span>
+                  {[10, 50, 100, 199, 299, 499].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, pricingType: 'PAID', price: preset })}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border transition-colors ${
+                        formData.price === preset
+                          ? 'bg-[#08482D] text-white border-[#08482D]'
+                          : 'bg-white dark:bg-[#14231b] text-[#08482D] dark:text-[#DAE7C7] border-[#DCE4D6] dark:border-[#22392c] hover:border-[#08482D]'
+                      }`}
+                    >
+                      ₹{preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* ── Payment Gateway Information (Paid Workshops Only) ── */}

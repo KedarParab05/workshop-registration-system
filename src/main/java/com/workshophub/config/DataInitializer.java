@@ -55,8 +55,30 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         try {
             bootstrapSuperAdmin();
+            ensureAllWorkshopsUseRazorpay();
         } catch (Exception e) {
             System.out.println("[DataInitializer] Message: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Enforces that ALL workshops (present and future) in MongoDB are configured as PAID with Razorpay.
+     */
+    private void ensureAllWorkshopsUseRazorpay() {
+        for (Workshop ws : workshopRepository.findAll()) {
+            boolean modified = false;
+            if (ws.getPricingType() != com.workshophub.model.enums.PricingType.PAID) {
+                ws.setPricingType(com.workshophub.model.enums.PricingType.PAID);
+                modified = true;
+            }
+            if (ws.getPrice() == null || ws.getPrice() <= 0) {
+                ws.setPrice(199.0);
+                modified = true;
+            }
+            if (modified) {
+                workshopRepository.save(ws);
+                System.out.println("[DataInitializer] Migrated workshop to PAID with Razorpay: " + ws.getTitle() + " (₹" + ws.getPrice() + ")");
+            }
         }
     }
 

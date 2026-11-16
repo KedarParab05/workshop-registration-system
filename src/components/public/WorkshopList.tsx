@@ -90,14 +90,14 @@ export const WorkshopList: React.FC = () => {
             Explore Workshops
           </h1>
           <p className="text-xs sm:text-sm text-[#5E5E61] dark:text-[#8ba895] mt-1">
-            Browse upcoming workshops, verify available seats, and register for free and paid sessions.
+            Browse upcoming workshops, verify available seats, and register with Razorpay Secure Checkout.
           </p>
         </div>
 
         {/* Workshop Trust Tag */}
         <div className="text-xs text-[#5E5E61] dark:text-[#8ba895] bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#233d2e] px-4 py-2.5 rounded-2xl shadow-xs self-start md:self-auto flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#08482D] dark:bg-[#9ee2b8]" />
-          <span><strong className="text-[#101410] dark:text-[#f0f5ee] font-semibold">Academic Workshops</strong> · Free & Paid Sessions</span>
+          <span><strong className="text-[#101410] dark:text-[#f0f5ee] font-semibold">Academic Workshops</strong> · Razorpay Instant Checkout</span>
         </div>
       </div>
 
@@ -233,12 +233,8 @@ export const WorkshopList: React.FC = () => {
                   <div className="absolute top-3 left-3 bg-[#DAE7C7] text-[#08482D] text-[10px] font-heading font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap">
                     {workshop.category}
                   </div>
-                  <div className={`absolute top-3 right-3 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap ${
-                    workshop.pricingType === 'PAID'
-                      ? 'bg-[#08482D] text-[#DAE7C7] border border-[#DAE7C7]/40'
-                      : 'bg-[#08482D] text-[#F5F8EF]'
-                  }`}>
-                    {workshop.pricingType === 'PAID' ? `₹${workshop.price}` : '100% FREE'}
+                  <div className="absolute top-3 right-3 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap bg-[#08482D] text-[#DAE7C7] border border-[#DAE7C7]/40">
+                    ₹{workshop.price || 199}
                   </div>
                   {seats.isFull && (
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">

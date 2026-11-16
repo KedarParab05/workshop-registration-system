@@ -116,20 +116,8 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
 
   const handleRegisterConfirm = async () => {
     setShowConfirmModal(false);
-    if (workshop.pricingType === 'PAID') {
-      // Open unified UPI + Razorpay payment modal
-      setShowPaymentModal(true);
-    } else {
-      setIsRegistering(true);
-      try {
-        const result = await registerForWorkshop(workshop.id, notes);
-        if (result.success && result.registration) {
-          setTicketToShow(result.registration);
-        }
-      } finally {
-        setIsRegistering(false);
-      }
-    }
+    // All workshops are processed exclusively through Razorpay Secure Checkout
+    setShowPaymentModal(true);
   };
 
   const handleVolunteerSubmit = async (e: React.FormEvent) => {
@@ -340,9 +328,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                   onClick={onOpenAuth}
                   className="w-full py-3.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] font-heading font-semibold text-xs rounded-2xl shadow-md shadow-[#08482D]/20 transition-all"
                 >
-                  {workshop.pricingType === 'PAID'
-                    ? `Sign In to Register & Pay (₹${workshop.price})`
-                    : 'Sign In to Book Free Seat'}
+                  Sign In to Register & Pay (₹{workshop.price || 199})
                 </button>
                 <p className="text-[11px] text-center text-[#5E5E61] dark:text-[#8ba895]">
                   Instant access for verified academic accounts.
@@ -353,18 +339,12 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 <button
                   onClick={() => setShowConfirmModal(true)}
                   disabled={isRegistering}
-                  className="w-full py-3.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] font-heading font-semibold text-xs rounded-2xl shadow-md shadow-[#08482D]/20 transition-all disabled:opacity-60"
+                  className="w-full py-3.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] font-heading font-semibold text-xs rounded-2xl shadow-md shadow-[#08482D]/20 transition-all disabled:opacity-60 cursor-pointer"
                 >
-                  {isRegistering
-                    ? 'Processing...'
-                    : workshop.pricingType === 'PAID'
-                    ? `Pay ₹${workshop.price} & Register`
-                    : 'Confirm Free Seat'}
+                  Pay ₹{workshop.price || 199} with Razorpay
                 </button>
                 <p className="text-[11px] text-center text-[#5E5E61] dark:text-[#8ba895]">
-                  {workshop.pricingType === 'PAID'
-                    ? 'Secured with encrypted instant checkout.'
-                    : 'Instant confirmation with cryptographic QR ticket.'}
+                  Secured with encrypted Razorpay instant checkout.
                 </p>
               </div>
             ) : (
@@ -443,25 +423,23 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 </div>
               </div>
 
-              {workshop.pricingType === 'PAID' && (
-                <div className="bg-[#E8F0DF]/60 dark:bg-[#1b3025]/80 p-3.5 rounded-2xl border border-[#DAE7C7] dark:border-[#233d2e] text-xs space-y-2">
-                  <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
-                    <span>Workshop Tuition:</span>
-                    <span className="font-semibold text-[#101410] dark:text-[#f0f5ee]">₹{workshop.price}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
-                    <span>Platform Service Fee:</span>
-                    <span className="text-[#08482D] dark:text-[#9ee2b8] font-medium">₹0 (Academic Waiver)</span>
-                  </div>
-                  <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e] flex justify-between items-center text-xs font-bold text-[#101410] dark:text-[#f0f5ee]">
-                    <span>Total Payable:</span>
-                    <span className="text-sm text-[#08482D] dark:text-[#9ee2b8]">₹{workshop.price}</span>
-                  </div>
-                  <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-0.5">
-                    Payment Gateway: Razorpay Secure Checkout
-                  </div>
+              <div className="bg-[#E8F0DF]/60 dark:bg-[#1b3025]/80 p-3.5 rounded-2xl border border-[#DAE7C7] dark:border-[#233d2e] text-xs space-y-2">
+                <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
+                  <span>Workshop Tuition:</span>
+                  <span className="font-semibold text-[#101410] dark:text-[#f0f5ee]">₹{workshop.price || 199}</span>
                 </div>
-              )}
+                <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
+                  <span>Platform Service Fee:</span>
+                  <span className="text-[#08482D] dark:text-[#9ee2b8] font-medium">₹0 (Academic Waiver)</span>
+                </div>
+                <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e] flex justify-between items-center text-xs font-bold text-[#101410] dark:text-[#f0f5ee]">
+                  <span>Total Payable:</span>
+                  <span className="text-sm text-[#08482D] dark:text-[#9ee2b8]">₹{workshop.price || 199}</span>
+                </div>
+                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-0.5">
+                  Payment Gateway: Razorpay Secure Checkout
+                </div>
+              </div>
 
               <div>
                 <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">

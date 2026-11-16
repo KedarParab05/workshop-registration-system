@@ -202,17 +202,13 @@ public class WorkshopService {
             }
         }
 
-        // Pricing Validation
-        if (workshop.getPricingType() == PricingType.PAID) {
-            if (workshop.getPrice() == null || workshop.getPrice() <= 0) {
-                throw new IllegalArgumentException("Paid workshops must specify a positive amount greater than ₹0.");
-            }
-            if (Double.isNaN(workshop.getPrice()) || Double.isInfinite(workshop.getPrice())) {
-                throw new IllegalArgumentException("Invalid price specified.");
-            }
-        } else {
-            workshop.setPricingType(PricingType.FREE);
-            workshop.setPrice(0.0);
+        // Pricing Validation: All workshops are processed through Razorpay
+        workshop.setPricingType(PricingType.PAID);
+        if (workshop.getPrice() == null || workshop.getPrice() <= 0) {
+            workshop.setPrice(199.0);
+        }
+        if (Double.isNaN(workshop.getPrice()) || Double.isInfinite(workshop.getPrice())) {
+            throw new IllegalArgumentException("Invalid price specified.");
         }
     }
 }
