@@ -22,17 +22,32 @@ export const getApiBase = (): string => {
 
 export const API_BASE = getApiBase();
 
-export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
+/**
+ * Fetch with AbortController timeout (default 15s).
+ * Throws an AbortError when the timeout fires so callers can show a friendly message.
+ */
+export async function apiFetch(
+  path: string,
+  options: RequestInit = {},
+  timeoutMs = 15000
+): Promise<Response> {
+  const controller = new AbortController();
+  const timerId = setTimeout(() => controller.abort(), timeoutMs);
   const token = localStorage.getItem('wh_jwt_token');
   const base = getApiBase();
-  return fetch(`${base}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
+  try {
+    return await fetch(`${base}${path}`, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+  } finally {
+    clearTimeout(timerId);
+  }
 }
 
 export function saveToken(token: string) {

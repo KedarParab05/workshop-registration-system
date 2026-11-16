@@ -39,6 +39,24 @@ public class AuthRestController {
     }
 
     /**
+     * GET /api/auth/health
+     * Fast, lightweight health check endpoint for early browser warmup and keep-alive.
+     */
+    @GetMapping("/health")
+    public ResponseEntity<?> healthCheck() {
+        return ResponseEntity.ok(Map.of(
+            "status", "UP",
+            "service", "workshophub-backend",
+            "timestamp", System.currentTimeMillis()
+        ));
+    }
+
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
+
+    /**
      * POST /api/auth/check-email
      * Checks whether an email is already registered in MongoDB.
      * Returns { exists: true/false }. Used by the frontend smart auth flow.
