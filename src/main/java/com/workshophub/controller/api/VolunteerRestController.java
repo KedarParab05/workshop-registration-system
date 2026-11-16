@@ -12,6 +12,7 @@ import com.workshophub.repository.RegistrationRepository;
 import com.workshophub.repository.UserRepository;
 import com.workshophub.repository.VolunteerRepository;
 import com.workshophub.repository.WorkshopRepository;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,17 +31,30 @@ public class VolunteerRestController {
     private final UserRepository userRepository;
     private final RegistrationRepository registrationRepository;
     private final AuditLogRepository auditLogRepository;
+    private final MongoTemplate mongoTemplate;
 
     public VolunteerRestController(VolunteerRepository volunteerRepository,
                                    WorkshopRepository workshopRepository,
                                    UserRepository userRepository,
                                    RegistrationRepository registrationRepository,
-                                   AuditLogRepository auditLogRepository) {
+                                   AuditLogRepository auditLogRepository,
+                                   MongoTemplate mongoTemplate) {
         this.volunteerRepository = volunteerRepository;
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
         this.registrationRepository = registrationRepository;
         this.auditLogRepository = auditLogRepository;
+        this.mongoTemplate = mongoTemplate;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void initIndexes() {
+        try {
+            mongoTemplate.indexOps("volunteers").dropIndex("accessCode");
+        } catch (Exception ignored) {}
+        try {
+            mongoTemplate.indexOps("volunteers").dropIndex("accessCode_1");
+        } catch (Exception ignored) {}
     }
 
     private User getAuthenticatedOrganizer(Principal principal, String fallbackOrganizerId) {
@@ -56,8 +70,14 @@ public class VolunteerRestController {
     }
 
     private String generateSecureCode() {
-        int randomNum = 100000 + new Random().nextInt(900000);
-        return "VOL-" + randomNum;
+        String code;
+        int attempts = 0;
+        do {
+            int randomNum = 100000 + new Random().nextInt(900000);
+            code = "VOL-" + randomNum;
+            attempts++;
+        } while (volunteerRepository.findByAccessCode(code).isPresent() && attempts < 50);
+        return code;
     }
 
     /**
@@ -71,7 +91,27 @@ public class VolunteerRestController {
         if (organizer != null && organizer.getRole() == UserRole.SUPER_ADMIN) {
             volunteers = volunteerRepository.findAll();
         } else if (organizer != null) {
-            volunteers = volunteerRepository.findByOrganizerId(organizer.getId());
+            List<Workshop> myWs = workshopRepository.findByOrganizerId(organizer.getId());
+            Set<String> wsIds = new HashSet<>();
+            for (Workshop w : myWs) {
+                wsIds.add(w.getId());
+            }
+            List<Volunteer> byOrg = volunteerRepository.findByOrganizerId(organizer.getId());
+            Set<String> seenIds = new HashSet<>();
+            volunteers = new ArrayList<>();
+            for (Volunteer v : byOrg) {
+                if (v.getId() != null && seenIds.add(v.getId())) {
+                    volunteers.add(v);
+                }
+            }
+            for (String wid : wsIds) {
+                List<Volunteer> forWs = volunteerRepository.findByAssignedWorkshopId(wid);
+                for (Volunteer v : forWs) {
+                    if (v.getId() != null && seenIds.add(v.getId())) {
+                        volunteers.add(v);
+                    }
+                }
+            }
         } else {
             volunteers = volunteerRepository.findAll();
         }
@@ -125,7 +165,7 @@ public class VolunteerRestController {
             }
         }
 
-        Volunteer v = new Volunteer();
+        Volunteer v = existingOpt.orElseGet(Volunteer::new);
         v.setName(name != null && !name.isBlank() ? name.trim() : "Volunteer Applicant");
         v.setEmail(cleanEmail);
         v.setPhoneNumber(phoneNumber != null ? phoneNumber.trim() : null);
@@ -136,7 +176,7 @@ public class VolunteerRestController {
         v.setStatus("PENDING_APPROVAL");
         v.setRequestNote(requestNote != null ? requestNote.trim() : "Requested via Volunteer Portal");
         v.setCreatedAt(LocalDateTime.now());
-        // accessCode remains null until approved by organizer!
+        v.setAccessCode(null);
 
         Volunteer saved = volunteerRepository.save(v);
 
@@ -185,6 +225,11 @@ public class VolunteerRestController {
             v.setAccessCode(generateSecureCode());
         }
         v.setStatus("ACTIVE");
+        User organizer = getAuthenticatedOrganizer(principal, null);
+        if (organizer != null) {
+            v.setOrganizerId(organizer.getId());
+            v.setOrganizerName(organizer.getFullName());
+        }
         Volunteer saved = volunteerRepository.save(v);
 
         auditLogRepository.save(new AuditLog(
@@ -322,8 +367,9 @@ public class VolunteerRestController {
         Volunteer v = opt.get();
         String newCode = generateSecureCode();
         v.setAccessCode(newCode);
-        volunteerRepository.save(v);
-        return ResponseEntity.ok(Map.of("success", true, "volunteer", v, "newCode", newCode));
+        v.setStatus("ACTIVE");
+        Volunteer saved = volunteerRepository.save(v);
+        return ResponseEntity.ok(Map.of("success", true, "volunteer", saved, "newCode", newCode));
     }
 
     /**

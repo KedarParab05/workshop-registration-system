@@ -32,7 +32,7 @@ public class Volunteer {
 
     private String assignedWorkshopTitle;
 
-    @Indexed(unique = true)
+    @Indexed(unique = true, sparse = true)
     private String accessCode; // e.g. "VOL-849201"
 
     private String status; // "PENDING_APPROVAL", "ACTIVE", "REVOKED", "REJECTED"

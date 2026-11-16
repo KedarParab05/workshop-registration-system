@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, UserCheck, KeyRound, Copy, Check, Sparkles } from 'lucide-react';
+import { X, UserCheck, KeyRound, Copy, Check, Sparkles, AlertCircle } from 'lucide-react';
 import { Workshop } from '../../types';
 
 interface AssignVolunteerModalProps {
@@ -25,6 +25,21 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (isOpen) {
+      if (workshops.length > 0) {
+        if (!assignedWorkshopId || !workshops.some((w) => w.id === assignedWorkshopId)) {
+          setAssignedWorkshopId(workshops[0].id);
+        }
+      } else {
+        setAssignedWorkshopId('');
+      }
+      setError('');
+      setCreatedCode(null);
+      setCopied(false);
+    }
+  }, [isOpen, workshops]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,7 +54,8 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
       setError('Valid volunteer email is required.');
       return;
     }
-    if (!assignedWorkshopId) {
+    const targetWorkshopId = assignedWorkshopId || workshops[0]?.id;
+    if (!targetWorkshopId) {
       setError('Please select an academic workshop.');
       return;
     }
@@ -49,7 +65,7 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
       name: name.trim(),
       email: email.trim(),
       phoneNumber: phoneNumber.trim(),
-      assignedWorkshopId,
+      assignedWorkshopId: targetWorkshopId,
     });
 
     setSubmitting(false);
@@ -172,17 +188,23 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
                 <label className="block font-heading font-semibold text-[#101410] dark:text-white mb-1">
                   Assigned Academic Workshop *
                 </label>
-                <select
-                  value={assignedWorkshopId}
-                  onChange={(e) => setAssignedWorkshopId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] font-medium"
-                >
-                  {workshops.map((ws) => (
-                    <option key={ws.id} value={ws.id}>
-                      {ws.title} — {ws.date} ({ws.venue})
-                    </option>
-                  ))}
-                </select>
+                {workshops.length === 0 ? (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-800 dark:text-amber-300 text-xs">
+                    No scheduled workshops found. Please create a workshop first before assigning a volunteer.
+                  </div>
+                ) : (
+                  <select
+                    value={assignedWorkshopId || workshops[0]?.id}
+                    onChange={(e) => setAssignedWorkshopId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] font-medium"
+                  >
+                    {workshops.map((ws) => (
+                      <option key={ws.id} value={ws.id}>
+                        {ws.title} — {ws.date} ({ws.venue})
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <p className="text-[11px] text-[#5E5E61] dark:text-slate-400 mt-1">
                   The volunteer will strictly be restricted to scanning passes for this specific session.
                 </p>
@@ -198,8 +220,8 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2.5 rounded-xl bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-50 text-white font-heading font-semibold shadow-md shadow-[#08482D]/20"
+                  disabled={submitting || workshops.length === 0}
+                  className="px-5 py-2.5 rounded-xl bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-50 text-white font-heading font-semibold shadow-md shadow-[#08482D]/20 cursor-pointer"
                 >
                   {submitting ? 'Generating Passcode...' : 'Appoint Volunteer'}
                 </button>

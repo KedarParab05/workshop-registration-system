@@ -681,14 +681,20 @@ export const VolunteerGatePortal: React.FC = () => {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={async () => {
                             setAccessCodeInput(req.accessCode!);
                             setAccessError('');
+                            setVerifyingAccess(true);
+                            const res = await verifyVolunteerLogin(req.accessCode!);
+                            setVerifyingAccess(false);
+                            if (!res.success) {
+                              setAccessError(res.error || 'Failed to verify code');
+                            }
                           }}
-                          className="px-2.5 py-1 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-lg text-[11px] font-heading font-semibold transition-colors flex items-center gap-1 shadow-sm"
+                          className="px-2.5 py-1 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-lg text-[11px] font-heading font-semibold transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
                         >
                           <KeyRound className="w-3 h-3 text-[#DAE7C7]" />
-                          <span>Use This Code</span>
+                          <span>Unlock Scanner</span>
                         </button>
                       </div>
                     )}

@@ -58,6 +58,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
   const [volunteerNote, setVolunteerNote] = useState('');
   const [requestingVolunteer, setRequestingVolunteer] = useState(false);
   const [volunteerSuccessMsg, setVolunteerSuccessMsg] = useState('');
+  const [volunteerErrorMsg, setVolunteerErrorMsg] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   React.useEffect(() => {
@@ -133,6 +134,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
     if (!currentUser) return;
     setRequestingVolunteer(true);
     setVolunteerSuccessMsg('');
+    setVolunteerErrorMsg('');
 
     const res = await requestVolunteering({
       name: currentUser.fullName,
@@ -150,6 +152,8 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
         setShowVolunteerModal(false);
         setVolunteerSuccessMsg('');
       }, 3500);
+    } else {
+      setVolunteerErrorMsg(res.message || 'Failed to submit volunteering application. Please try again.');
     }
   };
 
@@ -378,7 +382,23 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
           </div>
 
           {/* Student Gate Volunteer Application Box */}
-          {currentUser && currentUser.role === 'PARTICIPANT' && (
+          {!currentUser ? (
+            <div className="bg-[#E8F0DF]/60 dark:bg-[#14231b] p-5 rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-2.5">
+              <div className="flex items-center gap-2 font-heading font-bold text-xs text-[#08482D] dark:text-[#9ee2b8]">
+                <HandHeart className="w-4 h-4" />
+                <span>Volunteer at the Entrance Gate</span>
+              </div>
+              <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] leading-relaxed">
+                Want to assist the faculty coordinator by checking in attendees using our gate webcam scanner? Sign in with your student account to apply.
+              </p>
+              <button
+                onClick={onOpenAuth}
+                className="w-full py-2 bg-white dark:bg-[#1b3025] hover:bg-[#E8F0DF] dark:hover:bg-[#14231b] text-[#08482D] dark:text-[#9ee2b8] rounded-xl text-xs font-heading font-semibold border border-[#DCE4D6] dark:border-[#233d2e] transition-colors cursor-pointer"
+              >
+                Sign In as Student to Apply
+              </button>
+            </div>
+          ) : currentUser.role === 'PARTICIPANT' ? (
             <div className="bg-[#E8F0DF]/60 dark:bg-[#14231b] p-5 rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] space-y-2.5">
               <div className="flex items-center gap-2 font-heading font-bold text-xs text-[#08482D] dark:text-[#9ee2b8]">
                 <HandHeart className="w-4 h-4" />
@@ -388,13 +408,17 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 Want to assist the faculty coordinator by checking in attendees using our gate webcam scanner?
               </p>
               <button
-                onClick={() => setShowVolunteerModal(true)}
+                onClick={() => {
+                  setVolunteerErrorMsg('');
+                  setVolunteerSuccessMsg('');
+                  setShowVolunteerModal(true);
+                }}
                 className="w-full py-2 bg-white dark:bg-[#1b3025] hover:bg-[#E8F0DF] dark:hover:bg-[#14231b] text-[#08482D] dark:text-[#9ee2b8] rounded-xl text-xs font-heading font-semibold border border-[#DCE4D6] dark:border-[#233d2e] transition-colors cursor-pointer"
               >
                 Apply as Gate Volunteer
               </button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -528,6 +552,11 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 </div>
               ) : (
                 <form onSubmit={handleVolunteerSubmit} className="space-y-3">
+                  {volunteerErrorMsg && (
+                    <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl text-rose-700 dark:text-rose-400 text-xs">
+                      {volunteerErrorMsg}
+                    </div>
+                  )}
                   <div>
                     <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
                       Message / Availability Note for Organizer

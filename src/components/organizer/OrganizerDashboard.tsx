@@ -920,7 +920,7 @@ export const OrganizerDashboard: React.FC = () => {
           return {
             success: res.success,
             message: res.message,
-            accessCode: res.volunteer?.accessCode,
+            accessCode: res.volunteer?.accessCode || res.accessCode,
           };
         }}
       />
