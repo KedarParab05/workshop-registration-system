@@ -62,15 +62,11 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     /**
-     * Enforces that ALL workshops (present and future) in MongoDB are configured as PAID with Razorpay.
+     * Sanitizes workshop titles and ensures pricing is properly configured.
      */
     private void ensureAllWorkshopsUseRazorpay() {
         for (Workshop ws : workshopRepository.findAll()) {
             boolean modified = false;
-            if (ws.getPricingType() != com.workshophub.model.enums.PricingType.PAID) {
-                ws.setPricingType(com.workshophub.model.enums.PricingType.PAID);
-                modified = true;
-            }
 
             String title = ws.getTitle();
             if (title != null) {
@@ -92,13 +88,23 @@ public class DataInitializer implements CommandLineRunner {
                     modified = true;
                 }
             }
-            if (ws.getPrice() == null || ws.getPrice() <= 0) {
-                ws.setPrice(199.0);
-                modified = true;
+
+            // Keep pricing model as configured (FREE or PAID)
+            if (ws.getPricingType() == com.workshophub.model.enums.PricingType.FREE) {
+                if (ws.getPrice() == null || ws.getPrice() != 0.0) {
+                    ws.setPrice(0.0);
+                    modified = true;
+                }
+            } else if (ws.getPricingType() == com.workshophub.model.enums.PricingType.PAID) {
+                if (ws.getPrice() == null || ws.getPrice() <= 0) {
+                    ws.setPrice(199.0);
+                    modified = true;
+                }
             }
+
             if (modified) {
                 workshopRepository.save(ws);
-                System.out.println("[DataInitializer] Migrated workshop to PAID with Razorpay: " + ws.getTitle() + " (₹" + ws.getPrice() + ")");
+                System.out.println("[DataInitializer] Updated workshop: " + ws.getTitle() + " (" + ws.getPricingType() + " - ₹" + ws.getPrice() + ")");
             }
         }
     }

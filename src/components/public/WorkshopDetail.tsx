@@ -116,8 +116,16 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
 
   const handleRegisterConfirm = async () => {
     setShowConfirmModal(false);
-    // All workshops are processed exclusively through Razorpay Secure Checkout
-    setShowPaymentModal(true);
+    if (workshop.pricingType === 'PAID' && (workshop.price || 0) > 0) {
+      setShowPaymentModal(true);
+    } else {
+      setIsRegistering(true);
+      const res = await registerForWorkshop(workshop.id, notes);
+      setIsRegistering(false);
+      if (res.success && res.registration) {
+        setTicketToShow(res.registration);
+      }
+    }
   };
 
   const handleVolunteerSubmit = async (e: React.FormEvent) => {
@@ -423,23 +431,35 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 </div>
               </div>
 
-              <div className="bg-[#E8F0DF]/60 dark:bg-[#1b3025]/80 p-3.5 rounded-2xl border border-[#DAE7C7] dark:border-[#233d2e] text-xs space-y-2">
-                <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
-                  <span>Workshop Tuition:</span>
-                  <span className="font-semibold text-[#101410] dark:text-[#f0f5ee]">₹{workshop.price || 199}</span>
+              {workshop.pricingType === 'PAID' ? (
+                <div className="bg-[#E8F0DF]/60 dark:bg-[#1b3025]/80 p-3.5 rounded-2xl border border-[#DAE7C7] dark:border-[#233d2e] text-xs space-y-2">
+                  <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
+                    <span>Workshop Tuition:</span>
+                    <span className="font-semibold text-[#101410] dark:text-[#f0f5ee]">₹{workshop.price || 199}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
+                    <span>Platform Service Fee:</span>
+                    <span className="text-[#08482D] dark:text-[#9ee2b8] font-medium">₹0 (Academic Waiver)</span>
+                  </div>
+                  <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e] flex justify-between items-center text-xs font-bold text-[#101410] dark:text-[#f0f5ee]">
+                    <span>Total Payable:</span>
+                    <span className="text-sm text-[#08482D] dark:text-[#9ee2b8]">₹{workshop.price || 199}</span>
+                  </div>
+                  <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-0.5">
+                    Payment Gateway: Razorpay Secure Checkout
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
-                  <span>Platform Service Fee:</span>
-                  <span className="text-[#08482D] dark:text-[#9ee2b8] font-medium">₹0 (Academic Waiver)</span>
+              ) : (
+                <div className="bg-[#E8F0DF]/60 dark:bg-[#1b3025]/80 p-3.5 rounded-2xl border border-[#DAE7C7] dark:border-[#233d2e] text-xs space-y-1">
+                  <div className="flex justify-between items-center text-[#5E5E61] dark:text-[#8ba895]">
+                    <span>Registration Cost:</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">100% Free</span>
+                  </div>
+                  <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
+                    Instant seat confirmation. No payment required.
+                  </p>
                 </div>
-                <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e] flex justify-between items-center text-xs font-bold text-[#101410] dark:text-[#f0f5ee]">
-                  <span>Total Payable:</span>
-                  <span className="text-sm text-[#08482D] dark:text-[#9ee2b8]">₹{workshop.price || 199}</span>
-                </div>
-                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] pt-0.5">
-                  Payment Gateway: Razorpay Secure Checkout
-                </div>
-              </div>
+              )}
 
               <div>
                 <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
