@@ -374,7 +374,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
-  const navigateTo = (page: ActivePage, workshopId?: string) => {
+  const getHashForPage = (page: ActivePage, wsId?: string): string => {
+    switch (page) {
+      case 'workshops': return '#workshops';
+      case 'workshop-detail': return wsId ? `#workshop/${wsId}` : '#workshops';
+      case 'participant-dashboard': return '#participant-dashboard';
+      case 'my-registrations': return '#my-registrations';
+      case 'organizer-dashboard': return '#organizer-dashboard';
+      case 'organizer-workshops': return '#organizer-workshops';
+      case 'organizer-registrations': return '#organizer-registrations';
+      case 'volunteer-portal': return '#volunteer-portal';
+      case 'admin-dashboard': return '#admin-dashboard';
+      case 'our-story': return '#our-story';
+      case 'contact': return '#contact';
+      case 'home':
+      default: return '#home';
+    }
+  };
+
+  const parseHash = (hashStr: string): { page: ActivePage; workshopId?: string } => {
+    const clean = (hashStr || '').replace(/^#\/?/, '').toLowerCase();
+    if (!clean || clean === 'home') return { page: 'home' };
+    if (clean === 'workshops') return { page: 'workshops' };
+    if (clean.startsWith('workshop/')) {
+      const wsId = (hashStr || '').replace(/^#\/?workshop\//i, '');
+      return { page: 'workshop-detail', workshopId: wsId };
+    }
+    if (clean === 'participant-dashboard') return { page: 'participant-dashboard' };
+    if (clean === 'my-registrations') return { page: 'my-registrations' };
+    if (clean === 'organizer-dashboard') return { page: 'organizer-dashboard' };
+    if (clean === 'organizer-workshops') return { page: 'organizer-workshops' };
+    if (clean === 'organizer-registrations') return { page: 'organizer-registrations' };
+    if (clean === 'volunteer-portal') return { page: 'volunteer-portal' };
+    if (clean === 'admin-dashboard') return { page: 'admin-dashboard' };
+    if (clean === 'our-story') return { page: 'our-story' };
+    if (clean === 'contact') return { page: 'contact' };
+    return { page: 'home' };
+  };
+
+  const navigateTo = (page: ActivePage, workshopId?: string, skipHistory = false) => {
     if (workshopId) {
       setSelectedWorkshopId(workshopId);
       localStorage.setItem('wh_selected_workshop_id', workshopId);
@@ -382,33 +420,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActivePage(page);
     localStorage.setItem('wh_active_page', page);
 
-    if (page === 'our-story') {
-      window.location.hash = 'our-story';
-    } else if (page === 'contact') {
-      window.location.hash = 'contact';
-    } else if (page === 'home') {
-      if (window.location.hash === '#our-story' || window.location.hash === '#contact') {
-        history.replaceState(null, '', window.location.pathname);
-      }
+    const targetHash = getHashForPage(page, workshopId);
+    if (!skipHistory && window.location.hash !== targetHash) {
+      window.history.pushState({ page, workshopId }, '', targetHash);
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Immediate background fetch from backend
-    refreshData();
+    refreshData().catch(() => {});
   };
 
-  // Sync navigation on browser hash change
+  // Sync navigation on browser Back/Forward button clicks (popstate & hashchange)
   useEffect(() => {
-    const handleHash = () => {
-      const h = window.location.hash.toLowerCase();
-      if (h === '#our-story') {
-        setActivePage('our-story');
-      } else if (h === '#contact') {
-        setActivePage('contact');
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state && e.state.page) {
+        if (e.state.workshopId) {
+          setSelectedWorkshopId(e.state.workshopId);
+          localStorage.setItem('wh_selected_workshop_id', e.state.workshopId);
+        }
+        setActivePage(e.state.page);
+        localStorage.setItem('wh_active_page', e.state.page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const parsed = parseHash(window.location.hash);
+        if (parsed.workshopId) {
+          setSelectedWorkshopId(parsed.workshopId);
+          localStorage.setItem('wh_selected_workshop_id', parsed.workshopId);
+        }
+        setActivePage(parsed.page);
+        localStorage.setItem('wh_active_page', parsed.page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+
+    // Initial state setup so clicking back never leaves website unexpectedly
+    if (window.location.hash) {
+      const parsed = parseHash(window.location.hash);
+      if (parsed.workshopId) {
+        setSelectedWorkshopId(parsed.workshopId);
+      }
+      setActivePage(parsed.page);
+    } else {
+      const initialHash = getHashForPage(activePage, selectedWorkshopId || undefined);
+      window.history.replaceState({ page: activePage, workshopId: selectedWorkshopId }, '', initialHash);
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
   }, []);
 
   // Continuous DB polling & window focus listener for real-time synchronization across devices
@@ -1020,6 +1082,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const seats = calculateSeats(existing, registrations);
     const validation = validateWorkshopInput(data, seats.registeredCount);
     if (!validation.valid) {
+      const firstError = Object.values(validation.errors)[0];
+      showAlert(firstError || 'Please check the required workshop fields.', 'error');
       return { success: false, errors: validation.errors };
     }
 

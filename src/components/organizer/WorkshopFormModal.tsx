@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Workshop, WorkshopFormData, WorkshopStatus } from '../../types';
 import {
@@ -38,7 +38,9 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
   onClose,
   workshopToEdit,
 }) => {
-  const { createWorkshop, updateWorkshop, registrations } = useApp();
+  const { createWorkshop, updateWorkshop, registrations, showAlert } = useApp();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState<WorkshopFormData>({
     title: '',
@@ -139,21 +141,36 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setIsSubmitting(true);
 
-    if (workshopToEdit) {
-      const result = await updateWorkshop(workshopToEdit.id, formData);
-      if (result.success) {
-        onClose();
-      } else if (result.errors) {
-        setErrors(result.errors);
+    try {
+      if (workshopToEdit) {
+        const result = await updateWorkshop(workshopToEdit.id, formData);
+        if (result.success) {
+          onClose();
+        } else if (result.errors) {
+          setErrors(result.errors);
+          const firstKey = Object.keys(result.errors)[0];
+          const firstMsg = result.errors[firstKey];
+          showAlert(firstMsg || 'Please review the highlighted fields.', 'error');
+          modalContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } else {
+        const result = await createWorkshop(formData);
+        if (result.success) {
+          onClose();
+        } else if (result.errors) {
+          setErrors(result.errors);
+          const firstKey = Object.keys(result.errors)[0];
+          const firstMsg = result.errors[firstKey];
+          showAlert(firstMsg || 'Please review the highlighted fields.', 'error');
+          modalContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
-    } else {
-      const result = await createWorkshop(formData);
-      if (result.success) {
-        onClose();
-      } else if (result.errors) {
-        setErrors(result.errors);
-      }
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to save workshop changes.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -175,6 +192,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.2 }}
+          ref={modalContentRef}
           className="relative bg-white dark:bg-[#14231b] rounded-3xl max-w-2xl w-full p-5 sm:p-8 shadow-2xl border border-[#DCE4D6] dark:border-[#203a2c] my-auto max-h-[92vh] overflow-y-auto text-xs z-10 text-[#101410] dark:text-[#E8F0DF] transition-colors"
         >
           {/* Close Button */}
@@ -228,7 +246,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+                  className={`w-full px-3.5 py-2.5 rounded-xl border bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] ${errors.category ? 'border-rose-500' : 'border-[#DCE4D6] dark:border-[#22392c]'}`}
                 >
                   <option value="Web Development">Web Development</option>
                   <option value="Artificial Intelligence">Artificial Intelligence</option>
@@ -366,6 +384,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                     errors.date ? 'border-rose-500' : 'border-[#DCE4D6] dark:border-[#22392c]'
                   }`}
                 />
+                {errors.date && <p className="text-rose-500 text-[11px] mt-1">{errors.date}</p>}
               </div>
 
               <div>
@@ -376,7 +395,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                   type="time"
                   value={formData.startTime}
                   onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white"
+                  className={`w-full px-3.5 py-2.5 rounded-xl border bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white ${errors.startTime ? 'border-rose-500' : 'border-[#DCE4D6] dark:border-[#22392c]'}`}
                 />
               </div>
 
@@ -389,10 +408,10 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                   value={formData.endTime}
                   onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                   className={`w-full px-3.5 py-2.5 rounded-xl border bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white ${
-                    errors.time ? 'border-rose-500' : 'border-[#DCE4D6] dark:border-[#22392c]'
+                    errors.time || errors.endTime ? 'border-rose-500' : 'border-[#DCE4D6] dark:border-[#22392c]'
                   }`}
                 />
-                {errors.time && <p className="text-rose-500 text-[11px] mt-1">{errors.time}</p>}
+                {(errors.time || errors.startTime || errors.endTime) && <p className="text-rose-500 text-[11px] mt-1">{errors.time || errors.startTime || errors.endTime}</p>}
               </div>
             </div>
 
@@ -691,12 +710,20 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                 Cancel
               </button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-[#08482D] hover:bg-[#0c5c3b] text-white font-semibold font-heading shadow-md shadow-[#08482D]/20"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 rounded-xl bg-[#08482D] hover:bg-[#0c5c3b] disabled:bg-[#08482D]/70 text-white font-semibold font-heading shadow-md shadow-[#08482D]/20 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
-                {workshopToEdit ? 'Save Workshop Changes' : 'Create Academic Workshop'}
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Saving changes...</span>
+                  </>
+                ) : (
+                  <span>{workshopToEdit ? 'Save Workshop Changes' : 'Create Academic Workshop'}</span>
+                )}
               </motion.button>
             </div>
           </form>
