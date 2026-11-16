@@ -54,7 +54,7 @@ export const OurStoryPage: React.FC = () => {
     {
       label: 'Academic Theory to Practice',
       detail:
-        'Bridging textbook concepts and modern industry tech stacks (Microservices, PyTorch, Kubernetes, Zero-Trust Security).',
+        'Bridging textbook concepts and modern enterprise engineering practices (Distributed Systems, Applied Intelligence, Cloud Architecture, Zero-Trust Security).',
     },
     {
       label: 'Free & Paid Event Formats',

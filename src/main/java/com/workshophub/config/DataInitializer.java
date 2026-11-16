@@ -71,6 +71,27 @@ public class DataInitializer implements CommandLineRunner {
                 ws.setPricingType(com.workshophub.model.enums.PricingType.PAID);
                 modified = true;
             }
+
+            String title = ws.getTitle();
+            if (title != null) {
+                String cleanTitle = title
+                    .replace("Full-Stack Web Development with React 19 & Spring Boot", "Full-Stack Web Application Engineering")
+                    .replace("Practical AI: Deep Learning & Neural Architecture Studio", "Applied Artificial Intelligence & Neural Architecture Studio")
+                    .replace("Cloud Computing & AWS Architecture Fundamentals", "Cloud Infrastructure & Distributed Systems Engineering")
+                    .replace("Cybersecurity, Network Defense & Ethical Hacking", "Cybersecurity & Defensive Infrastructure Engineering")
+                    .replace("Advanced Java Programming & Enterprise Design Patterns", "Enterprise Software Engineering & Architectural Design Patterns")
+                    .replace("IoT & Embedded Systems with ESP32 & MQTT", "Connected Devices & Embedded Systems Engineering")
+                    .replace("Database Management & SQL Performance Masterclass", "Database Systems & High-Performance Data Engineering")
+                    .replace("DevOps & Docker Containerization Fundamentals", "DevOps & Container Infrastructure Engineering")
+                    .replace("Data Structures & Competitive Algorithms in Java", "Advanced Data Structures & Algorithmic Problem Solving")
+                    .replace("Building Production REST APIs with Spring Boot 3", "Enterprise REST API Architecture & Service Engineering")
+                    .replace("Cloud & DevOps Engineering: From Code to Cloud", "Cloud Infrastructure Engineering: Code to Cloud")
+                    .replace("Devops", "Cloud Infrastructure Operations");
+                if (!cleanTitle.equals(title)) {
+                    ws.setTitle(cleanTitle);
+                    modified = true;
+                }
+            }
             if (ws.getPrice() == null || ws.getPrice() <= 0) {
                 ws.setPrice(199.0);
                 modified = true;

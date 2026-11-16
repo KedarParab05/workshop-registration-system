@@ -58,12 +58,12 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
   // Dynamic Tagline based on workshop category
   const getTagline = (category?: string, summary?: string) => {
     const c = (category || '').toLowerCase();
-    if (c.includes('web')) return 'Build. Code. Deploy.';
+    if (c.includes('web')) return 'Design. Build. Deliver.';
     if (c.includes('ai') || c.includes('machine') || c.includes('deep')) return 'Train. Predict. Innovate.';
-    if (c.includes('cloud') || c.includes('devops') || c.includes('docker')) return 'Automate. Scale. Deliver.';
+    if (c.includes('cloud') || c.includes('devops') || c.includes('infrastructure')) return 'Automate. Scale. Deliver.';
     if (c.includes('cyber') || c.includes('security')) return 'Defend. Audit. Secure.';
-    if (c.includes('data') || c.includes('algorithm') || c.includes('dsa')) return 'Analyze. Optimize. Solve.';
-    if (c.includes('java') || c.includes('architecture')) return 'Design. Structure. Elevate.';
+    if (c.includes('data') || c.includes('algorithm')) return 'Analyze. Optimize. Solve.';
+    if (c.includes('software') || c.includes('architecture')) return 'Design. Structure. Elevate.';
     return summary ? summary.substring(0, 36) : 'Learn. Build. Grow.';
   };
 

@@ -285,12 +285,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const token = getToken();
       const isExplicitlyLoggedOut = localStorage.getItem('wh_logged_out') === 'true';
 
+      const isElevated = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ORGANIZER';
       const [wsRes, regRes, auditRes, usersRes, volRes, meRes] = await Promise.allSettled([
         apiFetch('/api/workshops?all=true'),
-        apiFetch('/api/registrations'),
-        apiFetch('/api/admin/audit-logs'),
-        apiFetch('/api/auth/users'),
-        apiFetch('/api/volunteers'),
+        token ? apiFetch('/api/registrations') : Promise.resolve(null),
+        token && isElevated ? apiFetch('/api/admin/audit-logs') : Promise.resolve(null),
+        token && isElevated ? apiFetch('/api/auth/users') : Promise.resolve(null),
+        token && isElevated ? apiFetch('/api/volunteers') : Promise.resolve(null),
         token && !isExplicitlyLoggedOut ? apiFetch('/api/auth/me') : Promise.resolve(null),
       ]);
 
@@ -416,8 +417,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Continuously fetch from backend every 5 seconds to keep participant seats and status live
     const interval = setInterval(() => {
-      refreshData();
-    }, 5000);
+      if (document.visibilityState === 'visible') {
+        refreshData();
+      }
+    }, 12000);
 
     const handleFocus = () => {
       refreshData();

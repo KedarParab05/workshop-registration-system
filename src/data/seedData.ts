@@ -26,7 +26,7 @@ export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title
     return BANNER_SPRING_REST;
   }
 
-  // 2. Data Structures & Competitive Algorithms in Java
+  // 2. Advanced Data Structures & Algorithmic Problem Solving
   if (
     id.includes('dsa') ||
     title.includes('data structure') ||
@@ -37,7 +37,7 @@ export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title
     return BANNER_DSA_JAVA;
   }
 
-  // 3. DevOps & Docker Containerization Fundamentals
+  // 3. DevOps & Container Infrastructure Engineering
   if (
     id.includes('docker') ||
     (title.includes('devops') && title.includes('docker')) ||
@@ -47,7 +47,7 @@ export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title
     return BANNER_DEVOPS_DOCKER;
   }
 
-  // 4. Cloud Computing & AWS Architecture Fundamentals
+  // 4. Cloud Infrastructure & Distributed Systems Engineering
   if (
     id.includes('cloud') ||
     (title.includes('cloud') && !title.includes('docker')) ||
@@ -58,7 +58,7 @@ export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title
     return BANNER_CLOUD;
   }
 
-  // 5. Full-Stack Web Development with React 19 & Spring Boot
+  // 5. Full-Stack Web Application Engineering
   if (
     id.includes('fullstack') ||
     (title.includes('react') && title.includes('spring boot')) ||
@@ -68,7 +68,7 @@ export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title
     return BANNER_WEB;
   }
 
-  // 6. Advanced Java Programming & Enterprise Design Patterns / System Architecture
+  // 6. Enterprise Software Engineering & Architectural Design Patterns / System Architecture
   if (
     id.includes('java-oop') ||
     title.includes('design pattern') ||
@@ -249,9 +249,9 @@ export const INITIAL_USERS: User[] = [
 export const INITIAL_WORKSHOPS: Workshop[] = [
   {
     id: 'ws-fullstack',
-    title: 'Full-Stack Web Development with React 19 & Spring Boot',
-    summary: 'Build modern, reactive full-stack web applications with TypeScript, React 19, Tailwind CSS, and Spring Boot microservices.',
-    description: 'A comprehensive 4-hour hands-on studio. We will construct a real-time reactive application from scratch, cover component modularity, state management with hooks, RESTful API design, JWT authentication, and cloud deployment pipelines.\n\nPrerequisites: Basic familiarity with JavaScript and web concepts.',
+    title: 'Full-Stack Web Application Engineering',
+    summary: 'Build high-performance, modular full-stack web applications with modern component architectures, dynamic state management, and enterprise backend microservices.',
+    description: 'A comprehensive 4-hour hands-on studio. We will construct a real-time interactive application from scratch, cover component modularity, state management with hooks, RESTful API design, JWT authentication, and cloud deployment pipelines.\n\nPrerequisites: Basic familiarity with modern web concepts and fundamentals.',
     category: 'Web Development',
     bannerImageUrl: '/assets/images/fullstack-web-workshop-banner.jpg',
     organizerId: 'usr-org-1',
@@ -271,10 +271,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 499,
     currency: 'INR',
     learningOutcomes: [
-      'React 19 Component Architecture & Custom Hooks',
-      'Spring Boot 3 RESTful Microservices & JPA',
-      'JWT Bearer Security, Interceptors & Role Guards',
-      'Tailwind CSS Responsive Design & Dark Mode',
+      'Modern Component Architecture & State Management',
+      'Scalable Enterprise Microservices & Data Persistence',
+      'Token-Based Security, Interceptors & Role-Based Access',
+      'Responsive Design Systems & Adaptive Theming',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-02T09:30:00.000Z',
@@ -282,9 +282,9 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-ai-deeplearning',
-    title: 'Practical AI: Deep Learning & Neural Architecture Studio',
-    summary: 'Hands-on implementation of deep neural networks, transformer models, and real-time inference using PyTorch and Hugging Face.',
-    description: 'Dive deep into modern machine learning techniques. Participants will train neural networks, fine-tune open weights, and build production inference pipelines using PyTorch.\n\nPrerequisites: Python programming knowledge and basic calculus.',
+    title: 'Applied Artificial Intelligence & Neural Architecture Studio',
+    summary: 'Hands-on implementation of deep neural networks, transformer architectures, and real-time intelligent inference engines.',
+    description: 'Dive deep into modern machine learning techniques. Participants will train neural networks, fine-tune open weights, and build production-grade inference pipelines.\n\nPrerequisites: Applied mathematics and computational logic fundamentals.',
     category: 'Artificial Intelligence',
     bannerImageUrl: '/assets/images/ai-machine-learning-workshop-banner.jpg',
     organizerId: 'usr-org-omkar',
@@ -304,10 +304,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 499,
     currency: 'INR',
     learningOutcomes: [
-      'PyTorch Tensor Computation & Backprop Graphs',
-      'Transformer Multi-Head Attention Mechanics',
-      'Fine-Tuning Open LLM Checkpoints with LoRA',
-      'Model Quantization & Production GPU Serving',
+      'Tensor Computation & Backpropagation Workflows',
+      'Transformer Attention Mechanics & Sequence Processing',
+      'Fine-Tuning Foundational Models & Parameter Adaptation',
+      'High-Throughput Model Quantization & Cloud Serving',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-03T14:00:00.000Z',
@@ -315,8 +315,8 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-cloud-devops',
-    title: 'Cloud Computing & AWS Architecture Fundamentals',
-    summary: 'Master core AWS cloud primitives, VPC networking, IAM security, EC2 autoscaling, and S3 event pipelines.',
+    title: 'Cloud Infrastructure & Distributed Systems Engineering',
+    summary: 'Master core cloud infrastructure primitives, isolated virtual networking, role-based security, automated elasticity, and event-driven data pipelines.',
     description: 'Architect resilient multi-tier cloud applications. Learn VPC peering, subnets, Internet Gateways, IAM security policies, automated elasticity, and cloud infrastructure monitoring with CloudWatch.\n\nPrerequisites: Basic Linux terminal command proficiency.',
     category: 'Cloud Computing',
     bannerImageUrl: '/assets/images/cloud-devops-workshop-banner.jpg',
@@ -337,10 +337,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 299,
     currency: 'INR',
     learningOutcomes: [
-      'VPC Network Architecture, Subnets & Gateways',
-      'IAM Role Delegation & Least-Privilege Policies',
-      'EC2 Auto Scaling Groups & Application Load Balancing',
-      'Serverless Lambda Functions & S3 Event Triggers',
+      'Virtual Network Architecture, Subnets & Secure Gateways',
+      'Identity Delegation & Least-Privilege Access Policies',
+      'Automated Compute Scaling & Application Traffic Balancing',
+      'Serverless Event Compute & Distributed Storage Workflows',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-04T10:00:00.000Z',
@@ -348,9 +348,9 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-cybersecurity',
-    title: 'Cybersecurity, Network Defense & Ethical Hacking',
-    summary: 'Hands-on packet inspection, vulnerability scanning, penetration testing techniques, and defensive hardening.',
-    description: 'Learn defensive and offensive security principles in an isolated sandbox. Covers Wireshark packet capture, OWASP Top 10 web vulnerabilities, SQL injection defenses, and public-key cryptography.\n\nPrerequisites: Basic understanding of IP networks and web architectures.',
+    title: 'Cybersecurity & Defensive Infrastructure Engineering',
+    summary: 'Hands-on traffic inspection, vulnerability assessment, penetration defense methodologies, and enterprise security hardening.',
+    description: 'Learn defensive and offensive security principles in an isolated sandbox. Covers network protocol analysis, core application vulnerabilities, data injection mitigation, and public-key cryptography.\n\nPrerequisites: Basic understanding of IP networks and web architectures.',
     category: 'Cybersecurity',
     bannerImageUrl: '/assets/images/cybersecurity-workshop-banner.jpg',
     organizerId: 'usr-org-2',
@@ -370,10 +370,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 399,
     currency: 'INR',
     learningOutcomes: [
-      'Network Packet Capture & Protocol Analysis with Wireshark',
-      'OWASP Top 10 Web Vulnerability Exploitation & Mitigation',
-      'Public Key Infrastructure & SSL/TLS Cryptographic Handshakes',
-      'Automated Defensive Hardening & Vulnerability Auditing',
+      'Network Protocol Inspection & Telemetry Analysis',
+      'Core Web Application Vulnerabilities & Threat Mitigation',
+      'Public Key Infrastructure & Encrypted Handshake Protocols',
+      'Automated Security Hardening & Systems Auditing',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-05T11:00:00.000Z',
@@ -381,9 +381,9 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-java-oop',
-    title: 'Advanced Java Programming & Enterprise Design Patterns',
-    summary: 'Deep dive into OOP idioms, memory management, concurrency primitives, and Gang-of-Four enterprise design patterns.',
-    description: 'Hands-on mastery of JVM architecture, modern Java 21 features (virtual threads, pattern matching), garbage collection tuning, factory and observer patterns, and multithreaded synchronization.\n\nPrerequisites: Core Java knowledge.',
+    title: 'Enterprise Software Engineering & Architectural Design Patterns',
+    summary: 'Deep dive into object-oriented design idioms, memory management, multithreaded concurrency, and enterprise architectural design patterns.',
+    description: 'Hands-on mastery of runtime execution architecture, lightweight virtual concurrency, memory management tuning, design patterns, and multithreaded synchronization.\n\nPrerequisites: Fundamental understanding of object-oriented programming.',
     category: 'Software Engineering',
     bannerImageUrl: '/assets/images/system-architecture-workshop-banner.jpg',
     organizerId: 'usr-org-1',
@@ -403,10 +403,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 299,
     currency: 'INR',
     learningOutcomes: [
-      'JVM Internals & Garbage Collection Tuning',
-      'Java 21 Virtual Threads & Structured Concurrency',
-      'Gang of Four Enterprise Design Patterns in Action',
-      'Clean Architecture & SOLID Principles',
+      'Runtime Memory Architecture & Performance Tuning',
+      'Lightweight Virtual Threads & Structured Concurrency',
+      'Enterprise Creational & Behavioral Design Patterns',
+      'Clean Architecture & Industry Design Principles',
     ],
     status: 'COMPLETED',
     createdAt: '2026-10-25T09:00:00.000Z',
@@ -414,8 +414,8 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-iot-systems',
-    title: 'IoT & Embedded Systems with ESP32 & MQTT',
-    summary: 'Build smart connected sensor nodes, publish telemetry over MQTT broker, and visualize real-time streams on a modern web dashboard.',
+    title: 'Connected Devices & Embedded Systems Engineering',
+    summary: 'Build intelligent connected sensor devices, transmit lightweight telemetry over message queues, and visualize real-time operational streams on interactive dashboards.',
     description: 'Hardware meets cloud software. Connect real-time hardware telemetry from microcontrollers to cloud message brokers and display dynamic metrics.\n\nPrerequisites: Basic C/C++ or Arduino knowledge.',
     category: 'Internet of Things',
     bannerImageUrl: '/assets/images/workshop-collaboration-hero.jpg',
@@ -436,10 +436,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 249,
     currency: 'INR',
     learningOutcomes: [
-      'ESP32 Pinout, GPIO & ADC Sensor Interfacing',
-      'MQTT Protocol Pub/Sub via Mosquitto Broker',
-      'Cloud Ingestion Pipelines with JSON Telemetry',
-      'Real-Time WebSocket Sensor Dashboards',
+      'Microcontroller Interfacing, Hardware Signals & Sensors',
+      'Lightweight Publish-Subscribe Message Queuing',
+      'Cloud Ingestion Pipelines & Structured Telemetry',
+      'Real-Time Bi-Directional Streaming Dashboards',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-06T13:00:00.000Z',
@@ -447,8 +447,8 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-sql-masterclass',
-    title: 'Database Management & SQL Performance Masterclass',
-    summary: 'Master complex joins, window functions, B-tree indexing strategies, query execution plans, and ACID transaction isolation.',
+    title: 'Database Systems & High-Performance Data Engineering',
+    summary: 'Master relational data modeling, analytical window aggregations, indexing strategies, query plan optimization, and robust transactional isolation.',
     description: 'A comprehensive deep dive into database performance engineering. Learn how relational query engines optimize queries, diagnose slow table scans using EXPLAIN ANALYZE, and structure robust schema normalization.\n\nPrerequisites: Basic SQL SELECT queries.',
     category: 'Software Engineering',
     bannerImageUrl: '/assets/images/cloud-devops-workshop-banner.jpg',
@@ -469,10 +469,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 199,
     currency: 'INR',
     learningOutcomes: [
-      'Advanced Analytical Window Functions & CTEs',
-      'B-Tree Indexing Strategies & Covering Indexes',
-      'Query Execution Plan Diagnosis with EXPLAIN',
-      'ACID Isolation Levels & Concurrency Locking',
+      'Advanced Analytical Aggregations & Query Decomposition',
+      'High-Throughput Indexing Strategies & Data Access Paths',
+      'Query Execution Cost Profiling & Bottleneck Diagnosis',
+      'Transactional Integrity, Isolation Levels & Concurrency Locking',
     ],
     status: 'COMPLETED',
     createdAt: '2026-10-26T10:00:00.000Z',
@@ -480,9 +480,9 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-docker-devops',
-    title: 'DevOps & Docker Containerization Fundamentals',
-    summary: 'Containerize multi-service applications, author Dockerfiles, manage volumes, networks, and Docker Compose stacks.',
-    description: 'From localhost code to containerized microservices. Build lean multi-stage Docker images, set up continuous integration pipelines, manage container volumes and networks, and deploy container stacks.\n\nPrerequisites: Basic command line usage.',
+    title: 'DevOps & Container Infrastructure Engineering',
+    summary: 'Package and orchestrate multi-service applications, configure isolated virtual networks, persistent storage volumes, and continuous integration workflows.',
+    description: 'From localhost code to containerized microservices. Build lightweight reproducible container environments, set up continuous integration pipelines, manage persistent storage, and orchestrate service deployments.\n\nPrerequisites: Basic command line usage.',
     category: 'Cloud Computing',
     bannerImageUrl: '/assets/images/devops-docker-workshop-banner.jpg',
     organizerId: 'usr-org-1',
@@ -502,10 +502,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 299,
     currency: 'INR',
     learningOutcomes: [
-      'Multi-Stage Dockerfile Authoring & Optimization',
-      'Container Networking, Port Mapping & Volume Mounts',
-      'Orchestrating Polyglot Apps with Docker Compose',
-      'Automated CI Image Scanning & Registry Publishing',
+      'Lightweight Reproducible Container Image Packaging',
+      'Isolated Virtual Networking & Persistent Data Volumes',
+      'Multi-Service Application Orchestration & Service Discovery',
+      'Continuous Integration Automation & Image Registry Delivery',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-07T10:00:00.000Z',
@@ -513,9 +513,9 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-dsa-java',
-    title: 'Data Structures & Competitive Algorithms in Java',
-    summary: 'Solve complex tree, graph, dynamic programming, and greedy algorithmic challenges with optimal time and space complexity.',
-    description: 'Accelerate algorithmic problem solving. Practice BFS/DFS traversals, Dijkstra shortest path, knapsack DP patterns, segment trees, and asymptotic runtime optimizations in Java.\n\nPrerequisites: Intermediate programming experience.',
+    title: 'Advanced Data Structures & Algorithmic Problem Solving',
+    summary: 'Solve complex hierarchical trees, network graphs, dynamic programming, and optimization challenges with asymptotic time and memory efficiency.',
+    description: 'Accelerate algorithmic problem solving. Practice BFS/DFS traversals, Dijkstra shortest path, knapsack DP patterns, segment trees, and asymptotic runtime and space optimizations.\n\nPrerequisites: Intermediate programming experience.',
     category: 'Software Engineering',
     bannerImageUrl: '/assets/images/dsa-java-workshop-banner.jpg',
     organizerId: 'usr-org-omkar',
@@ -535,10 +535,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 249,
     currency: 'INR',
     learningOutcomes: [
-      'Graph Traversal Algorithms (BFS/DFS & Shortest Paths)',
-      'Dynamic Programming Memoization & Tabulation',
-      'Tree Structures: BST, AVL & Binary Heaps',
-      'Amortized Runtime Complexity & Space Optimization',
+      'Graph Traversal & Shortest-Path Optimization Algorithms',
+      'Dynamic Programming Optimization & State Tabulation',
+      'Hierarchical Data Structures: Balanced Trees & Priority Heaps',
+      'Asymptotic Computational Complexity & Memory Optimization',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-08T14:00:00.000Z',
@@ -546,9 +546,9 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
   },
   {
     id: 'ws-spring-rest-apis',
-    title: 'Building Production REST APIs with Spring Boot 3',
-    summary: 'Architect enterprise Spring Boot 3 microservices with JPA/Hibernate, validation, security filters, and Swagger OpenAPI.',
-    description: 'Learn best practices for building production-ready RESTful web services with Spring Boot 3, Java 21, Spring Data MongoDB/JPA, Bean Validation, exception handling, and OpenAPI documentation.\n\nPrerequisites: Java and basic HTTP fundamentals.',
+    title: 'Enterprise REST API Architecture & Service Engineering',
+    summary: 'Architect enterprise-grade web service endpoints with structured validation, data persistence, security layers, and interactive documentation.',
+    description: 'Learn best practices for designing and deploying production-ready RESTful web services, structured input validation, transactional persistence, custom exception handling, and interactive documentation standards.\n\nPrerequisites: Basic web protocols and computing fundamentals.',
     category: 'Web Development',
     bannerImageUrl: '/assets/images/spring-boot-rest-apis-banner.jpg',
     organizerId: 'usr-org-1',
@@ -568,10 +568,10 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
     price: 100,
     currency: 'INR',
     learningOutcomes: [
-      'Spring Boot 3 Web Layer & Controller Advice',
-      'Declarative Bean Validation & Custom Constraints',
-      'Spring Data Repository Projections & Transactions',
-      'Interactive OpenAPI / Swagger Documentation',
+      'Enterprise Web Layer Design & Centralized Error Handling',
+      'Declarative Data Validation & Custom Integrity Constraints',
+      'High-Performance Data Queries & Transactional Integrity',
+      'Standardized Interactive API Documentation & Testing',
     ],
     status: 'PUBLISHED',
     createdAt: '2026-11-09T09:30:00.000Z',
@@ -623,7 +623,7 @@ export const INITIAL_REGISTRATIONS: Registration[] = [
     participantId: 'usr-aary-nikam',
     participantName: 'Aary Nikam',
     participantEmail: 'mca26.aary.nikam@gnims.com',
-    ticketCode: 'TKT-AARY-JAVA-33C3',
+    ticketCode: 'TKT-AARY-ENT-33C3',
     status: 'ATTENDED',
     pricingTypeSnapshot: 'FREE',
     amount: 0,
@@ -1011,7 +1011,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'WORKSHOP_CREATED',
     entityType: 'WORKSHOP',
     entityId: 'ws-fullstack',
-    shortDescription: 'Created workshop: Full-Stack Web Development with React 19 & Spring Boot (Free).',
+    shortDescription: 'Created workshop: Full-Stack Web Application Engineering (Free).',
     createdAt: '2026-11-02T09:30:00.000Z',
   },
   {
@@ -1021,7 +1021,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'WORKSHOP_CREATED',
     entityType: 'WORKSHOP',
     entityId: 'ws-ai-deeplearning',
-    shortDescription: 'Created studio: Practical AI: Deep Learning & Neural Architecture Studio (â‚¹499).',
+    shortDescription: 'Created studio: Applied Artificial Intelligence & Neural Architecture Studio (â‚¹499).',
     createdAt: '2026-11-03T14:00:00.000Z',
   },
   {
@@ -1031,7 +1031,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'WORKSHOP_CREATED',
     entityType: 'WORKSHOP',
     entityId: 'ws-cloud-devops',
-    shortDescription: 'Created workshop: Cloud Computing & AWS Architecture Fundamentals (â‚¹299).',
+    shortDescription: 'Created workshop: Cloud Infrastructure & Distributed Systems Engineering (â‚¹299).',
     createdAt: '2026-11-04T10:00:00.000Z',
   },
   {
@@ -1051,7 +1051,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'REGISTRATION_CONFIRMED',
     entityType: 'REGISTRATION',
     entityId: 'reg-aary-1',
-    shortDescription: 'Enrolled in Full-Stack Web Development with React 19 & Spring Boot.',
+    shortDescription: 'Enrolled in Full-Stack Web Application Engineering.',
     createdAt: '2026-11-09T10:00:00.000Z',
   },
   {
@@ -1071,7 +1071,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'REGISTRATION_PAID_CONFIRMED',
     entityType: 'REGISTRATION',
     entityId: 'reg-kedar-1',
-    shortDescription: 'Completed test payment (â‚¹299) for Cloud Computing & AWS Architecture.',
+    shortDescription: 'Completed test payment (â‚¹299) for Cloud Infrastructure & Distributed Systems.',
     createdAt: '2026-11-08T09:15:00.000Z',
   },
   {
@@ -1081,7 +1081,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'REGISTRATION_CONFIRMED',
     entityType: 'REGISTRATION',
     entityId: 'reg-omkar-1',
-    shortDescription: 'Enrolled in Full-Stack Web Development with React 19 & Spring Boot.',
+    shortDescription: 'Enrolled in Full-Stack Web Application Engineering.',
     createdAt: '2026-11-09T11:20:00.000Z',
   },
   {
@@ -1091,7 +1091,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     action: 'REGISTRATION_ATTENDED',
     entityType: 'REGISTRATION',
     entityId: 'reg-aary-3',
-    shortDescription: 'Verified ticket TKT-AARY-JAVA-33C3 at gate for Advanced Java Workshop.',
+    shortDescription: 'Verified ticket TKT-AARY-ENT-33C3 at gate for Enterprise Software Engineering Workshop.',
     createdAt: '2026-11-05T09:20:00.000Z',
   },
 ];

@@ -22,15 +22,15 @@ interface WorkshopFormModalProps {
 }
 
 const PRESET_BANNERS = [
-  { id: 'web', label: 'Full Stack React & Spring', url: BANNER_WEB },
-  { id: 'spring-rest', label: 'Spring Boot 3 APIs', url: BANNER_SPRING_REST },
-  { id: 'dsa', label: 'Java DSA & Algorithms', url: BANNER_DSA_JAVA },
-  { id: 'devops-pipe', label: 'DevOps & Docker CI/CD', url: BANNER_DEVOPS_DOCKER },
-  { id: 'cloud-aws', label: 'Cloud & Kubernetes', url: BANNER_CLOUD },
-  { id: 'sys-arch', label: 'System Flow Architecture', url: BANNER_SYSTEM_ARCH },
-  { id: 'ai', label: 'Artificial Intelligence', url: BANNER_AI },
-  { id: 'cyber', label: 'Cybersecurity', url: BANNER_CYBER },
-  { id: 'collab', label: 'Innovation Lab', url: HERO_IMAGE },
+  { id: 'web', label: 'Full-Stack Web Engineering', url: BANNER_WEB },
+  { id: 'spring-rest', label: 'Enterprise REST APIs', url: BANNER_SPRING_REST },
+  { id: 'dsa', label: 'Algorithms & Problem Solving', url: BANNER_DSA_JAVA },
+  { id: 'devops-pipe', label: 'Continuous Delivery & Infrastructure', url: BANNER_DEVOPS_DOCKER },
+  { id: 'cloud-aws', label: 'Cloud Systems & Scalability', url: BANNER_CLOUD },
+  { id: 'sys-arch', label: 'Enterprise Architecture & Systems', url: BANNER_SYSTEM_ARCH },
+  { id: 'ai', label: 'Applied Artificial Intelligence', url: BANNER_AI },
+  { id: 'cyber', label: 'Cybersecurity & Defense', url: BANNER_CYBER },
+  { id: 'collab', label: 'Innovation & Studio Lab', url: HERO_IMAGE },
 ];
 
 export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({

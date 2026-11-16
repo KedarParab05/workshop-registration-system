@@ -1,5 +1,5 @@
 /**
- * API utility for making authenticated requests to the Spring Boot backend.
+ * API utility for making authenticated requests to the backend services.
  * Automatically attaches JWT Bearer token from localStorage.
  */
 
