@@ -6,6 +6,7 @@ import com.workshophub.model.enums.AccountStatus;
 import com.workshophub.model.enums.UserRole;
 import com.workshophub.repository.AuditLogRepository;
 import com.workshophub.repository.UserRepository;
+import com.workshophub.util.ValidationUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,14 +49,30 @@ public class UserService {
      * Rule: Never allow public registration to assign SUPER_ADMIN role.
      */
     public User registerUser(String fullName, String email, String rawPassword, UserRole requestedRole, String department) {
-        if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException("Valid email address is required.");
-        }
-        if (userRepository.existsByEmailIgnoreCase(email)) {
+        return registerUser(fullName, email, rawPassword, requestedRole, department, null);
+    }
+
+    /**
+     * Registers a new user with full security validations:
+     * - Name validated (>= 2 chars)
+     * - Email validated (standard pattern)
+     * - Password complexity enforced (>= 6 chars, uppercase, lowercase, digit)
+     * - Phone number validated (10 digits Indian format ^[6-9]\d{9}$)
+     * - BCrypt password encryption
+     */
+    public User registerUser(String fullName, String email, String rawPassword, UserRole requestedRole, String department, String phoneNumber) {
+        String validName = ValidationUtils.validateFullName(fullName);
+        String validEmail = ValidationUtils.validateEmail(email);
+
+        if (userRepository.existsByEmailIgnoreCase(validEmail)) {
             throw new IllegalArgumentException("An account with this email address already exists.");
         }
-        if (rawPassword == null || rawPassword.length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters.");
+
+        ValidationUtils.validatePassword(rawPassword);
+
+        String cleanPhone = null;
+        if (phoneNumber != null && !phoneNumber.isBlank()) {
+            cleanPhone = ValidationUtils.validateAndCleanIndianPhone(phoneNumber);
         }
 
         // Security rule: Prevent public registration from assigning SUPER_ADMIN
@@ -64,11 +81,12 @@ public class UserService {
                           : UserRole.PARTICIPANT;
 
         User user = new User();
-        user.setFullName(fullName != null ? fullName.trim() : "Participant");
-        user.setEmail(email.trim().toLowerCase());
+        user.setFullName(validName);
+        user.setEmail(validEmail);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         user.setRole(safeRole);
-        user.setDepartment(department);
+        user.setDepartment(department != null ? department.trim() : null);
+        user.setPhoneNumber(cleanPhone);
         user.setAccountStatus(AccountStatus.ACTIVE);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());

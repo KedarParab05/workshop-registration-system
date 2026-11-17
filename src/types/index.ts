@@ -51,6 +51,7 @@ export interface Workshop {
   category: string;
   bannerImageUrl: string;
   bannerImagePublicId?: string;
+  bannerImagePublicId?: string;
   organizerId: string;
   organizerNameSnapshot: string;
   date: string; // YYYY-MM-DD
@@ -149,6 +150,7 @@ export interface WorkshopFormData {
   description: string;
   category: string;
   bannerImageUrl: string;
+  bannerImagePublicId?: string;
   date: string;
   startTime: string;
   endTime: string;

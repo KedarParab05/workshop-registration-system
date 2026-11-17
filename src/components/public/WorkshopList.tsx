@@ -7,15 +7,12 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Filter,
-  CheckCircle,
-  AlertCircle,
   ArrowRight,
   BookOpen,
   X,
   Compass,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 
 export const WorkshopList: React.FC = () => {
   const { workshops, registrations, navigateTo, currentUser } = useApp();
@@ -78,46 +75,46 @@ export const WorkshopList: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6 sm:space-y-8 transition-colors duration-200">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6 sm:space-y-8">
       {/* Header & Subtitle */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#DCE4D6] dark:border-[#233d2e] pb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-2 border-[#101D32] pb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-semibold bg-[#DAE7C7] dark:bg-[#1e3828] text-[#08482D] dark:text-[#9ee2b8] mb-2">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Academic Schedule & Discovery</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD6B0] border border-[#101D32] text-[#101D32] mb-2 shadow-[2px_2px_0px_0px_#101D32]">
+            <BookOpen className="w-3.5 h-3.5 text-[#F4511E]" />
+            <span>Academic Schedule &amp; Discovery</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold text-[#101410] dark:text-[#f0f5ee] tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-heading font-extrabold text-[#101D32] tracking-tight">
             Explore Workshops
           </h1>
-          <p className="text-xs sm:text-sm text-[#5E5E61] dark:text-[#8ba895] mt-1">
+          <p className="text-xs sm:text-sm text-[#101D32]/80 mt-1 font-sans">
             Browse upcoming workshops, verify available seats, and register with Razorpay Secure Checkout.
           </p>
         </div>
 
         {/* Workshop Trust Tag */}
-        <div className="text-xs text-[#5E5E61] dark:text-[#8ba895] bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#233d2e] px-4 py-2.5 rounded-2xl shadow-xs self-start md:self-auto flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#08482D] dark:bg-[#9ee2b8]" />
-          <span><strong className="text-[#101410] dark:text-[#f0f5ee] font-semibold">Academic Workshops</strong> · Razorpay Instant Checkout</span>
+        <div className="text-xs text-[#101D32] bg-white border-2 border-[#101D32] px-4 py-2.5 rounded-xl shadow-[4px_4px_0px_0px_#101D32] self-start md:self-auto flex items-center gap-2 font-sans font-medium">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#F4511E]" />
+          <span><strong className="text-[#101D32] font-bold">Academic Workshops</strong> · Razorpay Instant Checkout</span>
         </div>
       </div>
 
       {/* Filter Bar: Search, Category Buttons, Time Segmented Control */}
-      <div className="space-y-4 bg-white dark:bg-[#14231b] p-4 sm:p-5 rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-xs transition-colors">
+      <div className="space-y-4 bg-white p-4 sm:p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32]">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           {/* Search Box */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <div className="relative flex-1 font-sans">
+            <Search className="w-4 h-4 text-[#101D32]/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by topic, keyword, venue, or speaker..."
-              className="w-full pl-9 pr-9 py-2.5 rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-xs text-[#101410] dark:text-[#f0f5ee] focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+              className="w-full pl-9 pr-9 py-2.5 rounded-xl border-2 border-[#101D32] bg-white text-xs text-[#101D32] placeholder:text-[#101D32]/50 focus:outline-none focus:ring-2 focus:ring-[#F4511E]"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5E5E61] dark:text-[#95ad9e] hover:text-[#101410] dark:hover:text-[#f0f5ee] cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#101D32]/70 hover:text-[#101D32] cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -125,33 +122,33 @@ export const WorkshopList: React.FC = () => {
           </div>
 
           {/* Time Segmented Control */}
-          <div className="flex items-center gap-1 p-1 bg-[#F5F8EF] dark:bg-[#1b3025] border border-[#DCE4D6] dark:border-[#233d2e] rounded-2xl shrink-0 self-start sm:self-auto">
+          <div className="flex items-center gap-1 p-1 bg-[#FFF5E9] border-2 border-[#101D32] rounded-xl shrink-0 self-start sm:self-auto font-sans">
             <button
               onClick={() => setTimeFilter('upcoming')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-heading font-bold transition-all cursor-pointer ${
                 timeFilter === 'upcoming'
-                  ? 'bg-[#08482D] text-[#F5F8EF] shadow-xs'
-                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+                  ? 'bg-[#F4511E] text-white border border-[#101D32] shadow-[2px_2px_0px_0px_#101D32]'
+                  : 'text-[#101D32] hover:bg-[#FFD6B0]'
               }`}
             >
               Upcoming
             </button>
             <button
               onClick={() => setTimeFilter('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-heading font-bold transition-all cursor-pointer ${
                 timeFilter === 'all'
-                  ? 'bg-[#08482D] text-[#F5F8EF] shadow-xs'
-                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+                  ? 'bg-[#F4511E] text-white border border-[#101D32] shadow-[2px_2px_0px_0px_#101D32]'
+                  : 'text-[#101D32] hover:bg-[#FFD6B0]'
               }`}
             >
               All Dates
             </button>
             <button
               onClick={() => setTimeFilter('past')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-heading font-bold transition-all cursor-pointer ${
                 timeFilter === 'past'
-                  ? 'bg-[#08482D] text-[#F5F8EF] shadow-xs'
-                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+                  ? 'bg-[#F4511E] text-white border border-[#101D32] shadow-[2px_2px_0px_0px_#101D32]'
+                  : 'text-[#101D32] hover:bg-[#FFD6B0]'
               }`}
             >
               Completed
@@ -160,15 +157,15 @@ export const WorkshopList: React.FC = () => {
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none font-sans">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-heading font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-heading font-bold whitespace-nowrap transition-all border-2 border-[#101D32] cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-[#08482D] text-[#F5F8EF] shadow-xs'
-                  : 'bg-[#F5F8EF] dark:bg-[#1b3025] text-[#5E5E61] dark:text-[#8ba895] hover:bg-[#DAE7C7] hover:text-[#08482D] border border-[#DCE4D6] dark:border-[#233d2e]'
+                  ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
+                  : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
               }`}
             >
               {cat}
@@ -178,14 +175,14 @@ export const WorkshopList: React.FC = () => {
       </div>
 
       {/* Results Count & Clear */}
-      <div className="flex items-center justify-between text-xs text-[#5E5E61] dark:text-[#8ba895] px-1">
+      <div className="flex items-center justify-between text-xs text-[#101D32]/80 px-1 font-sans">
         <div>
-          Showing <strong className="text-[#101410] dark:text-[#f0f5ee]">{filteredWorkshops.length}</strong> available {filteredWorkshops.length === 1 ? 'workshop' : 'workshops'}
+          Showing <strong className="text-[#101D32] font-bold">{filteredWorkshops.length}</strong> available {filteredWorkshops.length === 1 ? 'workshop' : 'workshops'}
         </div>
         {(searchQuery || selectedCategory !== 'All' || timeFilter !== 'upcoming') && (
           <button
             onClick={clearFilters}
-            className="text-[#08482D] dark:text-[#9ee2b8] hover:underline font-heading font-semibold"
+            className="text-[#F4511E] hover:underline font-heading font-bold cursor-pointer"
           >
             Clear Filters
           </button>
@@ -194,17 +191,17 @@ export const WorkshopList: React.FC = () => {
 
       {/* Workshop Cards Grid */}
       {filteredWorkshops.length === 0 ? (
-        <div className="bg-white dark:bg-[#14231b] p-12 rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] text-center space-y-3">
-          <Compass className="w-10 h-10 text-[#5E5E61] dark:text-[#8ba895] mx-auto opacity-60" />
-          <h3 className="font-heading font-bold text-base text-[#101410] dark:text-[#f0f5ee]">
+        <div className="bg-white p-12 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] text-center space-y-3 font-sans">
+          <Compass className="w-10 h-10 text-[#101D32]/40 mx-auto" />
+          <h3 className="font-heading font-extrabold text-base text-[#101D32]">
             No matching workshops found
           </h3>
-          <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] max-w-sm mx-auto">
+          <p className="text-xs text-[#101D32]/70 max-w-sm mx-auto">
             Try adjusting your search query, selecting another category, or viewing all dates.
           </p>
           <button
             onClick={clearFilters}
-            className="mt-2 px-4 py-2 bg-[#08482D] text-[#F5F8EF] rounded-xl text-xs font-heading font-semibold hover:bg-[#0c5c3b] transition-colors"
+            className="mt-2 px-4 py-2 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] text-xs font-heading font-bold cursor-pointer"
           >
             Reset Filters
           </button>
@@ -214,13 +211,12 @@ export const WorkshopList: React.FC = () => {
           {filteredWorkshops.map((workshop) => {
             const seats = calculateSeats(workshop, registrations);
             return (
-              <motion.div
+              <div
                 key={workshop.id}
-                whileHover={{ y: -4 }}
-                className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] overflow-hidden shadow-xs hover:shadow-xl transition-all flex flex-col justify-between"
+                className="bg-white rounded-2xl border-2 border-[#101D32] overflow-hidden shadow-[4px_4px_0px_0px_#101D32] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101D32] transition-all flex flex-col justify-between"
               >
                 {/* Banner Thumbnail with 16:10 Aspect Ratio */}
-                <div className="relative aspect-[16/10] bg-[#E8F0DF] dark:bg-[#1b3025] overflow-hidden">
+                <div className="relative aspect-[16/10] bg-[#FFF5E9] overflow-hidden border-b-2 border-[#101D32]">
                   <img
                     src={normalizeBannerUrl(workshop.bannerImageUrl, workshop)}
                     alt={workshop.title}
@@ -230,15 +226,15 @@ export const WorkshopList: React.FC = () => {
                       e.currentTarget.src = normalizeBannerUrl('', workshop);
                     }}
                   />
-                  <div className="absolute top-3 left-3 bg-[#DAE7C7] text-[#08482D] text-[10px] font-heading font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap">
+                  <div className="absolute top-3 left-3 bg-[#FFD6B0] text-[#101D32] border border-[#101D32] text-[10px] font-heading font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md shadow-[2px_2px_0px_0px_#101D32] shrink-0 whitespace-nowrap">
                     {workshop.category}
                   </div>
-                  <div className="absolute top-3 right-3 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shadow-xs shrink-0 whitespace-nowrap bg-[#08482D] text-[#DAE7C7] border border-[#DAE7C7]/40">
+                  <div className="absolute top-3 right-3 text-[11px] font-mono font-extrabold px-2.5 py-1 rounded-md shadow-[2px_2px_0px_0px_#101D32] shrink-0 whitespace-nowrap bg-[#F4511E] text-white border border-[#101D32]">
                     ₹{workshop.price || 199}
                   </div>
                   {seats.isFull && (
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">
-                      <span className="text-white text-xs font-bold uppercase tracking-wider bg-rose-600 px-3 py-1 rounded-full shadow-lg">
+                    <div className="absolute inset-0 bg-[#101D32]/80 backdrop-blur-xs flex items-center justify-center">
+                      <span className="text-white text-xs font-heading font-extrabold uppercase tracking-wider bg-[#E84316] border-2 border-[#101D32] px-3 py-1 rounded-md shadow-[3px_3px_0px_0px_#101D32]">
                         Capacity Reached
                       </span>
                     </div>
@@ -248,56 +244,55 @@ export const WorkshopList: React.FC = () => {
                 {/* Content */}
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div>
-                    <div className="text-xs text-[#5E5E61] dark:text-[#8ba895] mb-1.5 flex items-center gap-1.5">
+                    <div className="text-xs text-[#101D32]/70 mb-1.5 flex items-center gap-1.5 font-sans">
                       <span>Led by</span>
-                      <strong className="text-[#101410] dark:text-[#f0f5ee] font-medium">{workshop.organizerNameSnapshot}</strong>
+                      <strong className="text-[#101D32] font-semibold">{workshop.organizerNameSnapshot}</strong>
                     </div>
 
-                    <h3 className="text-base font-heading font-bold text-[#101410] dark:text-[#f0f5ee] line-clamp-1 mb-2">
+                    <h3 className="text-base font-heading font-extrabold text-[#101D32] line-clamp-1 mb-2">
                       {workshop.title}
                     </h3>
 
-                    <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-[#101D32]/80 line-clamp-2 leading-relaxed font-sans">
                       {workshop.summary}
                     </p>
 
-                    <div className="space-y-1.5 text-xs text-[#5E5E61] dark:text-[#8ba895] pt-3 mt-3 border-t border-[#DCE4D6]/70 dark:border-[#233d2e]">
+                    <div className="space-y-1.5 text-xs text-[#101D32]/80 pt-3 mt-3 border-t-2 border-[#101D32]/10 font-sans">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5 text-[#08482D] dark:text-[#9ee2b8] shrink-0" />
-                        <span>{workshop.date}</span>
+                        <Calendar className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
+                        <span className="font-medium">{workshop.date}</span>
                         <span aria-hidden="true">·</span>
-                        <Clock className="w-3.5 h-3.5 text-[#08482D] dark:text-[#9ee2b8] shrink-0" />
-                        <span>{workshop.startTime} - {workshop.endTime}</span>
+                        <Clock className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
+                        <span className="font-medium">{workshop.startTime} - {workshop.endTime}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-[#08482D] dark:text-[#9ee2b8] shrink-0" />
-                        <span className="truncate">{workshop.venue}</span>
+                        <MapPin className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
+                        <span className="truncate font-medium">{workshop.venue}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Card Footer with Mobile-Friendly Action */}
-                  <div className="pt-3 border-t border-[#DCE4D6]/70 dark:border-[#233d2e] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="pt-3 border-t-2 border-[#101D32]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 font-sans">
                     <div className="text-xs">
                       {seats.isFull ? (
-                        <span className="text-rose-600 font-semibold">0 seats remaining</span>
+                        <span className="text-[#E84316] font-bold">0 seats remaining</span>
                       ) : (
-                        <span className="text-[#5E5E61] dark:text-[#8ba895]">
-                          <strong className="text-[#08482D] dark:text-[#9ee2b8] font-bold">{seats.availableSeats}</strong> of {workshop.capacity} seats left
+                        <span className="text-[#101D32]/80">
+                          <strong className="text-[#F4511E] font-extrabold">{seats.availableSeats}</strong> of {workshop.capacity} seats left
                         </span>
                       )}
                     </div>
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       onClick={() => navigateTo('workshop-detail', workshop.id)}
-                      className="w-full sm:w-auto px-4 py-2 text-xs font-heading font-semibold text-[#08482D] dark:text-[#9ee2b8] bg-[#E8F0DF] dark:bg-[#1b3025] hover:bg-[#DAE7C7] dark:hover:bg-[#223f2f] rounded-xl transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5"
+                      className="w-full sm:w-auto px-4 py-2 text-xs font-heading font-bold text-white bg-[#F4511E] hover:bg-[#E84316] rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#101D32] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
                     >
                       <span>View Details</span>
                       <ArrowRight className="w-3.5 h-3.5" />
-                    </motion.button>
+                    </button>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

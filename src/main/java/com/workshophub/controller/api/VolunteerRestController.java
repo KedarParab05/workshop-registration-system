@@ -12,6 +12,7 @@ import com.workshophub.repository.RegistrationRepository;
 import com.workshophub.repository.UserRepository;
 import com.workshophub.repository.VolunteerRepository;
 import com.workshophub.repository.WorkshopRepository;
+import com.workshophub.util.ValidationUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -125,76 +126,81 @@ public class VolunteerRestController {
      */
     @PostMapping("/request")
     public ResponseEntity<?> requestVolunteering(@RequestBody Map<String, String> body) {
-        String name = body.get("name");
-        String email = body.get("email");
-        String phoneNumber = body.get("phoneNumber");
-        String workshopId = body.get("assignedWorkshopId");
-        String requestNote = body.get("requestNote");
+        try {
+            String name = body.get("name");
+            String email = body.get("email");
+            String phoneNumber = body.get("phoneNumber");
+            String workshopId = body.get("assignedWorkshopId");
+            String requestNote = body.get("requestNote");
 
-        if (email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Volunteer email is required."));
-        }
-        if (workshopId == null || workshopId.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Workshop selection is required."));
-        }
+            String validEmail = ValidationUtils.validateEmail(email);
+            String validName = (name != null && !name.isBlank()) ? ValidationUtils.validateFullName(name) : "Volunteer Applicant";
+            String cleanPhone = (phoneNumber != null && !phoneNumber.isBlank()) ? ValidationUtils.validateAndCleanIndianPhone(phoneNumber) : null;
 
-        Workshop workshop = workshopRepository.findById(workshopId).orElse(null);
-        if (workshop == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "Workshop not found."));
-        }
-
-        String cleanEmail = email.trim().toLowerCase();
-        Optional<Volunteer> existingOpt = volunteerRepository.findByEmailIgnoreCaseAndAssignedWorkshopId(cleanEmail, workshopId);
-        if (existingOpt.isPresent()) {
-            Volunteer existing = existingOpt.get();
-            if ("ACTIVE".equalsIgnoreCase(existing.getStatus()) && existing.getAccessCode() != null) {
-                return ResponseEntity.ok(Map.of(
-                        "success", true,
-                        "alreadyApproved", true,
-                        "message", "Your volunteering request was already approved! Your Access Code is: " + existing.getAccessCode(),
-                        "volunteer", existing,
-                        "accessCode", existing.getAccessCode()
-                ));
-            } else if ("PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
-                return ResponseEntity.ok(Map.of(
-                        "success", true,
-                        "pending", true,
-                        "message", "Your request is currently pending organizer approval. Please check back shortly or ask the organizer for your code.",
-                        "volunteer", existing
-                ));
+            if (workshopId == null || workshopId.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Workshop selection is required."));
             }
+
+            Workshop workshop = workshopRepository.findById(workshopId).orElse(null);
+            if (workshop == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "Workshop not found."));
+            }
+
+            String cleanEmail = validEmail;
+            Optional<Volunteer> existingOpt = volunteerRepository.findByEmailIgnoreCaseAndAssignedWorkshopId(cleanEmail, workshopId);
+            if (existingOpt.isPresent()) {
+                Volunteer existing = existingOpt.get();
+                if ("ACTIVE".equalsIgnoreCase(existing.getStatus()) && existing.getAccessCode() != null) {
+                    return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "alreadyApproved", true,
+                            "message", "Your volunteering request was already approved! Your Access Code is: " + existing.getAccessCode(),
+                            "volunteer", existing,
+                            "accessCode", existing.getAccessCode()
+                    ));
+                } else if ("PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
+                    return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "pending", true,
+                            "message", "Your request is currently pending organizer approval. Please check back shortly or ask the organizer for your code.",
+                            "volunteer", existing
+                    ));
+                }
+            }
+
+            Volunteer v = existingOpt.orElseGet(Volunteer::new);
+            v.setName(validName);
+            v.setEmail(cleanEmail);
+            v.setPhoneNumber(cleanPhone);
+            v.setOrganizerId(workshop.getOrganizerId());
+            v.setOrganizerName(workshop.getOrganizerNameSnapshot());
+            v.setAssignedWorkshopId(workshop.getId());
+            v.setAssignedWorkshopTitle(workshop.getTitle());
+            v.setStatus("PENDING_APPROVAL");
+            v.setRequestNote(requestNote != null ? requestNote.trim() : "Requested via Volunteer Portal");
+            v.setCreatedAt(LocalDateTime.now());
+            v.setAccessCode(null);
+
+            Volunteer saved = volunteerRepository.save(v);
+
+            auditLogRepository.save(new AuditLog(
+                    saved.getId(),
+                    saved.getName(),
+                    "VOLUNTEER_REQUEST_SUBMITTED",
+                    "VOLUNTEER",
+                    saved.getId(),
+                    "Volunteer " + saved.getName() + " requested to volunteer for '" + workshop.getTitle() + "'"
+            ));
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "pending", true,
+                    "message", "Request submitted to workshop organizer (" + workshop.getOrganizerNameSnapshot() + ")! Once they approve it, they will give you an Access Code.",
+                    "volunteer", saved
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
         }
-
-        Volunteer v = existingOpt.orElseGet(Volunteer::new);
-        v.setName(name != null && !name.isBlank() ? name.trim() : "Volunteer Applicant");
-        v.setEmail(cleanEmail);
-        v.setPhoneNumber(phoneNumber != null ? phoneNumber.trim() : null);
-        v.setOrganizerId(workshop.getOrganizerId());
-        v.setOrganizerName(workshop.getOrganizerNameSnapshot());
-        v.setAssignedWorkshopId(workshop.getId());
-        v.setAssignedWorkshopTitle(workshop.getTitle());
-        v.setStatus("PENDING_APPROVAL");
-        v.setRequestNote(requestNote != null ? requestNote.trim() : "Requested via Volunteer Portal");
-        v.setCreatedAt(LocalDateTime.now());
-        v.setAccessCode(null);
-
-        Volunteer saved = volunteerRepository.save(v);
-
-        auditLogRepository.save(new AuditLog(
-                saved.getId(),
-                saved.getName(),
-                "VOLUNTEER_REQUEST_SUBMITTED",
-                "VOLUNTEER",
-                saved.getId(),
-                "Volunteer " + saved.getName() + " requested to volunteer for '" + workshop.getTitle() + "'"
-        ));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "success", true,
-                "pending", true,
-                "message", "Request submitted to workshop organizer (" + workshop.getOrganizerNameSnapshot() + ")! Once they approve it, they will give you an Access Code.",
-                "volunteer", saved
-        ));
     }
 
     /**
@@ -271,49 +277,55 @@ public class VolunteerRestController {
      */
     @PostMapping
     public ResponseEntity<?> createVolunteer(@RequestBody Map<String, String> body, Principal principal) {
-        String name = body.get("name");
-        String email = body.get("email");
-        String phoneNumber = body.get("phoneNumber");
-        String workshopId = body.get("assignedWorkshopId");
-        String organizerId = body.get("organizerId");
+        try {
+            String name = body.get("name");
+            String email = body.get("email");
+            String phoneNumber = body.get("phoneNumber");
+            String workshopId = body.get("assignedWorkshopId");
+            String organizerId = body.get("organizerId");
 
-        if (name == null || name.trim().isEmpty() || email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Volunteer name and email are required."));
+            String validName = ValidationUtils.validateFullName(name);
+            String validEmail = ValidationUtils.validateEmail(email);
+            String cleanPhone = (phoneNumber != null && !phoneNumber.isBlank()) ? ValidationUtils.validateAndCleanIndianPhone(phoneNumber) : null;
+
+            if (workshopId == null || workshopId.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Assigned workshop is required."));
+            }
+
+            Workshop workshop = workshopRepository.findById(workshopId).orElse(null);
+            if (workshop == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "Workshop not found."));
+            }
+
+            User organizer = getAuthenticatedOrganizer(principal, organizerId != null ? organizerId : workshop.getOrganizerId());
+            String orgId = organizer != null ? organizer.getId() : workshop.getOrganizerId();
+            String orgName = organizer != null ? organizer.getFullName() : workshop.getOrganizerNameSnapshot();
+
+            String code = generateSecureCode();
+            Volunteer volunteer = new Volunteer(validName, validEmail, orgId, orgName, workshop.getId(), workshop.getTitle(), code);
+            if (cleanPhone != null) {
+                volunteer.setPhoneNumber(cleanPhone);
+            }
+            Volunteer saved = volunteerRepository.save(volunteer);
+
+            auditLogRepository.save(new AuditLog(
+                    orgId,
+                    orgName,
+                    "VOLUNTEER_ASSIGNED",
+                    "VOLUNTEER",
+                    saved.getId(),
+                    "Gate volunteer " + saved.getName() + " assigned to workshop '" + workshop.getTitle() + "' with code " + code
+            ));
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "volunteer", saved,
+                    "accessCode", code,
+                    "message", "Volunteer assigned successfully. Share code '" + code + "' with volunteer."
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
         }
-        if (workshopId == null || workshopId.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Assigned workshop is required."));
-        }
-
-        Workshop workshop = workshopRepository.findById(workshopId).orElse(null);
-        if (workshop == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "Workshop not found."));
-        }
-
-        User organizer = getAuthenticatedOrganizer(principal, organizerId != null ? organizerId : workshop.getOrganizerId());
-        String orgId = organizer != null ? organizer.getId() : workshop.getOrganizerId();
-        String orgName = organizer != null ? organizer.getFullName() : workshop.getOrganizerNameSnapshot();
-
-        String code = generateSecureCode();
-        Volunteer volunteer = new Volunteer(name.trim(), email.trim().toLowerCase(), orgId, orgName, workshop.getId(), workshop.getTitle(), code);
-        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
-            volunteer.setPhoneNumber(phoneNumber.trim());
-        }
-        Volunteer saved = volunteerRepository.save(volunteer);
-
-        auditLogRepository.save(new AuditLog(
-                orgId,
-                orgName,
-                "VOLUNTEER_ASSIGNED",
-                "VOLUNTEER",
-                saved.getId(),
-                "Gate volunteer " + saved.getName() + " assigned to workshop '" + workshop.getTitle() + "' with code " + code
-        ));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "success", true,
-                "volunteer", saved,
-                "message", "Volunteer assigned successfully. Share code '" + code + "' with volunteer."
-        ));
     }
 
     /**
@@ -322,22 +334,31 @@ public class VolunteerRestController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateVolunteerProfile(@PathVariable String id, @RequestBody Map<String, String> body) {
-        Optional<Volunteer> opt = volunteerRepository.findById(id);
-        if (opt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "Volunteer not found."));
+        try {
+            Optional<Volunteer> opt = volunteerRepository.findById(id);
+            if (opt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "Volunteer not found."));
+            }
+            Volunteer v = opt.get();
+            if (body.containsKey("name")) {
+                v.setName(ValidationUtils.validateFullName(body.get("name")));
+            }
+            if (body.containsKey("email")) {
+                v.setEmail(ValidationUtils.validateEmail(body.get("email")));
+            }
+            if (body.containsKey("phoneNumber")) {
+                String raw = body.get("phoneNumber");
+                if (raw != null && !raw.isBlank()) {
+                    v.setPhoneNumber(ValidationUtils.validateAndCleanIndianPhone(raw));
+                } else {
+                    v.setPhoneNumber(null);
+                }
+            }
+            Volunteer saved = volunteerRepository.save(v);
+            return ResponseEntity.ok(Map.of("success", true, "volunteer", saved));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
         }
-        Volunteer v = opt.get();
-        if (body.containsKey("name") && body.get("name") != null && !body.get("name").isBlank()) {
-            v.setName(body.get("name").trim());
-        }
-        if (body.containsKey("email") && body.get("email") != null && !body.get("email").isBlank()) {
-            v.setEmail(body.get("email").trim().toLowerCase());
-        }
-        if (body.containsKey("phoneNumber")) {
-            v.setPhoneNumber(body.get("phoneNumber"));
-        }
-        Volunteer saved = volunteerRepository.save(v);
-        return ResponseEntity.ok(Map.of("success", true, "volunteer", saved));
     }
 
     /**

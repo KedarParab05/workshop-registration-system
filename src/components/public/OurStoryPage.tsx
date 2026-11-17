@@ -1,17 +1,11 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import {
-  Compass,
-  BookOpen,
-  Award,
-  Users,
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
   Layers,
-  Cpu,
-  Ticket,
-  QrCode,
+  Users,
   DollarSign,
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -83,10 +77,10 @@ export const OurStoryPage: React.FC = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="text-3xl sm:text-5xl lg:text-6xl font-display font-normal sm:font-medium text-[#101410] dark:text-[#f0f5ee] tracking-tight leading-tight break-words px-2"
+          className="text-3xl sm:text-5xl lg:text-6xl font-heading font-extrabold text-[#101410] tracking-tight leading-tight break-words px-2"
         >
           The Spirit of Kaushalya
-          <span className="block text-2xl sm:text-3xl font-sans font-medium text-[#08482D] dark:text-[#DAE7C7] mt-1.5">
+          <span className="block text-2xl sm:text-3xl font-sans font-bold text-[#F4511E] mt-1.5">
             (कौशल्य)
           </span>
         </motion.h1>
@@ -95,69 +89,69 @@ export const OurStoryPage: React.FC = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.1 }}
-          className="text-base sm:text-lg text-[#5E5E61] dark:text-slate-300 leading-relaxed font-sans"
+          className="text-base sm:text-lg text-[#101D32]/80 leading-relaxed font-sans"
         >
-          In Sanskrit, <strong className="text-[#08482D] dark:text-[#DAE7C7]">Kaushalya</strong> signifies skill, capability, mastery, and dedication to craft. We built Kaushalya to bridge the gap between academic theory and the practical, hands-on engineering capabilities demanded by modern technology.
+          In Sanskrit, <strong className="text-[#F4511E]">Kaushalya</strong> signifies skill, capability, mastery, and dedication to craft. We built Kaushalya to bridge the gap between academic theory and practical, hands-on engineering capabilities demanded by modern technology.
         </motion.p>
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
           NARRATIVE EDITORIAL SECTION (TWO-COLUMN SPREAD)
       ───────────────────────────────────────────────────────────── */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch font-sans">
         {/* Left Column: Origin Story */}
-        <div className="lg:col-span-7 bg-[#E8F0DF]/60 dark:bg-[#14231b]/60 border border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-8 sm:p-10 space-y-6 flex flex-col justify-between transition-colors">
+        <div className="lg:col-span-7 bg-[#FFF5E9] border-2 border-[#101D32] rounded-2xl p-8 sm:p-10 space-y-6 flex flex-col justify-between shadow-[4px_4px_0px_0px_#101D32]">
           <div className="space-y-4">
-            <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7]">
-              Origin & Mission
+            <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#F4511E] bg-[#FFD6B0] border border-[#101D32] px-2.5 py-1 rounded-md inline-block">
+              Origin &amp; Mission
             </span>
-            <h2 className="text-2xl sm:text-3xl font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#101410] tracking-tight">
               From Lecture Halls to Engineering Mastery
             </h2>
-            <p className="text-sm text-[#5E5E61] dark:text-slate-300 leading-relaxed">
+            <p className="text-sm text-[#101D32]/80 leading-relaxed">
               Every semester, collegiate engineering and computing departments host specialized workshops, lab bootcamps, and technical symposiums. Yet organizers historically wrestled with fragmented spreadsheets, uncontrolled walk-ins exceeding physical room fire capacities, lost attendance records, and cumbersome payment collection.
             </p>
-            <p className="text-sm text-[#5E5E61] dark:text-slate-300 leading-relaxed">
+            <p className="text-sm text-[#101D32]/80 leading-relaxed">
               Kaushalya was architected as an academic-first event governance studio. It empowers faculty mentors, department heads, and student society chairs to manage the complete lifecycle of technical sessions — from curriculum definition and GPS lab venue configuration to live seat reservation holds and verified gate check-in.
             </p>
           </div>
 
-          <div className="pt-4 border-t border-[#DCE4D6] dark:border-[#203a2c] grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="pt-4 border-t-2 border-[#101D32]/20 grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
-              <div className="text-2xl font-heading font-extrabold text-[#08482D] dark:text-[#DAE7C7]">100%</div>
-              <div className="text-[11px] text-[#5E5E61] dark:text-slate-400">Verifiable Passes</div>
+              <div className="text-2xl font-heading font-extrabold text-[#F4511E]">100%</div>
+              <div className="text-[11px] text-[#101D32]/70 font-bold uppercase tracking-wider">Verifiable Passes</div>
             </div>
             <div>
-              <div className="text-2xl font-heading font-extrabold text-[#08482D] dark:text-[#DAE7C7]">Zero</div>
-              <div className="text-[11px] text-[#5E5E61] dark:text-slate-400">Seat Overbooking</div>
+              <div className="text-2xl font-heading font-extrabold text-[#F4511E]">Zero</div>
+              <div className="text-[11px] text-[#101D32]/70 font-bold uppercase tracking-wider">Seat Overbooking</div>
             </div>
             <div>
-              <div className="text-2xl font-heading font-extrabold text-[#08482D] dark:text-[#DAE7C7]">4 Roles</div>
-              <div className="text-[11px] text-[#5E5E61] dark:text-slate-400">Collaborative Governance</div>
+              <div className="text-2xl font-heading font-extrabold text-[#F4511E]">4 Roles</div>
+              <div className="text-[11px] text-[#101D32]/70 font-bold uppercase tracking-wider">Governance</div>
             </div>
           </div>
         </div>
 
         {/* Right Column: Architectural Highlights */}
-        <div className="lg:col-span-5 bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-8 sm:p-10 space-y-6 flex flex-col justify-between shadow-xs">
+        <div className="lg:col-span-5 bg-white border-2 border-[#101D32] rounded-2xl p-8 sm:p-10 space-y-6 flex flex-col justify-between shadow-[4px_4px_0px_0px_#101D32]">
           <div className="space-y-4">
-            <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7]">
+            <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#101D32] bg-[#FFD6B0] border border-[#101D32] px-2.5 py-1 rounded-md inline-block">
               Platform Architecture
             </span>
-            <h3 className="text-xl font-heading font-bold text-[#101410] dark:text-white">
+            <h3 className="text-xl font-heading font-extrabold text-[#101410]">
               Academic Event Governance Pillars
             </h3>
             <div className="space-y-3.5 pt-1">
               {pillars.map((pillar, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#E8F0DF] dark:bg-[#192f22] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded bg-[#F4511E] text-white flex items-center justify-center shrink-0 mt-0.5 border border-[#101D32]">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-heading font-bold text-[#101410] dark:text-white">
+                    <h4 className="text-xs font-heading font-extrabold text-[#101410]">
                       {pillar.label}
                     </h4>
-                    <p className="text-[11px] text-[#5E5E61] dark:text-slate-400 leading-snug">
+                    <p className="text-[11px] text-[#101D32]/70 leading-snug">
                       {pillar.detail}
                     </p>
                   </div>
@@ -166,13 +160,13 @@ export const OurStoryPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#DCE4D6] dark:border-[#203a2c]">
+          <div className="pt-4 border-t-2 border-[#101D32]/20">
             <button
               onClick={() => navigateTo('workshops')}
-              className="w-full py-3 px-4 bg-[#08482D] hover:bg-[#0c5c3b] text-white font-heading font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-bold text-xs rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Explore Available Workshops</span>
-              <ArrowRight className="w-4 h-4 text-[#DAE7C7]" />
+              <ArrowRight className="w-4 h-4 text-white" />
             </button>
           </div>
         </div>
@@ -181,15 +175,15 @@ export const OurStoryPage: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────
           CORE GUIDING PRINCIPLES (4-CARD GRID)
       ───────────────────────────────────────────────────────────── */}
-      <section className="space-y-8">
+      <section className="space-y-8 font-sans">
         <div className="text-center space-y-2 max-w-xl mx-auto">
-          <span className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider">
+          <span className="text-xs font-heading font-extrabold text-[#F4511E] uppercase tracking-wider bg-[#FFD6B0] border border-[#101D32] px-2.5 py-0.5 rounded-md inline-block">
             Foundations
           </span>
-          <h2 className="text-3xl sm:text-4xl font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-heading font-extrabold text-[#101410] tracking-tight">
             Guiding Principles
           </h2>
-          <p className="text-xs sm:text-sm text-[#5E5E61] dark:text-slate-400">
+          <p className="text-xs sm:text-sm text-[#101D32]/80">
             Four commitments that shape every line of code, operational feature, and user interaction.
           </p>
         </div>
@@ -200,22 +194,22 @@ export const OurStoryPage: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="p-7 rounded-3xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] shadow-xs space-y-4 hover:border-[#08482D]/40 transition-colors"
+                className="p-7 rounded-2xl bg-white border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] space-y-4"
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
-                    <Icon className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-lg bg-[#FFD6B0] border-2 border-[#101D32] text-[#101D32] flex items-center justify-center shadow-[2px_2px_0px_0px_#101D32]">
+                    <Icon className="w-5 h-5 text-[#F4511E]" />
                   </div>
-                  <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/50 dark:bg-[#192f22] px-2.5 py-1 rounded-full">
+                  <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#101D32] bg-[#FFF5E9] border border-[#101D32] px-2.5 py-1 rounded-md">
                     {p.badge}
                   </span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="text-lg font-heading font-bold text-[#101410] dark:text-white">
+                  <h3 className="text-lg font-heading font-extrabold text-[#101410]">
                     {p.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#5E5E61] dark:text-slate-400 leading-relaxed font-sans">
+                  <p className="text-xs sm:text-sm text-[#101D32]/80 leading-relaxed font-sans">
                     {p.description}
                   </p>
                 </div>
@@ -228,24 +222,24 @@ export const OurStoryPage: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────
           BOTTOM CALLOUT TO EXPLORE OR CONTACT
       ───────────────────────────────────────────────────────────── */}
-      <section className="p-8 sm:p-12 rounded-3xl bg-[#E8F0DF]/60 dark:bg-[#14231b]/60 border border-[#DCE4D6] dark:border-[#203a2c] text-center space-y-4">
-        <h3 className="text-2xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee]">
+      <section className="p-8 sm:p-12 rounded-2xl bg-[#FFF5E9] border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] text-center space-y-4 font-sans">
+        <h3 className="text-2xl font-heading font-extrabold text-[#101410]">
           Ready to experience hands-on learning?
         </h3>
-        <p className="text-xs sm:text-sm text-[#5E5E61] dark:text-slate-400 max-w-lg mx-auto">
+        <p className="text-xs sm:text-sm text-[#101D32]/80 max-w-lg mx-auto">
           Browse upcoming academic workshops across Web Development, Artificial Intelligence, Cloud Infrastructure, and Cybersecurity.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <button
             onClick={() => navigateTo('workshops')}
-            className="px-6 py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-white font-heading font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2"
+            className="px-6 py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-bold text-xs rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all flex items-center gap-2 cursor-pointer"
           >
             <span>Browse Workshop Catalog</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#DAE7C7]" />
+            <ArrowRight className="w-3.5 h-3.5 text-white" />
           </button>
           <button
             onClick={() => navigateTo('contact')}
-            className="px-6 py-2.5 bg-white dark:bg-[#18281f] border border-[#DCE4D6] dark:border-[#22392c] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2b22] text-[#101410] dark:text-white font-heading font-bold text-xs rounded-xl transition-all"
+            className="px-6 py-2.5 bg-white border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:bg-[#FFD6B0] text-[#101410] font-heading font-bold text-xs rounded-lg transition-all cursor-pointer"
           >
             Contact Department Team
           </button>
@@ -254,4 +248,3 @@ export const OurStoryPage: React.FC = () => {
     </div>
   );
 };
-

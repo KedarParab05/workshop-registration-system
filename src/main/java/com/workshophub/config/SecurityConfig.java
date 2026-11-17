@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/workshops/**").permitAll()
                 .requestMatchers("/api/registrations/**").permitAll()
                 .requestMatchers("/api/payments/**").permitAll()
+                .requestMatchers("/api/uploads/**").permitAll()
                 .requestMatchers("/api/admin/**").permitAll()
                 // Static resources & JSP
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**", "/WEB-INF/**").permitAll()

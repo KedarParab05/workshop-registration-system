@@ -9,16 +9,11 @@ import {
   Keyboard,
   CheckCircle,
   AlertTriangle,
-  Clock,
   User,
   Sparkles,
-  Calendar,
-  ShieldCheck,
   ShieldAlert,
-  Search,
   RefreshCw,
   MapPin,
-  Check,
   Layers,
   Volume2,
   VolumeX,
@@ -385,7 +380,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
     }
   }, [currentCameraId]);
 
-  // Flip / Switch Camera
+  // Flip Camera
   const handleSwitchCamera = useCallback(async () => {
     if (availableCameras.length > 1) {
       const currentIndex = availableCameras.findIndex((c) => c.id === currentCameraId);
@@ -405,16 +400,18 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
     if (qrScannerRef.current) {
       try {
         await qrScannerRef.current.toggleFlash();
-        setFlashOn(qrScannerRef.current.isFlashOn());
+        const state = qrScannerRef.current.isFlashOn();
+        setFlashOn(state);
       } catch {}
     }
   }, []);
 
+  // Manage Camera lifecycle when modal is open / tab switches
   useEffect(() => {
     if (isOpen && activeTab === 'camera') {
       const timer = setTimeout(() => {
         startCamera();
-      }, 100);
+      }, 150);
       return () => {
         clearTimeout(timer);
         stopCamera();
@@ -422,18 +419,11 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
     } else {
       stopCamera();
     }
-    return () => {
-      stopCamera();
-    };
   }, [isOpen, activeTab, startCamera, stopCamera]);
 
-  // Handle uploaded image file
+  // Image Upload Handler
   const handleProcessImageFile = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setResult({ status: 'error', message: 'Please upload an image file (PNG, JPG, or WEBP).' });
-      return;
-    }
-
+    if (!file) return;
     setVerifying(true);
     setResult({ status: 'idle', message: '' });
 
@@ -463,42 +453,40 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Selected workshop object
-  const activeWorkshopObj = workshops.find((w) => w.id === selectedWorkshopId);
+  // Active workshop object
+  const activeWorkshopObj = selectedWorkshopId !== 'ALL'
+    ? myWorkshops.find((w) => w.id === selectedWorkshopId)
+    : undefined;
 
-  // Quick test codes for demo
+  // Confirmed registrations for quick-test in demo mode
   const testableRegistrations = registrations
-    .filter(
-      (r) =>
-        r.status === 'CONFIRMED' &&
-        (selectedWorkshopId === 'ALL' || r.workshopId === selectedWorkshopId)
-    )
+    .filter((r) => selectedWorkshopId === 'ALL' || r.workshopId === selectedWorkshopId)
+    .filter((r) => r.status === 'CONFIRMED' && !r.verified)
     .slice(0, 4);
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#08482D]/40 backdrop-blur-md"
+          className="fixed inset-0 bg-[#101D32]/60 backdrop-blur-sm"
         />
 
         {/* Modal Dialog */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 15 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 15 }}
-          transition={{ duration: 0.2 }}
-          className="relative bg-white dark:bg-[#14231b] rounded-3xl max-w-2xl w-full p-5 sm:p-7 shadow-2xl border border-[#DCE4D6] dark:border-[#203a2c] my-6 text-xs z-10 text-[#101410] dark:text-[#E8F0DF] transition-colors"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="relative bg-[#FFF5E9] rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-[8px_8px_0px_0px_#101D32] border-2 border-[#101D32] my-auto max-h-[94vh] overflow-y-auto text-xs z-10 text-[#101D32]"
         >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-xl text-[#5E5E61] hover:text-[#101410] dark:hover:text-white hover:bg-[#F5F8EF] dark:hover:bg-[#18281f] transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-xl text-[#101D32] hover:bg-[#FFD6B0] border-2 border-transparent hover:border-[#101D32] transition-all"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -507,15 +495,15 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
           {/* Modal Header */}
           <div className="flex items-center justify-between gap-4 mb-4 pr-8">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shadow-md">
-                <Scan className="w-6 h-6 text-[#DAE7C7]" />
+              <div className="w-11 h-11 rounded-2xl bg-[#101D32] text-white border-2 border-[#101D32] flex items-center justify-center shadow-[2px_2px_0px_0px_#101D32]">
+                <Scan className="w-6 h-6 text-[#FFD6B0]" />
               </div>
               <div>
-                <div className="inline-flex items-center gap-1.5 text-[11px] font-heading font-semibold text-[#08482D] dark:text-[#DAE7C7] uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3 text-[#08482D] dark:text-[#a8d38d]" />
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-[#101D32] bg-[#FFD6B0] px-2.5 py-0.5 rounded-full border border-[#101D32]">
+                  <Sparkles className="w-3 h-3 text-[#F4511E]" />
                   Live Gate Scanner & Roster Verifier
                 </div>
-                <h2 className="text-xl font-heading font-bold text-[#101410] dark:text-white">
+                <h2 className="text-xl font-heading font-black text-[#101410] mt-0.5">
                   Ticket Scanner for Organizers
                 </h2>
               </div>
@@ -525,25 +513,25 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
             <button
               type="button"
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className={`p-2 rounded-xl border text-xs flex items-center gap-1.5 transition-colors ${
+              className={`p-2 rounded-xl border-2 border-[#101D32] text-xs flex items-center gap-1.5 transition-all shadow-[2px_2px_0px_0px_#101D32] ${
                 soundEnabled
-                  ? 'border-[#DAE7C7] dark:border-[#2d4d3a] text-[#08482D] dark:text-[#DAE7C7] bg-[#E8F0DF] dark:bg-[#1b2f23]'
-                  : 'border-[#DCE4D6] dark:border-[#22392c] text-[#5E5E61]'
+                  ? 'bg-[#FFD6B0] text-[#101D32]'
+                  : 'bg-white text-[#101D32]/60'
               }`}
               title={soundEnabled ? 'Sound feedback active' : 'Sound feedback muted'}
             >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" /> : <VolumeX className="w-4 h-4" />}
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-[#F4511E]" /> : <VolumeX className="w-4 h-4" />}
             </button>
           </div>
 
           {/* Respective Workshop Selector */}
-          <div className="mb-4 p-3.5 rounded-2xl bg-[#F5F8EF] dark:bg-[#18281f] border border-[#DCE4D6] dark:border-[#22392c] space-y-2">
+          <div className="mb-4 p-3.5 rounded-2xl bg-white border-2 border-[#101D32] shadow-[3px_3px_0px_0px_#101D32] space-y-2">
             <div className="flex items-center justify-between">
-              <label className="font-heading font-semibold text-[#101410] dark:text-white flex items-center gap-1.5 text-xs">
-                <Layers className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+              <label className="font-heading font-bold text-[#101410] flex items-center gap-1.5 text-xs">
+                <Layers className="w-4 h-4 text-[#F4511E]" />
                 <span>Verifying For Respective Workshop:</span>
               </label>
-              <span className="text-[11px] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
+              <span className="text-[11px] text-[#F4511E] font-bold">
                 {activeWorkshopObj?.venue || 'Campus Venue'}
               </span>
             </div>
@@ -554,7 +542,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 setSelectedWorkshopId(e.target.value);
                 setResult({ status: 'idle', message: '' });
               }}
-              className="w-full px-3 py-2 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-white dark:bg-[#14231b] text-[#101410] dark:text-white text-xs font-heading font-semibold focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+              className="w-full px-3 py-2 rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-[#101D32] text-xs font-heading font-bold focus:outline-none focus:bg-white shadow-[2px_2px_0px_0px_#101D32]"
             >
               <option value="ALL">All My Hosted Workshops (Any Session)</option>
               {myWorkshops.map((ws) => (
@@ -565,8 +553,8 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
             </select>
 
             {activeWorkshopObj && (
-              <div className="flex items-center gap-2 text-[11px] text-[#5E5E61] dark:text-slate-400 pt-0.5">
-                <MapPin className="w-3.5 h-3.5 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
+              <div className="flex items-center gap-2 text-[11px] text-[#101D32]/75 font-medium pt-0.5">
+                <MapPin className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                 <span className="truncate">
                   Gate Location: <strong>{activeWorkshopObj.venue}</strong>
                   {activeWorkshopObj.venueAddress ? ` • ${activeWorkshopObj.venueAddress}` : ''}
@@ -576,13 +564,13 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
           </div>
 
           {/* Scan Mode Tabs */}
-          <div className="flex border-b border-[#DCE4D6] dark:border-[#203a2c] mb-4">
+          <div className="flex border-b-2 border-[#101D32] mb-4">
             <button
               onClick={() => setActiveTab('camera')}
-              className={`flex-1 pb-2.5 text-center font-heading font-semibold text-xs flex items-center justify-center gap-1.5 border-b-2 transition-all ${
+              className={`flex-1 pb-2.5 text-center font-heading font-bold text-xs flex items-center justify-center gap-1.5 border-b-2 transition-all ${
                 activeTab === 'camera'
-                  ? 'border-[#08482D] text-[#08482D] dark:border-[#DAE7C7] dark:text-[#DAE7C7]'
-                  : 'border-transparent text-[#5E5E61] hover:text-[#101410] dark:hover:text-white'
+                  ? 'border-[#F4511E] text-[#F4511E]'
+                  : 'border-transparent text-[#101D32]/70 hover:text-[#101D32]'
               }`}
             >
               <Camera className="w-4 h-4" />
@@ -590,10 +578,10 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('upload')}
-              className={`flex-1 pb-2.5 text-center font-heading font-semibold text-xs flex items-center justify-center gap-1.5 border-b-2 transition-all ${
+              className={`flex-1 pb-2.5 text-center font-heading font-bold text-xs flex items-center justify-center gap-1.5 border-b-2 transition-all ${
                 activeTab === 'upload'
-                  ? 'border-[#08482D] text-[#08482D] dark:border-[#DAE7C7] dark:text-[#DAE7C7]'
-                  : 'border-transparent text-[#5E5E61] hover:text-[#101410] dark:hover:text-white'
+                  ? 'border-[#F4511E] text-[#F4511E]'
+                  : 'border-transparent text-[#101D32]/70 hover:text-[#101D32]'
               }`}
             >
               <UploadCloud className="w-4 h-4" />
@@ -601,10 +589,10 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('manual')}
-              className={`flex-1 pb-2.5 text-center font-heading font-semibold text-xs flex items-center justify-center gap-1.5 border-b-2 transition-all ${
+              className={`flex-1 pb-2.5 text-center font-heading font-bold text-xs flex items-center justify-center gap-1.5 border-b-2 transition-all ${
                 activeTab === 'manual'
-                  ? 'border-[#08482D] text-[#08482D] dark:border-[#DAE7C7] dark:text-[#DAE7C7]'
-                  : 'border-transparent text-[#5E5E61] hover:text-[#101410] dark:hover:text-white'
+                  ? 'border-[#F4511E] text-[#F4511E]'
+                  : 'border-transparent text-[#101D32]/70 hover:text-[#101D32]'
               }`}
             >
               <Keyboard className="w-4 h-4" />
@@ -615,7 +603,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
           {/* TAB 1: LIVE CAMERA SCANNER */}
           {activeTab === 'camera' && (
             <div className="space-y-3">
-              <div className="relative w-full h-64 sm:h-72 bg-slate-950 rounded-2xl overflow-hidden border-2 border-[#DCE4D6] dark:border-[#203a2c] flex items-center justify-center">
+              <div className="relative w-full h-64 sm:h-72 bg-slate-950 rounded-2xl overflow-hidden border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-center justify-center">
                 {/* Video Feed */}
                 <video
                   ref={videoRef}
@@ -647,7 +635,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                       className="p-2 bg-slate-900/70 hover:bg-slate-800 text-white rounded-xl backdrop-blur-md transition-colors"
                       title="Switch / Flip Camera"
                     >
-                      <SwitchCamera className="w-4 h-4 text-[#DAE7C7]" />
+                      <SwitchCamera className="w-4 h-4 text-[#FFD6B0]" />
                     </button>
                   </div>
                 )}
@@ -655,18 +643,18 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 {/* Target Frame Overlay */}
                 {cameraActive && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                    <div className="w-48 h-48 border-2 border-[#DAE7C7]/90 rounded-2xl relative shadow-[0_0_0_9999px_rgba(15,23,42,0.45)]">
+                    <div className="w-48 h-48 border-2 border-[#FFD6B0]/90 rounded-2xl relative shadow-[0_0_0_9999px_rgba(16,29,50,0.55)]">
                       {/* Corner markers */}
-                      <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-[#DAE7C7] rounded-tl-lg" />
-                      <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-[#DAE7C7] rounded-tr-lg" />
-                      <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-[#DAE7C7] rounded-bl-lg" />
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-[#DAE7C7] rounded-br-lg" />
+                      <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-[#F4511E] rounded-tl-lg" />
+                      <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-[#F4511E] rounded-tr-lg" />
+                      <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-[#F4511E] rounded-bl-lg" />
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-[#F4511E] rounded-br-lg" />
 
                       {/* Animated Scanning Laser Line */}
                       <motion.div
                         animate={{ y: [0, 180, 0] }}
                         transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-                        className="w-full h-0.5 bg-gradient-to-r from-transparent via-[#DAE7C7] to-transparent shadow-[0_0_10px_rgba(218,231,199,0.9)]"
+                        className="w-full h-0.5 bg-gradient-to-r from-transparent via-[#F4511E] to-transparent shadow-[0_0_10px_rgba(244,81,30,0.9)]"
                       />
                     </div>
                   </div>
@@ -675,7 +663,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 {/* Loading state */}
                 {cameraLoading && (
                   <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10">
-                    <Loader2 className="w-7 h-7 text-[#DAE7C7] animate-spin" />
+                    <Loader2 className="w-7 h-7 text-[#FFD6B0] animate-spin" />
                     <span className="text-xs text-slate-300 font-medium">Initializing camera…</span>
                   </div>
                 )}
@@ -683,7 +671,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 {/* Camera Inactive or Error State */}
                 {!cameraActive && !cameraLoading && (
                   <div className="p-6 text-center space-y-3 max-w-sm">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-800 text-[#DAE7C7] flex items-center justify-center mx-auto">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-800 text-[#FFD6B0] flex items-center justify-center mx-auto">
                       <Camera className="w-6 h-6" />
                     </div>
                     <p className="text-xs text-slate-300">
@@ -692,7 +680,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                     <button
                       type="button"
                       onClick={() => startCamera()}
-                      className="px-4 py-2 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-xl text-xs font-heading font-semibold transition-colors inline-flex items-center gap-1.5"
+                      className="px-4 py-2 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-xl text-xs font-heading font-extrabold border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-colors inline-flex items-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       <span>Start Camera Scanner</span>
@@ -701,11 +689,11 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 )}
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-slate-400 px-1">
+              <div className="flex items-center justify-between text-[11px] text-[#101D32]/75 px-1 font-medium">
                 <span>Point participant’s mobile QR pass at the viewfinder frame.</span>
                 {cameraActive && (
-                  <span className="flex items-center gap-1 text-[#08482D] dark:text-[#a8d38d] font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-[#08482D] dark:bg-[#a8d38d] animate-pulse" />
+                  <span className="flex items-center gap-1 text-[#F4511E] font-bold">
+                    <span className="w-2 h-2 rounded-full bg-[#F4511E] animate-pulse" />
                     Scanning active
                   </span>
                 )}
@@ -732,8 +720,8 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 className={`w-full h-52 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all ${
                   dragOver
-                    ? 'border-[#08482D] bg-[#E8F0DF]/50 dark:bg-[#1b2f23]'
-                    : 'border-[#DCE4D6] dark:border-[#22392c] hover:border-[#08482D] bg-[#F5F8EF]/50 dark:bg-[#18281f]/40'
+                    ? 'border-[#F4511E] bg-[#FFD6B0]/50'
+                    : 'border-[#101D32] hover:border-[#F4511E] bg-white'
                 }`}
               >
                 <input
@@ -747,13 +735,13 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                     }
                   }}
                 />
-                <div className="w-12 h-12 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center mb-3 shadow-inner">
-                  <UploadCloud className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-[#FFD6B0] text-[#101D32] border-2 border-[#101D32] flex items-center justify-center mb-3 shadow-[2px_2px_0px_0px_#101D32]">
+                  <UploadCloud className="w-6 h-6 text-[#F4511E]" />
                 </div>
-                <div className="font-heading font-semibold text-[#101410] dark:text-white text-xs">
+                <div className="font-heading font-bold text-[#101410] text-xs">
                   Click to select QR Ticket Screenshot or Drag & Drop
                 </div>
-                <p className="text-[11px] text-[#5E5E61] dark:text-slate-400 mt-1 max-w-xs">
+                <p className="text-[11px] text-[#101D32]/70 mt-1 max-w-xs font-medium">
                   Upload an image of the participant’s pass to decode and verify ticket instant validation.
                 </p>
               </div>
@@ -770,7 +758,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
               className="space-y-3"
             >
               <div>
-                <label className="block font-heading font-semibold text-[#101410] dark:text-white mb-1.5">
+                <label className="block font-heading font-bold text-[#101410] mb-1.5">
                   Ticket Code / Barcode Scanner Input *
                 </label>
                 <div className="relative">
@@ -780,14 +768,14 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                     onChange={(e) => setTicketInput(e.target.value)}
                     placeholder="e.g. TKT-C5387CD1-6388 or scan barcode"
                     autoFocus
-                    className="w-full pl-3.5 pr-24 py-3 text-sm font-mono border border-[#DCE4D6] dark:border-[#22392c] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#08482D] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white uppercase tracking-wider"
+                    className="w-full pl-3.5 pr-24 py-3 text-sm font-mono border-2 border-[#101D32] rounded-xl focus:outline-none focus:bg-white bg-white text-[#101D32] font-bold uppercase tracking-wider shadow-[2px_2px_0px_0px_#101D32]"
                   />
                   <button
                     type="submit"
                     disabled={verifying || !ticketInput.trim()}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-50 text-white rounded-lg font-heading font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-[#F4511E] hover:bg-[#E84316] disabled:opacity-50 text-white rounded-lg font-heading font-extrabold text-xs flex items-center gap-1.5 border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all cursor-pointer"
                   >
-                    <Scan className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                    <Scan className="w-3.5 h-3.5 text-white" />
                     <span>{verifying ? 'Checking...' : 'Verify'}</span>
                   </button>
                 </div>
@@ -796,12 +784,12 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
           )}
 
           {/* Demo Bypass Date Checkbox */}
-          <div className="mt-3 flex items-center justify-between p-2.5 bg-[#F5F8EF] dark:bg-[#18281f] rounded-xl border border-[#DCE4D6] dark:border-[#22392c] text-[11px]">
+          <div className="mt-3 flex items-center justify-between p-3 bg-white rounded-xl border-2 border-[#101D32] text-[11px] shadow-[2px_2px_0px_0px_#101D32]">
             <div>
-              <span className="font-heading font-semibold text-[#101410] dark:text-white block">
+              <span className="font-heading font-bold text-[#101410] block">
                 Demo Testing: Allow Any Date Bypass
               </span>
-              <span className="text-[#5E5E61] dark:text-slate-400">
+              <span className="text-[#101D32]/75 font-medium">
                 Enables ticket check-in simulation outside the workshop calendar date.
               </span>
             </div>
@@ -809,7 +797,7 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
               type="checkbox"
               checked={allowBypass}
               onChange={(e) => setAllowBypass(e.target.checked)}
-              className="w-4 h-4 rounded text-[#08482D] focus:ring-[#08482D] cursor-pointer"
+              className="w-4 h-4 rounded border-2 border-[#101D32] text-[#F4511E] focus:ring-[#F4511E] cursor-pointer"
             />
           </div>
 
@@ -821,35 +809,35 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="mt-4 p-4 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] border border-[#DAE7C7] dark:border-[#2d4d3a] space-y-2.5"
+                className="mt-4 p-4 rounded-2xl bg-white border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] space-y-2.5"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[#08482D] dark:text-[#DAE7C7] font-heading font-bold text-sm">
-                    <CheckCircle className="w-5 h-5 text-[#08482D] dark:text-[#a8d38d] shrink-0" />
+                  <div className="flex items-center gap-2 text-[#101D32] font-heading font-black text-sm">
+                    <CheckCircle className="w-5 h-5 text-[#F4511E] shrink-0" />
                     <span>VALID PASS: ACCESS GRANTED</span>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#08482D] text-white text-[10px] font-bold uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#FFD6B0] text-[#101D32] text-[10px] font-bold uppercase tracking-wider border border-[#101D32]">
                     Checked In
                   </span>
                 </div>
 
-                <p className="text-xs text-[#08482D] dark:text-[#DAE7C7] leading-relaxed font-medium">
+                <p className="text-xs text-[#101D32] leading-relaxed font-bold">
                   {result.message}
                 </p>
 
                 {result.registration && (
-                  <div className="p-3 bg-white/90 dark:bg-[#14231b]/90 rounded-xl border border-[#DAE7C7] dark:border-[#2d4d3a] text-xs space-y-1 shadow-sm">
-                    <div className="flex items-center gap-1.5 font-semibold text-[#101410] dark:text-white">
-                      <User className="w-3.5 h-3.5 text-[#08482D] dark:text-[#a8d38d]" />
+                  <div className="p-3 bg-[#FFF5E9] rounded-xl border-2 border-[#101D32] text-xs space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold text-[#101410]">
+                      <User className="w-3.5 h-3.5 text-[#F4511E]" />
                       <span>{result.registration.participantName}</span>
-                      <span className="text-[#5E5E61] dark:text-slate-400 font-normal">({result.registration.participantEmail})</span>
+                      <span className="text-[#101D32]/70 font-normal">({result.registration.participantEmail})</span>
                     </div>
                     {result.workshop && (
-                      <div className="text-[#5E5E61] dark:text-slate-300">
+                      <div className="text-[#101D32]/80 font-medium">
                         Workshop: <strong>{result.workshop.title}</strong> • Room: {result.workshop.venue}
                       </div>
                     )}
-                    <div className="text-[11px] text-[#08482D] dark:text-[#DAE7C7] font-mono font-bold">
+                    <div className="text-[11px] text-[#F4511E] font-mono font-bold">
                       Ticket Code: {result.registration.ticketCode}
                     </div>
                   </div>
@@ -863,22 +851,22 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="mt-4 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 space-y-2"
+                className="mt-4 p-4 rounded-2xl bg-rose-50 border-2 border-rose-500 shadow-[4px_4px_0px_0px_#101D32] space-y-2"
               >
-                <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-heading font-bold text-sm">
-                  <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
+                <div className="flex items-center gap-2 text-rose-800 font-heading font-black text-sm">
+                  <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />
                   <span>ENTRY DENIED: Verification Rejected</span>
                 </div>
 
-                <div className="text-xs text-rose-700 dark:text-rose-300 leading-relaxed font-medium">
+                <div className="text-xs text-rose-700 leading-relaxed font-bold">
                   {result.message}
                 </div>
 
                 {result.registration && (
-                  <div className="p-2.5 bg-white/80 dark:bg-[#14231b]/80 rounded-xl border border-rose-200 dark:border-rose-900/60 text-[11px] text-[#5E5E61] dark:text-slate-300">
+                  <div className="p-2.5 bg-white rounded-xl border border-rose-300 text-[11px] text-[#101D32]">
                     Participant: <strong>{result.registration.participantName}</strong> ({result.registration.participantEmail})
                     {result.workshop && (
-                      <div className="mt-0.5 text-slate-500 dark:text-slate-400">
+                      <div className="mt-0.5 text-[#101D32]/70 font-medium">
                         Scheduled for: <strong>{result.workshop.title}</strong> ({result.workshop.venue})
                       </div>
                     )}
@@ -890,8 +878,8 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
 
           {/* Quick Demo Test Buttons */}
           {testableRegistrations.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-[#DCE4D6] dark:border-[#203a2c] space-y-2">
-              <span className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-heading font-semibold uppercase tracking-wider block">
+            <div className="mt-4 pt-3 border-t-2 border-[#101D32] space-y-2">
+              <span className="text-[11px] text-[#101D32]/80 font-heading font-bold uppercase tracking-wider block">
                 Quick Test Codes (Confirmed Bookings for Selected Session):
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -903,12 +891,12 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
                       setTicketInput(r.ticketCode || r.id);
                       processTicketVerification(r.ticketCode || r.id);
                     }}
-                    className="p-2 rounded-xl bg-[#F5F8EF] dark:bg-[#18281f] hover:bg-[#E8F0DF] dark:hover:bg-[#1f382a] border border-[#DCE4D6] dark:border-[#22392c] text-left transition-colors truncate"
+                    className="p-2.5 rounded-xl bg-white hover:bg-[#FFD6B0] border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] text-left transition-all truncate"
                   >
-                    <div className="font-mono font-bold text-[11px] text-[#08482D] dark:text-[#DAE7C7] truncate">
+                    <div className="font-mono font-bold text-[11px] text-[#F4511E] truncate">
                       {r.ticketCode || r.id}
                     </div>
-                    <div className="text-[10px] text-[#5E5E61] dark:text-slate-400 truncate">
+                    <div className="text-[10px] text-[#101D32] font-semibold truncate">
                       {r.participantName}
                     </div>
                   </button>
@@ -919,36 +907,36 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
 
           {/* LIVE GATE SESSION SCAN HISTORY */}
           {scanHistory.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-[#DCE4D6] dark:border-[#203a2c] space-y-2">
-              <span className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-heading font-semibold uppercase tracking-wider block">
+            <div className="mt-4 pt-3 border-t-2 border-[#101D32] space-y-2">
+              <span className="text-[11px] text-[#101D32]/80 font-heading font-bold uppercase tracking-wider block">
                 Recent Scans In This Gate Session:
               </span>
               <div className="space-y-1.5 max-h-28 overflow-y-auto pr-1">
                 {scanHistory.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-2 rounded-xl bg-[#F5F8EF] dark:bg-[#18281f] border border-[#DCE4D6] dark:border-[#22392c] text-[11px]"
+                    className="flex items-center justify-between p-2 rounded-xl bg-white border-2 border-[#101D32] text-[11px] shadow-[2px_2px_0px_0px_#101D32]"
                   >
                     <div className="flex items-center gap-2 truncate pr-2">
                       {item.status === 'GRANTED' ? (
-                        <CheckCircle className="w-3.5 h-3.5 text-[#08482D] dark:text-[#a8d38d] shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                       ) : (
                         <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
                       )}
-                      <span className="font-semibold text-[#101410] dark:text-white truncate">
+                      <span className="font-bold text-[#101410] truncate">
                         {item.participantName}
                       </span>
-                      <span className="font-mono text-[#5E5E61] dark:text-slate-400 text-[10px] truncate">
+                      <span className="font-mono text-[#101D32]/70 text-[10px] truncate">
                         ({item.ticketCode})
                       </span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[#5E5E61] dark:text-slate-400 text-[10px]">{item.timestamp}</span>
+                      <span className="text-[#101D32]/70 text-[10px] font-mono">{item.timestamp}</span>
                       <span
-                        className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border border-[#101D32] ${
                           item.status === 'GRANTED'
-                            ? 'bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7]'
-                            : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
+                            ? 'bg-[#FFD6B0] text-[#101D32]'
+                            : 'bg-rose-100 text-rose-700'
                         }`}
                       >
                         {item.status}
@@ -961,13 +949,13 @@ export const QRVerifierModal: React.FC<QRVerifierModalProps> = ({
           )}
 
           {/* Modal Footer */}
-          <div className="mt-5 flex items-center justify-between border-t border-[#DCE4D6] dark:border-[#203a2c] pt-3">
-            <span className="text-[11px] text-[#5E5E61] dark:text-slate-400">
+          <div className="mt-5 flex items-center justify-between border-t-2 border-[#101D32] pt-3">
+            <span className="text-[11px] text-[#101D32]/75 font-medium">
               Scanned status updates directly in real-time.
             </span>
             <button
               onClick={onClose}
-              className="px-5 py-2.5 bg-[#E8F0DF] dark:bg-[#1a3325] hover:bg-[#DCE4D6] dark:hover:bg-[#224431] text-[#08482D] dark:text-[#DAE7C7] font-heading font-semibold text-xs rounded-xl transition-colors"
+              className="px-5 py-2.5 bg-white hover:bg-[#FFD6B0] text-[#101D32] font-heading font-bold text-xs rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
             >
               Done / Close Scanner
             </button>

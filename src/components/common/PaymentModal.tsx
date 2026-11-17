@@ -11,7 +11,6 @@ import {
   Building2,
   Smartphone,
   Wallet,
-  CheckCircle2,
   Calendar,
   MapPin,
   User as UserIcon,
@@ -141,7 +140,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   useEffect(() => {
     if (isOpen && !receipt) {
-      // Pre-load Razorpay checkout script in parallel
       loadRazorpayScript().catch(() => {});
       initOrder();
     }
@@ -179,7 +177,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     setLaunchingRazorpay(true);
     setPaymentError(null);
 
-    // If order data is still initializing in the background, wait for it smoothly
     let activeOrder = orderData;
     if (!activeOrder && orderPromiseRef.current) {
       activeOrder = await orderPromiseRef.current;
@@ -193,7 +190,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       return;
     }
 
-    // 1. Ensure official Razorpay script is loaded
     const loaded = await loadRazorpayScript();
     if (!loaded || !(window as any).Razorpay) {
       setLaunchingRazorpay(false);
@@ -204,7 +200,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     const RazorpayClass = (window as any).Razorpay;
 
-    // 2. Build official Razorpay Checkout options
     const options = {
       key: activeOrder.keyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || '',
       amount: activeOrder.amount,
@@ -223,7 +218,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         registrationId: activeOrder.registrationId,
       },
       theme: {
-        color: '#08482D', // Kaushalya primary forest green
+        color: '#F4511E', // Kaushalya primary orange
       },
       handler: async (response: {
         razorpay_payment_id: string;
@@ -328,44 +323,44 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
       {/* ── Main Razorpay Checkout Modal ── */}
       {!receipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-md overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-[#101D32]/70 backdrop-blur-sm overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-[#121f17] rounded-3xl w-full max-w-xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-2xl overflow-hidden flex flex-col my-auto"
+            className="bg-white rounded-2xl w-full max-w-xl border-2 border-[#101D32] shadow-[8px_8px_0px_0px_#101D32] overflow-hidden flex flex-col my-auto"
           >
             {/* ── Modal Header ── */}
-            <div className="p-4 sm:p-5 bg-[#F5F8EF] dark:bg-[#16291e] border-b border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between gap-3">
+            <div className="p-4 sm:p-5 bg-[#FFF5E9] border-b-2 border-[#101D32] flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shadow-md shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[#F4511E] text-white border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/50 dark:bg-[#08482D]/40 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#101D32] bg-[#FFD6B0] border border-[#101D32] px-2 py-0.5 rounded-md">
                       Razorpay Secure Checkout
                     </span>
-                    <div className="flex items-center gap-1 text-[11px] font-mono text-[#5E5E61] dark:text-[#8ba895]">
-                      <Clock className="w-3 h-3 text-amber-500" />
+                    <div className="flex items-center gap-1 text-[11px] font-mono text-[#101D32] font-bold">
+                      <Clock className="w-3.5 h-3.5 text-[#F4511E]" />
                       <span>{formatTimer(timeLeft)}</span>
                     </div>
                   </div>
-                  <h2 className="text-sm sm:text-base font-heading font-bold text-[#101410] dark:text-[#f0f5ee] line-clamp-1 mt-0.5">
+                  <h2 className="text-sm sm:text-base font-heading font-extrabold text-[#101D32] line-clamp-1 mt-0.5">
                     {workshop.title}
                   </h2>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <div className="text-right">
-                  <div className="text-[10px] font-heading text-[#5E5E61] dark:text-[#8ba895] uppercase">Total</div>
-                  <div className="text-xl sm:text-2xl font-heading font-extrabold text-[#08482D] dark:text-[#DAE7C7]">₹{price}</div>
+                  <div className="text-[10px] font-heading font-bold text-[#101D32]/70 uppercase">Total</div>
+                  <div className="text-xl sm:text-2xl font-heading font-extrabold text-[#F4511E]">₹{price}</div>
                 </div>
                 <button
                   onClick={onClose}
                   disabled={isVerifying || launchingRazorpay}
-                  className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-[#5E5E61] dark:text-[#8ba895] transition-colors cursor-pointer disabled:opacity-50"
+                  className="w-8 h-8 rounded-lg border-2 border-transparent hover:border-[#101D32] hover:bg-[#FFD6B0] flex items-center justify-center text-[#101D32] transition-colors cursor-pointer disabled:opacity-50"
                   aria-label="Close"
                 >
                   <X className="w-4 h-4" />
@@ -377,16 +372,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             {isVerifying && (
               <div className="p-10 flex flex-col items-center justify-center text-center space-y-4">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full border-4 border-[#08482D]/20 border-t-[#08482D] animate-spin" />
+                  <div className="w-16 h-16 rounded-full border-4 border-[#FFD6B0] border-t-[#F4511E] animate-spin" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Lock className="w-6 h-6 text-[#08482D] dark:text-[#DAE7C7]" />
+                    <Lock className="w-6 h-6 text-[#101D32]" />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-base font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
+                  <h3 className="text-base font-heading font-extrabold text-[#101D32]">
                     Verifying Payment
                   </h3>
-                  <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] animate-pulse mt-1">
+                  <p className="text-xs text-[#101D32]/80 font-medium animate-pulse mt-1">
                     {verifyStep || 'Validating cryptographic signature with Razorpay...'}
                   </p>
                 </div>
@@ -397,92 +392,92 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             {!isVerifying && (
               <div className="p-5 sm:p-6 space-y-5">
                 {/* 1. Workshop & Attendee Overview Card */}
-                <div className="p-4 rounded-2xl bg-[#F5F8EF] dark:bg-[#16291e] border border-[#DCE4D6] dark:border-[#233d2e] space-y-3">
+                <div className="p-4 rounded-xl bg-[#FFF5E9] border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7] bg-[#DAE7C7]/50 dark:bg-[#08482D]/40 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#101D32] bg-[#FFD6B0] border border-[#101D32] px-2 py-0.5 rounded-md">
                         {workshop.category}
                       </span>
-                      <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-[#f0f5ee] mt-1 line-clamp-1">
+                      <h3 className="text-sm font-heading font-extrabold text-[#101D32] mt-1 line-clamp-1">
                         {workshop.title}
                       </h3>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#5E5E61] dark:text-[#8ba895] pt-2 border-t border-[#DCE4D6]/60 dark:border-[#233d2e]">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-[#08482D] dark:text-[#DAE7C7]" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#101D32]/80 pt-2 border-t-2 border-[#101D32]/20 font-sans">
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <Calendar className="w-3.5 h-3.5 text-[#F4511E]" />
                       <span>{workshop.date} ({workshop.startTime} - {workshop.endTime})</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#08482D] dark:text-[#DAE7C7]" />
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <MapPin className="w-3.5 h-3.5 text-[#F4511E]" />
                       <span className="truncate">{workshop.venue}</span>
                     </div>
                     {currentUser && (
-                      <div className="flex items-center gap-1.5 sm:col-span-2">
-                        <UserIcon className="w-3.5 h-3.5 text-[#08482D] dark:text-[#DAE7C7]" />
-                        <span>Attendee: <strong className="text-[#101410] dark:text-[#f0f5ee]">{currentUser.fullName}</strong> ({currentUser.email})</span>
+                      <div className="flex items-center gap-1.5 sm:col-span-2 font-medium">
+                        <UserIcon className="w-3.5 h-3.5 text-[#F4511E]" />
+                        <span>Attendee: <strong className="text-[#101D32]">{currentUser.fullName}</strong> ({currentUser.email})</span>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* 2. Price Ledger Breakdown */}
-                <div className="p-4 rounded-2xl bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#233d2e] space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-[#5E5E61] dark:text-[#8ba895]">
+                <div className="p-4 rounded-xl bg-white border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] space-y-2 text-xs font-sans">
+                  <div className="flex items-center justify-between text-[#101D32]/80">
                     <span>Workshop Seat Registration</span>
-                    <span className="font-mono font-medium text-[#101410] dark:text-[#f0f5ee]">₹{price}.00</span>
+                    <span className="font-mono font-bold text-[#101D32]">₹{price}.00</span>
                   </div>
-                  <div className="flex items-center justify-between text-[#5E5E61] dark:text-[#8ba895]">
+                  <div className="flex items-center justify-between text-[#101D32]/80">
                     <span>Convenience / Processing Fee</span>
-                    <span className="font-mono text-emerald-600 font-semibold">FREE (₹0.00)</span>
+                    <span className="font-mono text-[#F4511E] font-bold">FREE (₹0.00)</span>
                   </div>
-                  <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between font-heading font-bold text-sm text-[#101410] dark:text-[#f0f5ee]">
+                  <div className="pt-2 border-t-2 border-[#101D32]/20 flex items-center justify-between font-heading font-extrabold text-sm text-[#101D32]">
                     <span>Total Amount Payable</span>
-                    <span className="font-mono text-base text-[#08482D] dark:text-[#DAE7C7]">₹{price}.00</span>
+                    <span className="font-mono text-base text-[#F4511E]">₹{price}.00</span>
                   </div>
                 </div>
 
                 {/* 3. Razorpay Gateway Exclusive Badge */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 via-[#F5F8EF] to-emerald-50/50 dark:from-[#16291e] dark:via-[#13231a] dark:to-[#16291e] border border-[#DAE7C7] dark:border-[#22392c] space-y-3">
+                <div className="p-4 rounded-xl bg-[#FFF5E9] border-2 border-[#101D32] space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-[#08482D] text-[#DAE7C7] flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-md bg-[#101D32] text-white flex items-center justify-center">
                         <Lock className="w-3.5 h-3.5" />
                       </div>
                       <div>
-                        <div className="text-xs font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
+                        <div className="text-xs font-heading font-extrabold text-[#101D32]">
                           Official Razorpay Gateway
                         </div>
-                        <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">
+                        <div className="text-[10px] text-[#101D32]/70 font-medium">
                           256-Bit SSL Encrypted &amp; PCI-DSS Certified
                         </div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-mono font-bold text-[#101D32] bg-[#FFD6B0] border border-[#101D32] px-2 py-0.5 rounded-md">
                       Instant Verification
                     </span>
                   </div>
 
-                  <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] leading-relaxed">
+                  <p className="text-xs text-[#101D32]/80 leading-relaxed font-sans">
                     Click <strong>Pay with Razorpay</strong> to open the secure Razorpay Checkout. Complete your payment using your preferred method:
                   </p>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] font-medium text-[#101410] dark:text-[#d3e2d6]">
-                    <div className="p-2 rounded-xl bg-white dark:bg-[#1a3025] border border-[#DCE4D6] dark:border-[#233d2e] flex items-center gap-1.5">
-                      <Smartphone className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] font-bold text-[#101D32]">
+                    <div className="p-2 rounded-lg bg-white border-2 border-[#101D32] flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#101D32]">
+                      <Smartphone className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                       <span>UPI &amp; QR</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-[#1a3025] border border-[#DCE4D6] dark:border-[#233d2e] flex items-center gap-1.5">
-                      <CreditCard className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                    <div className="p-2 rounded-lg bg-white border-2 border-[#101D32] flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#101D32]">
+                      <CreditCard className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                       <span>Cards</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-[#1a3025] border border-[#DCE4D6] dark:border-[#233d2e] flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <div className="p-2 rounded-lg bg-white border-2 border-[#101D32] flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#101D32]">
+                      <Building2 className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                       <span>NetBanking</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-white dark:bg-[#1a3025] border border-[#DCE4D6] dark:border-[#233d2e] flex items-center gap-1.5">
-                      <Wallet className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                    <div className="p-2 rounded-lg bg-white border-2 border-[#101D32] flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#101D32]">
+                      <Wallet className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                       <span>Wallets</span>
                     </div>
                   </div>
@@ -490,11 +485,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
                 {/* 4. Error Message (if any) */}
                 {(orderError || paymentError) && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                  <div className="p-3.5 rounded-xl bg-[#FFD6B0] border-2 border-[#101D32] flex items-start gap-2.5 text-xs text-[#101D32] shadow-[4px_4px_0px_0px_#101D32]">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E84316]" />
                     <div className="flex-1">
-                      <p className="font-semibold">{orderError ? 'Order Initialization Error' : 'Payment Status'}</p>
-                      <p className="mt-0.5 text-[11px] opacity-90">{orderError || paymentError}</p>
+                      <p className="font-heading font-extrabold">{orderError ? 'Order Initialization Error' : 'Payment Status'}</p>
+                      <p className="mt-0.5 text-[11px] font-medium">{orderError || paymentError}</p>
                     </div>
                   </div>
                 )}
@@ -504,16 +499,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   <button
                     onClick={orderError ? initOrder : handlePayNow}
                     disabled={launchingRazorpay || isVerifying}
-                    className="w-full py-3.5 bg-[#08482D] hover:bg-[#0c5c3b] disabled:bg-[#08482D]/60 text-[#F5F8EF] font-heading font-bold text-sm rounded-2xl shadow-lg shadow-[#08482D]/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full py-3.5 bg-[#F4511E] hover:bg-[#E84316] disabled:bg-[#101D32]/40 text-white font-heading font-extrabold text-sm rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101D32] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {loadingOrder ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin text-[#DAE7C7]" />
+                        <RefreshCw className="w-4 h-4 animate-spin text-white" />
                         <span>Initializing Razorpay Order...</span>
                       </>
                     ) : launchingRazorpay ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin text-[#DAE7C7]" />
+                        <RefreshCw className="w-4 h-4 animate-spin text-white" />
                         <span>Opening Razorpay Checkout...</span>
                       </>
                     ) : orderError ? (
@@ -528,14 +523,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       </>
                     ) : (
                       <>
-                        <Lock className="w-4 h-4 text-[#DAE7C7]" />
+                        <Lock className="w-4 h-4 text-white" />
                         <span>Pay ₹{price} with Razorpay</span>
-                        <ArrowRight className="w-4 h-4 text-[#DAE7C7]" />
+                        <ArrowRight className="w-4 h-4 text-white" />
                       </>
                     )}
                   </button>
 
-                  <p className="text-[11px] text-center text-[#5E5E61] dark:text-[#8ba895]">
+                  <p className="text-[11px] text-center text-[#101D32]/70 font-medium font-sans">
                     Your seat is temporarily held for 15 minutes. Official confirmed pass generated upon payment.
                   </p>
                 </div>
@@ -544,15 +539,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
             {/* ── Modal Footer ── */}
             {!isVerifying && (
-              <div className="p-3 sm:p-4 bg-[#F5F8EF] dark:bg-[#16291e] border-t border-[#DCE4D6] dark:border-[#233d2e] flex items-center justify-between text-xs text-[#5E5E61] dark:text-[#8ba895]">
-                <div className="flex items-center gap-1.5 text-[11px]">
-                  <Lock className="w-3.5 h-3.5 text-[#08482D] dark:text-[#DAE7C7]" />
+              <div className="p-3 sm:p-4 bg-[#FFF5E9] border-t-2 border-[#101D32] flex items-center justify-between text-xs text-[#101D32]/80 font-sans">
+                <div className="flex items-center gap-1.5 text-[11px] font-medium">
+                  <Lock className="w-3.5 h-3.5 text-[#F4511E]" />
                   <span>Powered by Razorpay · NPCI &amp; RBI Compliant</span>
                 </div>
                 <button
                   onClick={onClose}
                   disabled={isVerifying || launchingRazorpay}
-                  className="px-3 py-1 text-xs font-heading font-semibold hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                  className="px-3 py-1 text-xs font-heading font-bold text-[#101D32] hover:bg-[#FFD6B0] border border-[#101D32] rounded-lg transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

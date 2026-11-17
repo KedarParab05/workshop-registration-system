@@ -41,15 +41,18 @@ export async function apiFetch(
   const timerId = setTimeout(() => controller.abort(), timeoutMs);
   const token = localStorage.getItem('wh_jwt_token');
   const base = getApiBase();
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const headers: Record<string, string> = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...((options.headers as Record<string, string>) || {}),
+  };
+
   try {
     return await fetch(`${base}${path}`, {
       ...options,
       signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(options.headers || {}),
-      },
+      headers,
     });
   } finally {
     clearTimeout(timerId);

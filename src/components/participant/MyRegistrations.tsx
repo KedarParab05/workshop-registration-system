@@ -7,12 +7,10 @@ import {
   CheckCircle,
   XCircle,
   Search,
-  Filter,
   AlertTriangle,
   ArrowRight,
   Sparkles,
   QrCode,
-  ShieldCheck,
   Compass,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -67,25 +65,25 @@ export const MyRegistrations: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 transition-colors duration-200">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-[#FFF5E9] text-[#101D32]">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DCE4D6] dark:border-[#233d2e] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#101D32] pb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-semibold bg-[#DAE7C7] text-[#08482D] mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-extrabold bg-[#FFD6B0] text-[#101D32] border border-[#101D32] mb-2 shadow-[2px_2px_0px_0px_#101D32]">
+            <Sparkles className="w-3.5 h-3.5 text-[#F4511E]" />
             <span>Student Ticket Wallet</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee] tracking-tight">
-            My Registrations & Tickets
+          <h1 className="text-3xl sm:text-4xl font-heading font-extrabold text-[#101D32] tracking-tight">
+            My Registrations &amp; Passes
           </h1>
-          <p className="text-xs sm:text-sm text-[#5E5E61] dark:text-[#8ba895] mt-1">
+          <p className="text-xs sm:text-sm text-[#101D32]/70 mt-1 font-medium">
             Access your workshop QR passes, review event logistics, or release your seat if your plans change.
           </p>
         </div>
 
         <button
           onClick={() => navigateTo('workshops')}
-          className="px-5 py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] rounded-2xl text-xs font-heading font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-[#08482D]/20 self-start sm:self-auto"
+          className="px-5 py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] neo-btn text-xs font-heading font-extrabold flex items-center justify-center gap-1.5 self-start sm:self-auto cursor-pointer"
         >
           <span>Find Workshops</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -93,33 +91,33 @@ export const MyRegistrations: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white dark:bg-[#14231b] p-4 rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-xs transition-colors">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white p-4 rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32]">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-[#5E5E61] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#101D32]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by workshop title..."
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#101410] dark:text-[#f0f5ee] focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-[#101D32] font-medium focus:outline-none focus:ring-2 focus:ring-[#F4511E]"
           />
         </div>
 
-        <div className="grid grid-cols-2 sm:flex items-center gap-1 p-1 bg-[#F5F8EF] dark:bg-[#1b3025] rounded-2xl text-xs font-heading font-medium w-full md:w-auto border border-[#DCE4D6] dark:border-[#233d2e]">
+        <div className="grid grid-cols-2 sm:flex items-center gap-1 p-1 bg-[#FFF5E9] rounded-xl text-xs font-heading font-bold w-full md:w-auto border-2 border-[#101D32]">
           {(['ALL', 'CONFIRMED', 'ATTENDED', 'PENDING_PAYMENT', 'CANCELLED'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setStatusFilter(tab)}
-              className={`px-3 py-1.5 rounded-xl text-center transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
                 statusFilter === tab
-                  ? 'bg-[#08482D] text-[#F5F8EF] shadow-xs font-semibold'
-                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+                  ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32] font-extrabold border border-[#101D32]'
+                  : 'text-[#101D32]/70 hover:text-[#101D32]'
               }`}
             >
               {tab === 'ALL'
                 ? `All (${myRegistrations.length})`
                 : tab === 'PENDING_PAYMENT'
-                ? 'Pending Payment'
+                ? 'Pending'
                 : tab}
             </button>
           ))}
@@ -128,21 +126,21 @@ export const MyRegistrations: React.FC = () => {
 
       {/* Registrations List */}
       {filtered.length === 0 ? (
-        <div className="bg-white dark:bg-[#14231b] p-12 rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] text-center space-y-3">
-          <Compass className="w-10 h-10 text-[#5E5E61] dark:text-[#8ba895] mx-auto opacity-50" />
-          <h3 className="font-heading font-bold text-base text-[#101410] dark:text-[#f0f5ee]">
+        <div className="bg-white p-12 rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] text-center space-y-3">
+          <Compass className="w-10 h-10 text-[#101D32]/40 mx-auto" />
+          <h3 className="font-heading font-extrabold text-base text-[#101D32]">
             No workshop tickets found
           </h3>
-          <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] max-w-sm mx-auto">
+          <p className="text-xs text-[#101D32]/70 max-w-sm mx-auto font-medium">
             {searchQuery
               ? 'No registrations match your search keyword.'
               : 'You have no workshop registrations in this category.'}
           </p>
           <button
             onClick={() => navigateTo('workshops')}
-            className="mt-2 px-5 py-2.5 bg-[#08482D] text-[#F5F8EF] rounded-xl text-xs font-heading font-semibold hover:bg-[#0c5c3b] transition-colors"
+            className="mt-2 px-6 py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-xl border-2 border-[#101D32] shadow-[3px_3px_0px_0px_#101D32] neo-btn text-xs font-heading font-extrabold cursor-pointer"
           >
-            Explore Academic Schedule
+            Explore Workshop Schedule
           </button>
         </div>
       ) : (
@@ -155,48 +153,47 @@ export const MyRegistrations: React.FC = () => {
             const isCancelled = reg.status === 'CANCELLED';
 
             return (
-              <motion.div
+              <div
                 key={reg.id}
-                whileHover={{ y: -3 }}
-                className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#233d2e] p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                className="bg-white rounded-xl border-2 border-[#101D32] p-6 shadow-[4px_4px_0px_0px_#101D32] flex flex-col justify-between space-y-4"
               >
                 <div>
                   <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-heading font-bold bg-[#DAE7C7] text-[#08482D]">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-heading font-extrabold bg-[#FFD6B0] text-[#101D32] border border-[#101D32]">
                       {ws?.category || 'Academic Session'}
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-heading font-bold ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-heading font-extrabold border border-[#101D32] ${
                         isConfirmed
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          ? 'bg-[#FFD6B0] text-[#101D32]'
                           : isAttended
-                          ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                          ? 'bg-blue-100 text-blue-900'
                           : isPendingPayment
-                          ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                          : 'bg-rose-100 text-rose-800 border border-rose-200'
+                          ? 'bg-amber-100 text-amber-900'
+                          : 'bg-rose-100 text-rose-900'
                       }`}
                     >
                       {isPendingPayment ? 'PENDING PAYMENT' : reg.status}
                     </span>
                   </div>
 
-                  <h3 className="font-heading font-bold text-base text-[#101410] dark:text-[#f0f5ee] mb-1.5 line-clamp-1">
+                  <h3 className="font-heading font-extrabold text-base text-[#101D32] mb-1.5 line-clamp-1">
                     {ws?.title || 'Workshop Session'}
                   </h3>
 
-                  <div className="space-y-1 text-xs text-[#5E5E61] dark:text-[#8ba895] pt-1">
+                  <div className="space-y-1 text-xs text-[#101D32]/70 font-medium pt-1">
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-[#08482D] dark:text-[#9ee2b8] shrink-0" />
+                      <Calendar className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                       <span>{ws?.date} ({ws?.startTime} - {ws?.endTime})</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#08482D] dark:text-[#9ee2b8] shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                       <span className="truncate">{ws?.venue}</span>
                     </div>
                   </div>
 
-                  <div className="mt-3 pt-3 border-t border-[#DCE4D6]/70 dark:border-[#233d2e] flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895] font-mono">
-                    <span>Pass ID: <strong className="text-[#101410] dark:text-[#f0f5ee]">{reg.ticketCode || (isPendingPayment ? 'HELD-15MIN' : 'TKT-PENDING')}</strong></span>
+                  <div className="mt-3 pt-3 border-t-2 border-[#101D32]/10 flex items-center justify-between text-[11px] text-[#101D32]/70 font-mono">
+                    <span>Pass ID: <strong className="text-[#101D32] font-bold">{reg.ticketCode || (isPendingPayment ? 'HELD-15MIN' : 'TKT-PENDING')}</strong></span>
                     <span>
                       {reg.pricingTypeSnapshot === 'PAID'
                         ? isPendingPayment
@@ -208,13 +205,13 @@ export const MyRegistrations: React.FC = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="pt-3 border-t border-[#DCE4D6]/70 dark:border-[#233d2e] flex items-center justify-between gap-2">
+                <div className="pt-3 border-t-2 border-[#101D32]/10 flex items-center justify-between gap-2">
                   {(isConfirmed || isAttended) && ws && (
                     <button
                       onClick={() => setSelectedTicket({ registration: reg, workshop: ws })}
-                      className="px-3.5 py-1.5 bg-[#08482D] hover:bg-[#0c5c3b] text-[#F5F8EF] rounded-xl text-xs font-heading font-semibold transition-colors flex items-center gap-1.5 shadow-sm shadow-[#08482D]/20"
+                      className="px-3.5 py-1.5 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] neo-btn text-xs font-heading font-extrabold flex items-center gap-1.5 cursor-pointer"
                     >
-                      <QrCode className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                      <QrCode className="w-3.5 h-3.5 text-white" />
                       <span>View Digital Pass</span>
                     </button>
                   )}
@@ -222,7 +219,7 @@ export const MyRegistrations: React.FC = () => {
                   {isPendingPayment && ws && (
                     <button
                       onClick={() => navigateTo('workshop-detail', ws.id)}
-                      className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-heading font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-1.5 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] neo-btn text-xs font-heading font-extrabold flex items-center gap-1.5 cursor-pointer"
                     >
                       <span>Complete Payment (₹{reg.amount})</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -232,13 +229,13 @@ export const MyRegistrations: React.FC = () => {
                   {isConfirmed && ws && (
                     <button
                       onClick={() => setSelectedRegToCancel({ id: reg.id, title: ws.title })}
-                      className="px-3 py-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl text-xs font-heading font-semibold transition-colors"
+                      className="px-3 py-1.5 text-rose-600 hover:text-rose-700 text-xs font-heading font-extrabold hover:underline cursor-pointer"
                     >
                       Cancel Seat
                     </button>
                   )}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -247,35 +244,35 @@ export const MyRegistrations: React.FC = () => {
       {/* Cancellation Confirmation Dialog */}
       <AnimatePresence>
         {selectedRegToCancel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101D32]/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-[#14231b] rounded-3xl p-6 sm:p-7 max-w-md w-full border border-[#DCE4D6] dark:border-[#233d2e] shadow-2xl space-y-4"
+              className="bg-white rounded-2xl p-6 sm:p-7 max-w-md w-full border-2 border-[#101D32] shadow-[8px_8px_0px_0px_#101D32] space-y-4"
             >
-              <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400">
+              <div className="flex items-center gap-3 text-[#F4511E]">
                 <AlertTriangle className="w-6 h-6 shrink-0" />
-                <h3 className="text-base font-heading font-bold text-[#101410] dark:text-[#f0f5ee]">
+                <h3 className="text-base font-heading font-extrabold text-[#101D32]">
                   Cancel Workshop Seat?
                 </h3>
               </div>
 
-              <p className="text-xs text-[#5E5E61] dark:text-[#8ba895] leading-relaxed">
-                Are you sure you want to release your seat for <strong className="text-[#101410] dark:text-[#f0f5ee]">{selectedRegToCancel.title}</strong>?
+              <p className="text-xs text-[#101D32]/70 leading-relaxed font-medium">
+                Are you sure you want to release your seat for <strong className="text-[#101D32]">{selectedRegToCancel.title}</strong>?
                 Once cancelled, your seat is immediately restored to the available pool for fellow students.
               </p>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#DCE4D6] dark:border-[#233d2e]">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t-2 border-[#101D32]/10">
                 <button
                   onClick={() => setSelectedRegToCancel(null)}
-                  className="px-4 py-2 text-xs font-heading font-semibold text-[#5E5E61] dark:text-[#95ad9e] hover:bg-[#E8F0DF] dark:hover:bg-[#1a3325] rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-heading font-bold text-[#101D32] hover:bg-[#FFD6B0] rounded-xl transition-colors cursor-pointer"
                 >
                   Keep Seat
                 </button>
                 <button
                   onClick={handleConfirmCancel}
-                  className="px-4 py-2 text-xs font-heading font-semibold text-white bg-rose-600 hover:bg-rose-500 rounded-xl shadow-md transition-colors"
+                  className="px-4 py-2 text-xs font-heading font-extrabold text-white bg-rose-600 hover:bg-rose-500 rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] cursor-pointer"
                 >
                   Confirm Cancellation
                 </button>

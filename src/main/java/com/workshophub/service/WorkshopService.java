@@ -25,13 +25,16 @@ public class WorkshopService {
     private final WorkshopRepository workshopRepository;
     private final RegistrationRepository registrationRepository;
     private final AuditLogRepository auditLogRepository;
+    private final ImageStorageService imageStorageService;
 
     public WorkshopService(WorkshopRepository workshopRepository,
                            RegistrationRepository registrationRepository,
-                           AuditLogRepository auditLogRepository) {
+                           AuditLogRepository auditLogRepository,
+                           ImageStorageService imageStorageService) {
         this.workshopRepository = workshopRepository;
         this.registrationRepository = registrationRepository;
         this.auditLogRepository = auditLogRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     public List<Workshop> findAllPublished() {
@@ -179,6 +182,9 @@ public class WorkshopService {
             existing.setUpdatedAt(LocalDateTime.now());
             workshopRepository.save(existing);
         } else {
+            if (existing.getBannerImagePublicId() != null && !existing.getBannerImagePublicId().isBlank()) {
+                imageStorageService.deleteImage(existing.getBannerImagePublicId());
+            }
             workshopRepository.deleteById(id);
         }
     }

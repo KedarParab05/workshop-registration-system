@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { BrandLogo } from '../common/BrandLogo';
 import {
@@ -19,10 +19,19 @@ import {
   ShieldAlert,
   ChevronDown,
   ChevronUp,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { apiFetch, saveToken } from '../../utils/api';
 import { UserRole } from '../../types';
+import {
+  validateIndianPhone,
+  validatePassword,
+  calculatePasswordStrength,
+  validateFullName,
+  validateEmail,
+} from '../../utils/validation';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -45,25 +54,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [showAllStudents, setShowAllStudents] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Form Fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [department, setDepartment] = useState('');
   const [role, setRole] = useState<'PARTICIPANT' | 'ORGANIZER'>('PARTICIPANT');
+
+  // Dynamic Password Strength
+  const passwordStrength = useMemo(() => calculatePasswordStrength(password), [password]);
 
   useEffect(() => {
     if (isOpen) {
       setMode(initialRole ? 'register' : initialMode);
       setEmail('');
       setPassword('');
+      setConfirmPassword('');
       setFullName('');
       setPhoneNumber('');
       setDepartment('');
       setErrorMsg('');
       setShowPassword(false);
+      setShowConfirmPassword(false);
       if (initialRole === 'ORGANIZER') {
         setRole('ORGANIZER');
       } else {
@@ -126,9 +142,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMsg('');
 
-    const trimmedEmail = email.trim().toLowerCase();
-    if (!trimmedEmail || !trimmedEmail.includes('@')) {
-      setErrorMsg('Please enter a valid email address.');
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.isValid) {
+      setErrorMsg(emailCheck.error || 'Please enter a valid email address.');
       return;
     }
 
@@ -141,7 +157,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       const res = await apiFetch('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email: trimmedEmail, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
       const data = await parseAuthResponse(res);
 
@@ -150,46 +166,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         applyBackendUser(data.user);
         showAlert(`Welcome back, ${data.user.fullName}!`, 'success');
         onClose();
+      } else if (res.status === 429) {
+        setErrorMsg(data.error || 'Too many failed login attempts. Please try again later.');
       } else if (res.status === 401) {
-        setErrorMsg('Email or password is incorrect.');
+        setErrorMsg(data.error || 'Invalid email or password.');
       } else if (res.status === 403) {
         setErrorMsg('Your account has been suspended.');
-      } else if (res.status === 500 || (data.error && data.error.toLowerCase().includes('internal server error'))) {
-        const localMatched = users.find((u) => u.email?.toLowerCase() === trimmedEmail);
-        if (localMatched) {
-          applyBackendUser(localMatched);
-          showAlert(`Welcome back, ${localMatched.fullName}!`, 'success');
-          onClose();
-          return;
-        }
-        setErrorMsg('Server is currently synchronizing. Please try again or use Instant Demo Login.');
-      } else if (res.status === 502 || res.status === 503 || res.status === 504) {
-        const localMatched = users.find((u) => u.email?.toLowerCase() === trimmedEmail);
-        if (localMatched) {
-          applyBackendUser(localMatched);
-          showAlert(`Welcome back, ${localMatched.fullName}!`, 'success');
-          onClose();
-          return;
-        }
-        setErrorMsg("Server is waking up. Please try again in a moment.");
       } else if (data.error) {
         setErrorMsg(data.error);
       } else {
         setErrorMsg('Something went wrong. Please try again shortly.');
       }
-    } catch (err: any) {
-      const localMatched = users.find((u) => u.email?.toLowerCase() === trimmedEmail);
-      if (localMatched) {
-        applyBackendUser(localMatched);
-        showAlert(`Welcome back, ${localMatched.fullName}!`, 'success');
-        onClose();
-        return;
-      }
-      if (err?.name === 'AbortError') {
-        setErrorMsg('Server is taking longer than usual to wake up. Please try again in a moment.');
-      } else {
-        setErrorMsg("We couldn't connect to the server. Please try again.");
-      }
+    } catch {
+      setErrorMsg("We couldn't connect to the server. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -199,20 +188,41 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMsg('');
 
-    const trimmedName = fullName.trim();
-    if (!trimmedName || trimmedName.length < 2) {
-      setErrorMsg('Full name must be at least 2 characters.');
+    // 1. Full name validation
+    const nameCheck = validateFullName(fullName);
+    if (!nameCheck.isValid) {
+      setErrorMsg(nameCheck.error || 'Full name must be at least 2 characters.');
       return;
     }
 
-    const trimmedEmail = email.trim().toLowerCase();
-    if (!trimmedEmail || !trimmedEmail.includes('@')) {
-      setErrorMsg('Please enter a valid email address.');
+    // 2. Email validation
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.isValid) {
+      setErrorMsg(emailCheck.error || 'Please enter a valid email address.');
       return;
     }
 
-    if (!password || password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters.');
+    // 3. Indian Phone number validation (mandatory or validated if entered)
+    let cleanedPhone: string | undefined = undefined;
+    if (phoneNumber && phoneNumber.trim()) {
+      const phoneCheck = validateIndianPhone(phoneNumber);
+      if (!phoneCheck.isValid) {
+        setErrorMsg(phoneCheck.error || 'Please enter a valid Indian mobile number.');
+        return;
+      }
+      cleanedPhone = phoneCheck.cleanPhone;
+    }
+
+    // 4. Password complexity validation
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.isValid) {
+      setErrorMsg(passwordCheck.error || 'Password must be at least 6 characters.');
+      return;
+    }
+
+    // 5. Password confirmation validation
+    if (password !== confirmPassword) {
+      setErrorMsg('Passwords do not match.');
       return;
     }
 
@@ -221,12 +231,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const res = await apiFetch('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: trimmedName,
-          email: trimmedEmail,
+          fullName: fullName.trim(),
+          email: email.trim().toLowerCase(),
           password,
           role,
           department: department.trim() || undefined,
-          phoneNumber: phoneNumber.trim() || undefined,
+          phoneNumber: cleanedPhone,
         }),
       });
 
@@ -239,43 +249,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       } else if (res.status === 400 && data.error && data.error.toLowerCase().includes('already exists')) {
         setErrorMsg('An account with this email already exists.');
-      } else if (res.status === 500 || (data.error && data.error.toLowerCase().includes('internal server error'))) {
-        const localUser = {
-          id: 'usr-' + Math.random().toString(36).substring(2, 10),
-          fullName: trimmedName,
-          email: trimmedEmail,
-          role,
-          accountStatus: 'ACTIVE',
-          department: department.trim() || undefined,
-          phoneNumber: phoneNumber.trim() || undefined,
-          createdAt: new Date().toISOString(),
-        };
-        applyBackendUser(localUser);
-        showAlert(`Welcome to Kaushalya, ${localUser.fullName}!`, 'success');
-        onClose();
-        return;
-      } else if (res.status === 502 || res.status === 503 || res.status === 504) {
-        setErrorMsg("We couldn't connect to the server. Please try again.");
       } else if (data.error) {
         setErrorMsg(data.error);
       } else {
         setErrorMsg('Something went wrong. Please try again shortly.');
       }
-    } catch (err: any) {
-      // If timed-out or connection failed, create a local session so the user isn't blocked
-      const localUser = {
-        id: 'usr-' + Math.random().toString(36).substring(2, 10),
-        fullName: trimmedName,
-        email: trimmedEmail,
-        role,
-        accountStatus: 'ACTIVE',
-        department: department.trim() || undefined,
-        phoneNumber: phoneNumber.trim() || undefined,
-        createdAt: new Date().toISOString(),
-      };
-      applyBackendUser(localUser);
-      showAlert(`Welcome to Kaushalya, ${localUser.fullName}!`, 'success');
-      onClose();
+    } catch {
+      setErrorMsg("We couldn't connect to the server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -306,7 +286,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           onClose();
           return;
         }
-        setErrorMsg(data.error || 'Unable to connect to account.');
+        setErrorMsg(data.error || 'Failed to switch demo account.');
       }
     } catch {
       const localMatched = users.find((u) => u.email?.toLowerCase() === demoEmail.toLowerCase());
@@ -314,9 +294,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         applyBackendUser(localMatched);
         showAlert(`Welcome back, ${localMatched.fullName}!`, 'success');
         onClose();
-        return;
+      } else {
+        setErrorMsg('Could not connect to server for demo login.');
       }
-      setErrorMsg("We couldn't connect to the server. Please try again.");
     } finally {
       setLoading(false);
       setActiveDemoEmail(null);
@@ -324,30 +304,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const inputCls =
-    'w-full px-3.5 py-2.5 rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#101410] dark:text-[#f0f5ee] text-xs placeholder:text-[#5E5E61] dark:placeholder:text-[#8ba895] focus:outline-none focus:ring-2 focus:ring-[#08482D] transition';
+    'w-full py-2.5 px-3.5 rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-[#101D32] text-xs font-medium placeholder:text-[#101D32]/50 shadow-[2px_2px_0px_0px_#101D32] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#F4511E] transition';
 
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 bg-[#101D32]/60 backdrop-blur-xs"
         />
 
+        {/* Modal Dialog */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative bg-white dark:bg-[#14231b] rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[#DCE4D6] dark:border-[#233d2e] z-10 text-[#101410] dark:text-[#f0f5ee] transition-colors max-h-[92vh] overflow-y-auto my-auto"
+          className="relative bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-[8px_8px_0px_0px_#101D32] border-2 border-[#101D32] z-10 text-xs text-[#101D32] max-h-[94vh] overflow-y-auto my-auto"
         >
-          {/* Close button */}
+          {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-xl text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee] hover:bg-[#E8F0DF] dark:hover:bg-[#1b3025] transition-colors"
+            className="absolute top-5 right-5 p-2 rounded-lg border-2 border-transparent hover:border-[#101D32] text-[#101D32] hover:bg-[#FFD6B0] transition-all cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -358,10 +339,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="flex justify-center mb-2.5">
               <BrandLogo size="md" showTagline={true} />
             </div>
-            <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-[#101410] dark:text-[#f0f5ee]">
+            <h2 className="text-xl sm:text-2xl font-heading font-black text-[#101D32]">
               {mode === 'login' ? 'Sign In to Your Account' : 'Create an Account'}
             </h2>
-            <p className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
+            <p className="text-xs text-[#101D32]/80 font-medium">
               {mode === 'login'
                 ? 'Enter your credentials to access your dashboard and passes.'
                 : 'Join the academic skills platform to attend or host workshops.'}
@@ -369,17 +350,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           {/* Mode Switch Tabs */}
-          <div className="flex rounded-2xl bg-[#F5F8EF] dark:bg-[#1b3025] p-1 border border-[#DCE4D6] dark:border-[#233d2e] mb-4">
+          <div className="flex rounded-xl bg-[#FFF5E9] p-1 border-2 border-[#101D32] mb-4 shadow-[2px_2px_0px_0px_#101D32]">
             <button
               type="button"
               onClick={() => {
                 setMode('login');
                 setErrorMsg('');
               }}
-              className={`flex-1 py-2 rounded-xl text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all ${
+              className={`flex-1 py-2 rounded-lg text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-white dark:bg-[#14231b] text-[#08482D] dark:text-[#DAE7C7] shadow-xs'
-                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+                  ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32] border border-[#101D32]'
+                  : 'text-[#101D32] hover:bg-[#FFD6B0]'
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
@@ -391,10 +372,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setMode('register');
                 setErrorMsg('');
               }}
-              className={`flex-1 py-2 rounded-xl text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all ${
+              className={`flex-1 py-2 rounded-lg text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 mode === 'register'
-                  ? 'bg-white dark:bg-[#14231b] text-[#08482D] dark:text-[#DAE7C7] shadow-xs'
-                  : 'text-[#5E5E61] dark:text-[#8ba895] hover:text-[#101410] dark:hover:text-[#f0f5ee]'
+                  ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32] border border-[#101D32]'
+                  : 'text-[#101D32] hover:bg-[#FFD6B0]'
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -404,8 +385,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Error Message */}
           {errorMsg && (
-            <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 text-xs rounded-2xl">
-              {errorMsg}
+            <div className="mb-4 p-3 bg-[#FFD6B0] border-2 border-[#101D32] text-[#101D32] text-xs font-bold rounded-xl shadow-[3px_3px_0px_0px_#101D32] flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-[#F4511E] shrink-0 mt-0.5" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
@@ -415,11 +397,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {mode === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1.5">
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1.5">
                   Email Address *
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     value={email}
@@ -427,7 +409,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setEmail(e.target.value);
                       setErrorMsg('');
                     }}
-                    placeholder="mca26.omkar.parelkar@gnims.com"
+                    placeholder="e.g. participant@university.edu"
                     className={`${inputCls} pl-10`}
                     autoFocus
                     required
@@ -436,11 +418,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1.5">
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1.5">
                   Password *
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -455,7 +437,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5E5E61] hover:text-[#101410] dark:hover:text-[#f0f5ee]"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#101D32]/70 hover:text-[#101D32] cursor-pointer"
                     tabIndex={-1}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
@@ -467,14 +449,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-60 text-[#F5F8EF] font-heading font-semibold text-xs rounded-2xl shadow-md shadow-[#08482D]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 bg-[#F4511E] hover:bg-[#E84316] disabled:opacity-60 text-white font-heading font-extrabold text-xs rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101D32] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <LogIn className="w-4 h-4 text-white" />}
                 <span>{loading ? 'Authenticating…' : 'Sign In'}</span>
               </button>
 
               <div className="text-center pt-1">
-                <span className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
+                <span className="text-xs text-[#101D32]/80 font-medium">
                   Don't have an account yet?{' '}
                   <button
                     type="button"
@@ -482,7 +464,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setMode('register');
                       setErrorMsg('');
                     }}
-                    className="text-[#08482D] dark:text-[#DAE7C7] font-bold hover:underline"
+                    className="text-[#F4511E] font-bold hover:underline cursor-pointer"
                   >
                     Create Account
                   </button>
@@ -494,12 +476,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 REGISTRATION FORM
             ───────────────────────────────────────────────────────────── */
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+              {/* Full Name */}
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1">
                   Full Name *
                 </label>
                 <div className="relative">
-                  <UserIcon className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <UserIcon className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={fullName}
@@ -515,12 +498,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               </div>
 
+              {/* Email Address */}
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1">
                   Email Address *
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     value={email}
@@ -528,31 +512,64 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setEmail(e.target.value);
                       setErrorMsg('');
                     }}
-                    placeholder="e.g. mca26.omkar.parelkar@gnims.com"
+                    placeholder="e.g. alex.morgan@university.edu"
                     className={`${inputCls} pl-10`}
                     required
                   />
                 </div>
               </div>
 
+              {/* Phone Number (Indian 10-Digit Mobile Number) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-heading font-bold text-[#101D32]">
+                    Mobile Phone Number *
+                  </label>
+                  <span className="text-[10px] text-[#101D32]/70 font-mono font-bold">10 digits Indian mobile</span>
+                </div>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none text-[#101D32] font-bold text-xs">
+                    <Phone className="w-3.5 h-3.5 text-[#F4511E]" />
+                    <span className="text-[11px] font-mono text-[#101D32]/70">+91</span>
+                  </div>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    maxLength={10}
+                    onChange={(e) => {
+                      // Only allow numeric input
+                      const raw = e.target.value.replace(/\D/g, '');
+                      setPhoneNumber(raw);
+                      setErrorMsg('');
+                    }}
+                    placeholder="9876543210"
+                    className={`${inputCls} pl-16 font-mono font-bold`}
+                    required
+                  />
+                </div>
+                <p className="text-[10px] text-[#101D32]/70 mt-1">
+                  Must start with 6, 7, 8, or 9 and contain exactly 10 digits.
+                </p>
+              </div>
+
               {/* Role Selection */}
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1">
                   I want to join as *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setRole('PARTICIPANT')}
-                    className={`p-2.5 rounded-2xl border text-left transition-all flex items-center gap-2 ${
+                    className={`p-2.5 rounded-xl border-2 text-left transition-all flex items-center gap-2 cursor-pointer ${
                       role === 'PARTICIPANT'
-                        ? 'border-[#08482D] dark:border-[#DAE7C7] bg-[#DAE7C7]/30 dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-bold'
-                        : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#5E5E61] dark:text-[#8ba895]'
+                        ? 'border-[#101D32] bg-[#FFD6B0] text-[#101D32] font-bold shadow-[2px_2px_0px_0px_#101D32]'
+                        : 'border-[#101D32]/40 bg-white text-[#101D32]/80 hover:bg-[#FFF5E9]'
                     }`}
                   >
-                    <GraduationCap className="w-4 h-4 shrink-0" />
+                    <GraduationCap className="w-4 h-4 shrink-0 text-[#F4511E]" />
                     <div>
-                      <div className="text-xs font-heading">Student</div>
+                      <div className="text-xs font-heading font-bold">Student</div>
                       <div className="text-[10px] font-normal opacity-80">Attendee</div>
                     </div>
                   </button>
@@ -560,27 +577,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setRole('ORGANIZER')}
-                    className={`p-2.5 rounded-2xl border text-left transition-all flex items-center gap-2 ${
+                    className={`p-2.5 rounded-xl border-2 text-left transition-all flex items-center gap-2 cursor-pointer ${
                       role === 'ORGANIZER'
-                        ? 'border-[#08482D] dark:border-[#DAE7C7] bg-[#DAE7C7]/30 dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-bold'
-                        : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF]/60 dark:bg-[#1b3025] text-[#5E5E61] dark:text-[#8ba895]'
+                        ? 'border-[#101D32] bg-[#FFD6B0] text-[#101D32] font-bold shadow-[2px_2px_0px_0px_#101D32]'
+                        : 'border-[#101D32]/40 bg-white text-[#101D32]/80 hover:bg-[#FFF5E9]'
                     }`}
                   >
-                    <Briefcase className="w-4 h-4 shrink-0" />
+                    <Briefcase className="w-4 h-4 shrink-0 text-[#F4511E]" />
                     <div>
-                      <div className="text-xs font-heading">Organizer</div>
+                      <div className="text-xs font-heading font-bold">Organizer</div>
                       <div className="text-[10px] font-normal opacity-80">Faculty / Host</div>
                     </div>
                   </button>
                 </div>
               </div>
 
+              {/* Password */}
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
-                  Password * <span className="font-normal text-[#5E5E61]">(min. 6 characters)</span>
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1">
+                  Password *
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -588,48 +606,111 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setPassword(e.target.value);
                       setErrorMsg('');
                     }}
-                    placeholder="Create a strong password"
+                    placeholder="At least 6 chars with uppercase, lowercase & number"
                     className={`${inputCls} pl-10 pr-10`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5E5E61] hover:text-[#101410] dark:hover:text-[#f0f5ee]"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#101D32]/70 hover:text-[#101D32] cursor-pointer"
                     tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                {/* Password Strength Indicator */}
+                {password && (
+                  <div className="mt-2 p-2 bg-[#FFF5E9] rounded-lg border border-[#101D32]/30 space-y-1.5">
+                    <div className="flex items-center justify-between text-[10px] font-bold">
+                      <span className="text-[#101D32]/75">Password Strength:</span>
+                      <span
+                        className={`uppercase tracking-wider ${
+                          passwordStrength.label === 'Strong'
+                            ? 'text-[#101D32] font-black'
+                            : passwordStrength.label === 'Medium'
+                            ? 'text-[#F4511E]'
+                            : 'text-[#E84316]'
+                        }`}
+                      >
+                        {passwordStrength.label}
+                      </span>
+                    </div>
+                    {/* Visual Segmented Bar */}
+                    <div className="grid grid-cols-3 gap-1.5 h-1.5">
+                      <div
+                        className={`rounded-full transition-all ${
+                          passwordStrength.score >= 1 ? 'bg-[#E84316]' : 'bg-[#101D32]/20'
+                        }`}
+                      />
+                      <div
+                        className={`rounded-full transition-all ${
+                          passwordStrength.score >= 2 ? 'bg-[#F4511E]' : 'bg-[#101D32]/20'
+                        }`}
+                      />
+                      <div
+                        className={`rounded-full transition-all ${
+                          passwordStrength.score >= 3 ? 'bg-[#101D32]' : 'bg-[#101D32]/20'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
+              {/* Confirm Password */}
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
-                  Department / Institution <span className="font-normal text-[#5E5E61]">(optional)</span>
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1">
+                  Confirm Password *
                 </label>
                 <div className="relative">
-                  <Building className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setErrorMsg('');
+                    }}
+                    placeholder="Re-enter your password"
+                    className={`${inputCls} pl-10 pr-10`}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#101D32]/70 hover:text-[#101D32] cursor-pointer"
+                    tabIndex={-1}
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {confirmPassword && password !== confirmPassword && (
+                  <p className="text-[#E84316] text-[10px] font-bold mt-1">Passwords do not match.</p>
+                )}
+                {confirmPassword && password === confirmPassword && (
+                  <p className="text-[#101D32] text-[10px] font-bold mt-1 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-[#F4511E]" />
+                    <span>Passwords match.</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Department */}
+              <div>
+                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1">
+                  Department / Institution <span className="font-normal text-[#101D32]/70">(optional)</span>
+                </label>
+                <div className="relative">
+                  <Building className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
-                    placeholder="e.g. Master of Computer Applications (MCA), GNIMS"
-                    className={`${inputCls} pl-10`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] mb-1">
-                  Phone Number <span className="font-normal text-[#5E5E61]">(optional)</span>
-                </label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-[#5E5E61] dark:text-[#8ba895] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+91 86577 90811"
+                    placeholder="e.g. Computer Science & AI"
                     className={`${inputCls} pl-10`}
                   />
                 </div>
@@ -638,14 +719,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-60 text-[#F5F8EF] font-heading font-semibold text-xs rounded-2xl shadow-md shadow-[#08482D]/20 transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
+                className="w-full py-3 bg-[#F4511E] hover:bg-[#E84316] disabled:opacity-60 text-white font-heading font-extrabold text-xs rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101D32] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <UserPlus className="w-4 h-4 text-white" />}
                 <span>{loading ? 'Creating Account…' : 'Create Account'}</span>
               </button>
 
               <div className="text-center pt-1">
-                <span className="text-xs text-[#5E5E61] dark:text-[#8ba895]">
+                <span className="text-xs text-[#101D32]/80 font-medium">
                   Already have an account?{' '}
                   <button
                     type="button"
@@ -653,7 +734,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setMode('login');
                       setErrorMsg('');
                     }}
-                    className="text-[#08482D] dark:text-[#DAE7C7] font-bold hover:underline"
+                    className="text-[#F4511E] font-bold hover:underline cursor-pointer"
                   >
                     Sign In
                   </button>
@@ -662,188 +743,84 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {/* Instant Campus Access */}
-          <div className="mt-5 pt-4 border-t border-[#DCE4D6] dark:border-[#233d2e] space-y-2.5">
-            <div className="flex items-center justify-between text-[11px] text-[#5E5E61] dark:text-[#8ba895]">
-              <span className="font-heading font-semibold flex items-center gap-1.5 text-[#08482D] dark:text-[#DAE7C7]">
-                <KeyRound className="w-3.5 h-3.5" />
-                <span>Quick Access Accounts</span>
+          {/* ─────────────────────────────────────────────────────────────
+              EVALUATOR QUICK-LOGIN PERSONAS (Demo Fast-Track)
+          ───────────────────────────────────────────────────────────── */}
+          <div className="mt-5 pt-4 border-t-2 border-[#101D32] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-heading font-extrabold uppercase tracking-wider text-[#101D32] flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-[#F4511E]" />
+                <span>Instant Demo Login (Evaluators)</span>
               </span>
-              <span className="text-[10px] text-[#5E5E61] dark:text-[#8ba895]">Institutional Access</span>
+              <span className="text-[10px] text-[#101D32]/70 font-mono font-bold bg-[#FFD6B0] px-2 py-0.5 rounded-full border border-[#101D32]">
+                1-Click JWT Switch
+              </span>
             </div>
 
-            <p className="text-[11px] text-[#5E5E61] dark:text-[#8ba895] leading-relaxed">
-              Sign in instantly with your verified campus role profile.
-            </p>
-
-            {/* Primary 3 Demo Cards */}
-            <div className="grid grid-cols-3 gap-2">
-              {/* Student Demo Login */}
+            <div className="grid grid-cols-2 gap-2">
+              {/* Super Admin */}
               <button
                 type="button"
-                disabled={loading}
-                onClick={() => handleDemoSwitch('mca26.aary.nikam@gnims.com')}
-                className={`p-2 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
-                  activeDemoEmail === 'mca26.aary.nikam@gnims.com'
-                    ? 'border-[#08482D] bg-[#DAE7C7]/50 dark:bg-[#1a3826]'
-                    : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:border-[#08482D] dark:hover:border-[#DAE7C7] hover:bg-white dark:hover:bg-[#14231b]'
-                } ${loading && activeDemoEmail !== 'mca26.aary.nikam@gnims.com' ? 'opacity-50 pointer-events-none' : ''}`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-5 h-5 rounded-lg bg-[#DAE7C7] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
-                    {activeDemoEmail === 'mca26.aary.nikam@gnims.com' ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <GraduationCap className="w-3 h-3" />
-                    )}
-                  </div>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#E8F0DF] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
-                    Student
-                  </span>
-                </div>
-                <div className="font-heading font-bold text-[11px] text-[#101410] dark:text-[#f0f5ee] truncate">
-                  Aary Nikam
-                </div>
-                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
-                  GNIMS MCA (Verified Student)
-                </div>
-              </button>
-
-              {/* Organizer Demo Login */}
-              <button
-                type="button"
-                disabled={loading}
-                onClick={() => handleDemoSwitch('sarah.lin@faculty.edu')}
-                className={`p-2 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
-                  activeDemoEmail === 'sarah.lin@faculty.edu'
-                    ? 'border-[#08482D] bg-[#DAE7C7]/50 dark:bg-[#1a3826]'
-                    : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:border-[#08482D] dark:hover:border-[#DAE7C7] hover:bg-white dark:hover:bg-[#14231b]'
-                } ${loading && activeDemoEmail !== 'sarah.lin@faculty.edu' ? 'opacity-50 pointer-events-none' : ''}`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-5 h-5 rounded-lg bg-[#DAE7C7] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
-                    {activeDemoEmail === 'sarah.lin@faculty.edu' ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Briefcase className="w-3 h-3" />
-                    )}
-                  </div>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#E8F0DF] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
-                    Organizer
-                  </span>
-                </div>
-                <div className="font-heading font-bold text-[11px] text-[#101410] dark:text-[#f0f5ee] truncate">
-                  Dr. Sarah Lin
-                </div>
-                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
-                  Faculty Host
-                </div>
-              </button>
-
-              {/* Admin Demo Login */}
-              <button
-                type="button"
-                disabled={loading}
                 onClick={() => handleDemoSwitch('admin@workshophub.edu')}
-                className={`p-2 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
-                  activeDemoEmail === 'admin@workshophub.edu'
-                    ? 'border-[#08482D] bg-[#DAE7C7]/50 dark:bg-[#1a3826]'
-                    : 'border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:border-[#08482D] dark:hover:border-[#DAE7C7] hover:bg-white dark:hover:bg-[#14231b]'
-                } ${loading && activeDemoEmail !== 'admin@workshophub.edu' ? 'opacity-50 pointer-events-none' : ''}`}
+                disabled={loading}
+                className="p-2.5 rounded-xl border-2 border-[#101D32] bg-white hover:bg-[#FFD6B0] text-left transition-all shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] disabled:opacity-50 cursor-pointer"
               >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-5 h-5 rounded-lg bg-[#DAE7C7] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center">
-                    {activeDemoEmail === 'admin@workshophub.edu' ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <ShieldAlert className="w-3 h-3" />
-                    )}
-                  </div>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#E8F0DF] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
-                    Admin
-                  </span>
+                <div className="flex items-center gap-1.5 font-heading font-extrabold text-xs text-[#101D32]">
+                  <ShieldAlert className="w-3.5 h-3.5 text-[#F4511E]" />
+                  <span>Super Admin</span>
                 </div>
-                <div className="font-heading font-bold text-[11px] text-[#101410] dark:text-[#f0f5ee] truncate">
-                  System Admin
+                <div className="text-[10px] text-[#101D32]/70 truncate font-mono mt-0.5">
+                  admin@workshophub.edu
                 </div>
-                <div className="text-[10px] text-[#5E5E61] dark:text-[#8ba895] truncate">
-                  Platform Lead
+              </button>
+
+              {/* Faculty Organizer */}
+              <button
+                type="button"
+                onClick={() => handleDemoSwitch('vikram.rao@faculty.edu')}
+                disabled={loading}
+                className="p-2.5 rounded-xl border-2 border-[#101D32] bg-white hover:bg-[#FFD6B0] text-left transition-all shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] disabled:opacity-50 cursor-pointer"
+              >
+                <div className="flex items-center gap-1.5 font-heading font-extrabold text-xs text-[#101D32]">
+                  <Briefcase className="w-3.5 h-3.5 text-[#F4511E]" />
+                  <span>Prof. Vikram Rao</span>
+                </div>
+                <div className="text-[10px] text-[#101D32]/70 truncate font-mono mt-0.5">
+                  vikram.rao@faculty.edu
                 </div>
               </button>
             </div>
 
-            {/* Persona Switcher Toggle */}
-            <div className="pt-1">
+            {/* Students list expandable */}
+            <div className="space-y-1.5 pt-1">
               <button
                 type="button"
-                onClick={() => setShowAllStudents((prev) => !prev)}
-                className="w-full py-1 px-2 text-[10px] font-heading font-semibold text-[#5E5E61] dark:text-[#8ba895] hover:text-[#08482D] dark:hover:text-[#DAE7C7] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                onClick={() => setShowAllStudents(!showAllStudents)}
+                className="w-full py-1.5 px-2 bg-[#FFF5E9] hover:bg-[#FFD6B0] border border-[#101D32] rounded-lg text-[11px] font-heading font-bold text-[#101D32] flex items-center justify-between transition-colors cursor-pointer"
               >
-                <span>{showAllStudents ? 'Hide additional campus accounts' : 'More campus accounts (Omkar, Kedar, Vaibhavi, Sonal…)'}</span>
-                {showAllStudents ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                <span>Student Attendee Personas ({users.filter(u => u.role === 'PARTICIPANT').length || 4})</span>
+                {showAllStudents ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
 
               {showAllStudents && (
-                <div className="mt-2 grid grid-cols-2 gap-1.5 pt-1 border-t border-dashed border-[#DCE4D6] dark:border-[#233d2e]">
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleDemoSwitch('mca26.omkar.parelkar@gnims.com')}
-                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
-                  >
-                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleDemoSwitch('mca26.kedar.parab@gnims.com')}
-                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
-                  >
-                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Kedar Parab</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleDemoSwitch('mca26.vaibhavi.parmar@gnims.com')}
-                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
-                  >
-                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Vaibhavi Parmar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleDemoSwitch('mca26.sonal.sharma@gnims.com')}
-                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
-                  >
-                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Sonal Sharma</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">GNIMS MCA (Verified Student)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleDemoSwitch('omkar.parelkar@gnims.com')}
-                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
-                  >
-                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Omkar Parelkar</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Host Organizer (Studio Lead)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleDemoSwitch('alex.morgan@student.edu')}
-                    className="p-1.5 rounded-xl border border-[#DCE4D6] dark:border-[#233d2e] bg-[#F5F8EF] dark:bg-[#1b3025] hover:bg-[#DAE7C7]/40 text-left transition-colors text-[10px] cursor-pointer"
-                  >
-                    <div className="font-heading font-semibold text-[#101410] dark:text-[#f0f5ee] truncate">Alex Morgan</div>
-                    <div className="text-[#5E5E61] dark:text-[#8ba895] text-[9px] truncate">Student (Legacy Test)</div>
-                  </button>
+                <div className="grid grid-cols-2 gap-1.5 pt-1 max-h-36 overflow-y-auto">
+                  {[
+                    { name: 'Omkar Parelkar', email: 'mca26.omkar.parelkar@gnims.com' },
+                    { name: 'Marcus Vance', email: 'marcus@university.edu' },
+                    { name: 'Elena Rostova', email: 'elena@university.edu' },
+                    { name: 'Priya Sharma', email: 'priya@university.edu' },
+                  ].map((s) => (
+                    <button
+                      key={s.email}
+                      type="button"
+                      onClick={() => handleDemoSwitch(s.email)}
+                      disabled={loading}
+                      className="p-1.5 bg-white hover:bg-[#FFD6B0] border border-[#101D32] rounded-lg text-left text-[10px] transition-colors truncate cursor-pointer"
+                    >
+                      <div className="font-bold text-[#101D32] truncate">{s.name}</div>
+                      <div className="text-[#101D32]/70 truncate font-mono">{s.email}</div>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import QrScanner from 'qr-scanner';
 import {
   Scan,
@@ -21,9 +21,7 @@ import {
   Search,
   ShieldCheck,
   RefreshCw,
-  Sparkles,
   SwitchCamera,
-  Check,
   Focus,
   Zap,
 } from 'lucide-react';
@@ -42,7 +40,6 @@ interface ScanHistoryItem {
 export const VolunteerGatePortal: React.FC = () => {
   const {
     currentVolunteer,
-    assignedVolunteerWorkshop,
     registrations,
     verifyTicketAsVolunteer,
     verifyVolunteerLogin,
@@ -52,7 +49,7 @@ export const VolunteerGatePortal: React.FC = () => {
     currentUser,
   } = useApp();
 
-  // ── Access Code Gate State ──
+  // Access Code Gate State
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const [verifyingAccess, setVerifyingAccess] = useState(false);
   const [accessError, setAccessError] = useState('');
@@ -148,23 +145,25 @@ export const VolunteerGatePortal: React.FC = () => {
           osc.frequency.setValueAtTime(220, audioCtx.currentTime);
           osc.frequency.setValueAtTime(160, audioCtx.currentTime + 0.12);
           gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
           osc.start();
-          osc.stop(audioCtx.currentTime + 0.4);
+          osc.stop(audioCtx.currentTime + 0.35);
         }
-      } catch {}
+      } catch {
+        // Audio unavailable
+      }
     },
     [soundEnabled]
   );
 
-  // Verification execution
+  // Verify Ticket
   const processTicketVerification = useCallback(
     async (rawCode: string) => {
       if (!rawCode || !rawCode.trim()) return;
-
       const trimmed = rawCode.trim();
       const now = Date.now();
 
+      // Debounce duplicate scans within 3 seconds
       if (
         lastScannedCodeRef.current &&
         lastScannedCodeRef.current.code === trimmed &&
@@ -183,9 +182,7 @@ export const VolunteerGatePortal: React.FC = () => {
       let codeToVerify = trimmed;
       try {
         const parsed = JSON.parse(trimmed);
-        if (parsed.ticketCode) {
-          codeToVerify = parsed.ticketCode;
-        }
+        if (parsed.ticketCode) codeToVerify = parsed.ticketCode;
       } catch {}
 
       const res = await verifyTicketAsVolunteer(codeToVerify, allowBypass);
@@ -194,9 +191,8 @@ export const VolunteerGatePortal: React.FC = () => {
         playAudioFeedback(true);
         setResult({
           status: 'success',
-          message: res.message || 'Ticket verified successfully! Access granted.',
+          message: res.message || 'Pass verified successfully! Access granted.',
           registration: res.registration,
-          workshop: res.workshop || assignedVolunteerWorkshop || undefined,
         });
 
         setScanHistory((prev) => [
@@ -206,17 +202,21 @@ export const VolunteerGatePortal: React.FC = () => {
             ticketCode: codeToVerify,
             participantName: res.registration?.participantName || 'Attendee',
             status: 'GRANTED',
-            message: '1-time entry granted',
+            message: 'Gate Admission Granted',
           },
-          ...prev.slice(0, 9),
+          ...prev.slice(0, 19),
         ]);
         setTicketInput('');
       } else {
         playAudioFeedback(false);
+        const existing = registrations.find(
+          (r) => r.ticketCode === codeToVerify || r.id === codeToVerify
+        );
+
         setResult({
           status: 'error',
-          message: res.message || 'Verification failed.',
-          workshop: res.workshop,
+          message: res.message || 'Pass rejected.',
+          registration: existing,
         });
 
         setScanHistory((prev) => [
@@ -224,21 +224,20 @@ export const VolunteerGatePortal: React.FC = () => {
             id: Date.now().toString(),
             timestamp: new Date().toLocaleTimeString(),
             ticketCode: codeToVerify,
-            participantName: 'Attendee',
+            participantName: existing?.participantName || 'Unknown Attendee',
             status: 'DENIED',
-            message: res.message || 'Invalid or already used pass',
+            message: res.message || 'Verification Failed',
           },
-          ...prev.slice(0, 9),
+          ...prev.slice(0, 19),
         ]);
       }
 
       setVerifying(false);
-
       setTimeout(() => {
         isScanningRef.current = false;
-      }, 2200);
+      }, 2500);
     },
-    [allowBypass, assignedVolunteerWorkshop, playAudioFeedback, verifyTicketAsVolunteer]
+    [allowBypass, playAudioFeedback, registrations, verifyTicketAsVolunteer]
   );
 
   const processRef = useRef(processTicketVerification);
@@ -261,122 +260,125 @@ export const VolunteerGatePortal: React.FC = () => {
   }, []);
 
   // Start Camera
-  const startCamera = useCallback(async (preferredCam: string = currentCameraId) => {
-    setCameraError(null);
-    setCameraLoading(true);
+  const startCamera = useCallback(
+    async (preferredCam: string = currentCameraId) => {
+      setCameraError(null);
+      setCameraLoading(true);
 
-    if (qrScannerRef.current) {
-      try {
-        qrScannerRef.current.stop();
-        qrScannerRef.current.destroy();
-      } catch {}
-      qrScannerRef.current = null;
-    }
-
-    if (!videoRef.current) {
-      setCameraLoading(false);
-      return;
-    }
-
-    try {
-      const scanner = new QrScanner(
-        videoRef.current,
-        (scanResult: QrScanner.ScanResult) => {
-          if (scanResult && scanResult.data) {
-            processRef.current(scanResult.data);
-          }
-        },
-        {
-          onDecodeError: () => {},
-          preferredCamera: preferredCam as any,
-          maxScansPerSecond: 25,
-          calculateScanRegion: (video) => ({
-            x: 0,
-            y: 0,
-            width: video.videoWidth || 1280,
-            height: video.videoHeight || 720,
-            downScaledWidth: video.videoWidth || 1280,
-            downScaledHeight: video.videoHeight || 720,
-          }),
-          highlightScanRegion: false,
-          highlightCodeOutline: false,
-          returnDetailedScanResult: true,
-        }
-      );
-
-      scanner.setInversionMode('both');
-      await scanner.start();
-      qrScannerRef.current = scanner;
-      setCameraActive(true);
-      setCameraLoading(false);
-
-      try {
-        const stream = (videoRef.current?.srcObject as MediaStream) || null;
-        const track = stream?.getVideoTracks()[0];
-        if (track && track.getCapabilities) {
-          const caps = track.getCapabilities() as any;
-          if (caps?.focusMode && Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) {
-            await track.applyConstraints({
-              advanced: [{ focusMode: 'continuous' }] as any,
-            });
-          }
-        }
-      } catch {}
-
-      try {
-        const cameras = await QrScanner.listCameras(false);
-        setAvailableCameras(cameras);
-      } catch {}
-
-      try {
-        const hasF = await scanner.hasFlash();
-        setFlashSupported(hasF);
-      } catch {
-        setFlashSupported(false);
-      }
-    } catch {
-      if (preferredCam === 'environment') {
+      if (qrScannerRef.current) {
         try {
-          if (videoRef.current) {
-            const fallbackScanner = new QrScanner(
-              videoRef.current,
-              (scanResult: QrScanner.ScanResult) => {
-                if (scanResult && scanResult.data) {
-                  processRef.current(scanResult.data);
-                }
-              },
-              {
-                preferredCamera: 'user',
-                maxScansPerSecond: 25,
-                calculateScanRegion: (video) => ({
-                  x: 0,
-                  y: 0,
-                  width: video.videoWidth || 1280,
-                  height: video.videoHeight || 720,
-                  downScaledWidth: video.videoWidth || 1280,
-                  downScaledHeight: video.videoHeight || 720,
-                }),
-                returnDetailedScanResult: true,
-              }
-            );
-            fallbackScanner.setInversionMode('both');
-            await fallbackScanner.start();
-            qrScannerRef.current = fallbackScanner;
-            setCurrentCameraId('user');
-            setCameraActive(true);
-            setCameraLoading(false);
-            return;
+          qrScannerRef.current.stop();
+          qrScannerRef.current.destroy();
+        } catch {}
+        qrScannerRef.current = null;
+      }
+
+      if (!videoRef.current) {
+        setCameraLoading(false);
+        return;
+      }
+
+      try {
+        const scanner = new QrScanner(
+          videoRef.current,
+          (scanResult: QrScanner.ScanResult) => {
+            if (scanResult && scanResult.data) {
+              processRef.current(scanResult.data);
+            }
+          },
+          {
+            onDecodeError: () => {},
+            preferredCamera: preferredCam as any,
+            maxScansPerSecond: 25,
+            calculateScanRegion: (video) => ({
+              x: 0,
+              y: 0,
+              width: video.videoWidth || 1280,
+              height: video.videoHeight || 720,
+              downScaledWidth: video.videoWidth || 1280,
+              downScaledHeight: video.videoHeight || 720,
+            }),
+            highlightScanRegion: false,
+            highlightCodeOutline: false,
+            returnDetailedScanResult: true,
+          }
+        );
+
+        scanner.setInversionMode('both');
+        await scanner.start();
+        qrScannerRef.current = scanner;
+        setCameraActive(true);
+        setCameraLoading(false);
+
+        try {
+          const stream = (videoRef.current?.srcObject as MediaStream) || null;
+          const track = stream?.getVideoTracks()[0];
+          if (track && track.getCapabilities) {
+            const caps = track.getCapabilities() as any;
+            if (caps?.focusMode && Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) {
+              await track.applyConstraints({
+                advanced: [{ focusMode: 'continuous' }] as any,
+              });
+            }
           }
         } catch {}
-      }
 
-      setCameraError(
-        'Unable to access camera. Please allow camera permissions or use the Barcode / File Upload mode below.'
-      );
-      setCameraActive(false);
-      setCameraLoading(false);
-    }
-  }, [currentCameraId]);
+        try {
+          const cameras = await QrScanner.listCameras(false);
+          setAvailableCameras(cameras);
+        } catch {}
+
+        try {
+          const hasF = await scanner.hasFlash();
+          setFlashSupported(hasF);
+        } catch {
+          setFlashSupported(false);
+        }
+      } catch {
+        if (preferredCam === 'environment') {
+          try {
+            if (videoRef.current) {
+              const fallbackScanner = new QrScanner(
+                videoRef.current,
+                (scanResult: QrScanner.ScanResult) => {
+                  if (scanResult && scanResult.data) {
+                    processRef.current(scanResult.data);
+                  }
+                },
+                {
+                  preferredCamera: 'user',
+                  maxScansPerSecond: 25,
+                  calculateScanRegion: (video) => ({
+                    x: 0,
+                    y: 0,
+                    width: video.videoWidth || 1280,
+                    height: video.videoHeight || 720,
+                    downScaledWidth: video.videoWidth || 1280,
+                    downScaledHeight: video.videoHeight || 720,
+                  }),
+                  returnDetailedScanResult: true,
+                }
+              );
+              fallbackScanner.setInversionMode('both');
+              await fallbackScanner.start();
+              qrScannerRef.current = fallbackScanner;
+              setCurrentCameraId('user');
+              setCameraActive(true);
+              setCameraLoading(false);
+              return;
+            }
+          } catch {}
+        }
+
+        setCameraError(
+          'Unable to access camera. Please allow camera permissions or use the Barcode / File Upload mode below.'
+        );
+        setCameraActive(false);
+        setCameraLoading(false);
+      }
+    },
+    [currentCameraId]
+  );
 
   // Flip Camera
   const handleSwitchCamera = useCallback(async () => {
@@ -398,16 +400,18 @@ export const VolunteerGatePortal: React.FC = () => {
     if (qrScannerRef.current) {
       try {
         await qrScannerRef.current.toggleFlash();
-        setFlashOn(qrScannerRef.current.isFlashOn());
+        const state = qrScannerRef.current.isFlashOn();
+        setFlashOn(state);
       } catch {}
     }
   }, []);
 
+  // Manage Camera lifecycle
   useEffect(() => {
     if (currentVolunteer && activeTab === 'camera') {
       const timer = setTimeout(() => {
         startCamera();
-      }, 100);
+      }, 150);
       return () => {
         clearTimeout(timer);
         stopCamera();
@@ -415,13 +419,11 @@ export const VolunteerGatePortal: React.FC = () => {
     } else {
       stopCamera();
     }
-    return () => {
-      stopCamera();
-    };
-  }, [currentVolunteer?.id, activeTab, startCamera, stopCamera]);
+  }, [currentVolunteer, activeTab, startCamera, stopCamera]);
 
-  // Handle uploaded QR image
+  // Image Upload
   const handleImageUpload = async (file: File) => {
+    if (!file) return;
     setVerifying(true);
     setResult({ status: 'idle', message: '' });
 
@@ -469,27 +471,27 @@ export const VolunteerGatePortal: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-6">
-        <div className="w-16 h-16 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] mx-auto flex items-center justify-center border border-[#DAE7C7] dark:border-[#2d4d3a] shadow-lg">
-          <KeyRound className="w-8 h-8" />
+        <div className="w-16 h-16 rounded-2xl bg-[#FFD6B0] text-[#101D32] mx-auto flex items-center justify-center border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32]">
+          <KeyRound className="w-8 h-8 text-[#F4511E]" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-heading font-bold text-[#101410] dark:text-white">
+          <h2 className="text-2xl font-heading font-black text-[#101410]">
             Volunteer Gate Station Authentication
           </h2>
-          <p className="text-sm text-[#5E5E61] dark:text-slate-400 max-w-md mx-auto">
+          <p className="text-sm text-[#101D32]/75 max-w-md mx-auto font-medium">
             Please sign in with your account to access your assigned gate station and enter your organizer authorization access code.
           </p>
         </div>
         <div className="flex justify-center gap-3">
           <button
             onClick={() => navigateTo('home')}
-            className="px-5 py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-xl text-sm font-heading font-semibold shadow-md transition-colors"
+            className="px-5 py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-xl text-sm font-heading font-extrabold border-2 border-[#101D32] shadow-[3px_3px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer"
           >
             Go to Home & Sign In
           </button>
           <button
             onClick={() => navigateTo('workshops')}
-            className="px-5 py-2.5 border border-[#DCE4D6] dark:border-[#203a2c] text-[#101410] dark:text-slate-300 hover:bg-[#F5F8EF] dark:hover:bg-[#18281f] rounded-xl text-sm font-medium transition-colors"
+            className="px-5 py-2.5 border-2 border-[#101D32] bg-white hover:bg-[#FFD6B0] text-[#101D32] rounded-xl text-sm font-heading font-bold shadow-[2px_2px_0px_0px_#101D32] transition-all cursor-pointer"
           >
             Browse Workshops
           </button>
@@ -504,30 +506,30 @@ export const VolunteerGatePortal: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#DAE7C7] text-[#08482D]">
-            <KeyRound className="w-3.5 h-3.5 text-[#08482D]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#FFD6B0] text-[#101D32] border border-[#101D32] shadow-[2px_2px_0px_0px_#101D32]">
+            <KeyRound className="w-3.5 h-3.5 text-[#F4511E]" />
             <span>Volunteer Gate Station Access</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[#101410] dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#101410]">
             Enter Organizer Authorization Code
           </h1>
-          <p className="text-sm text-[#5E5E61] dark:text-slate-400 max-w-xl mx-auto">
-            Welcome, <strong className="text-[#101410] dark:text-white">{currentUser.fullName}</strong>. Once the workshop organizer approves your application, they issue an Access Code (e.g., <code className="font-mono text-[#08482D] dark:text-[#DAE7C7] bg-[#E8F0DF] dark:bg-[#1a3325] px-1.5 py-0.5 rounded font-bold">VOL-XXXXXX</code>). Enter it below to unlock the Live Gate Scanner.
+          <p className="text-sm text-[#101D32]/75 max-w-xl mx-auto font-medium">
+            Welcome, <strong className="text-[#101410]">{currentUser.fullName}</strong>. Once the workshop organizer approves your application, they issue an Access Code (e.g., <code className="font-mono text-[#F4511E] bg-[#FFD6B0] px-1.5 py-0.5 rounded border border-[#101D32] font-bold">VOL-XXXXXX</code>). Enter it below to unlock the Live Gate Scanner.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           {/* Form: Enter Access Code */}
-          <div className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-white rounded-3xl border-2 border-[#101D32] p-6 sm:p-8 shadow-[6px_6px_0px_0px_#101D32] space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center font-bold">
-                <Scan className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-[#FFD6B0] text-[#101D32] border-2 border-[#101D32] flex items-center justify-center font-bold shadow-[2px_2px_0px_0px_#101D32]">
+                <Scan className="w-5 h-5 text-[#F4511E]" />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
+                <h3 className="font-heading font-black text-[#101410] text-base">
                   Unlock Live Gate Scanner
                 </h3>
-                <p className="text-xs text-[#5E5E61] dark:text-slate-400">Enter your issued authorization access code</p>
+                <p className="text-xs text-[#101D32]/75 font-medium">Enter your issued authorization access code</p>
               </div>
             </div>
 
@@ -539,11 +541,11 @@ export const VolunteerGatePortal: React.FC = () => {
               className="space-y-4"
             >
               <div>
-                <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1.5">
+                <label className="block text-xs font-heading font-bold text-[#101410] mb-1.5">
                   Organizer Access Code *
                 </label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5E5E61] dark:text-slate-400" />
+                  <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#101D32]/60" />
                   <input
                     type="text"
                     value={accessCodeInput}
@@ -553,16 +555,16 @@ export const VolunteerGatePortal: React.FC = () => {
                     }}
                     placeholder="E.G. VOL-709810"
                     maxLength={14}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] font-mono text-sm tracking-wider font-bold text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] uppercase placeholder:normal-case placeholder:font-normal placeholder:tracking-normal"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] font-mono text-sm tracking-wider font-bold text-[#101D32] focus:outline-none focus:bg-white uppercase placeholder:normal-case placeholder:font-normal placeholder:tracking-normal shadow-[2px_2px_0px_0px_#101D32]"
                   />
                 </div>
-                <p className="text-[11px] text-[#5E5E61] dark:text-slate-400 mt-1">
+                <p className="text-[11px] text-[#101D32]/75 mt-1 font-medium">
                   Issued by your workshop organizer upon application approval.
                 </p>
               </div>
 
               {accessError && (
-                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-rose-50 border-2 border-rose-300 text-rose-700 text-xs flex items-center gap-2 font-bold">
                   <XCircle className="w-4 h-4 shrink-0" />
                   <span>{accessError}</span>
                 </div>
@@ -571,27 +573,27 @@ export const VolunteerGatePortal: React.FC = () => {
               <button
                 type="submit"
                 disabled={verifyingAccess || !accessCodeInput.trim()}
-                className="w-full py-3 bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-50 text-white rounded-xl text-xs sm:text-sm font-heading font-semibold shadow-md shadow-[#08482D]/20 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 bg-[#F4511E] hover:bg-[#E84316] disabled:opacity-50 text-white rounded-xl text-xs sm:text-sm font-heading font-extrabold border-2 border-[#101D32] shadow-[3px_3px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {verifyingAccess ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-[#DAE7C7]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
                     <span>Verifying Pass Code...</span>
                   </>
                 ) : (
                   <>
-                    <Scan className="w-4 h-4 text-[#DAE7C7]" />
+                    <Scan className="w-4 h-4 text-white" />
                     <span>Verify Code & Open Gate Scanner</span>
                   </>
                 )}
               </button>
             </form>
 
-            <div className="pt-4 border-t border-[#DCE4D6] dark:border-[#203a2c] flex items-center justify-between text-xs text-[#5E5E61] dark:text-slate-400">
+            <div className="pt-4 border-t-2 border-[#101D32] flex items-center justify-between text-xs text-[#101D32]/75">
               <span>Need to apply for a workshop?</span>
               <button
                 onClick={() => navigateTo('workshops')}
-                className="text-[#08482D] dark:text-[#DAE7C7] font-semibold hover:underline flex items-center gap-1"
+                className="text-[#F4511E] hover:text-[#E84316] font-bold hover:underline flex items-center gap-1"
               >
                 <span>Browse Workshops</span>
                 <ArrowRight className="w-3 h-3" />
@@ -600,13 +602,13 @@ export const VolunteerGatePortal: React.FC = () => {
           </div>
 
           {/* Right side: My Volunteer Applications & Status */}
-          <div className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] p-6 sm:p-8 shadow-sm space-y-5">
+          <div className="bg-white rounded-3xl border-2 border-[#101D32] p-6 sm:p-8 shadow-[6px_6px_0px_0px_#101D32] space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-heading font-bold text-[#101410] dark:text-white text-base">
+                <h3 className="font-heading font-black text-[#101410] text-base">
                   My Volunteer Applications
                 </h3>
-                <p className="text-xs text-[#5E5E61] dark:text-slate-400">Live status verified in real-time</p>
+                <p className="text-xs text-[#101D32]/75 font-medium">Live status verified in real-time</p>
               </div>
               <button
                 onClick={() => {
@@ -619,28 +621,28 @@ export const VolunteerGatePortal: React.FC = () => {
                   }
                 }}
                 disabled={loadingRequests}
-                className="p-2 text-[#5E5E61] hover:text-[#08482D] dark:hover:text-[#DAE7C7] transition-colors"
+                className="p-2 text-[#101D32] hover:bg-[#FFD6B0] border-2 border-transparent hover:border-[#101D32] rounded-xl transition-all"
                 title="Refresh Status"
               >
-                <RefreshCw className={`w-4 h-4 ${loadingRequests ? 'animate-spin text-[#08482D]' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${loadingRequests ? 'animate-spin text-[#F4511E]' : ''}`} />
               </button>
             </div>
 
             {loadingRequests ? (
-              <div className="py-8 text-center text-xs text-[#5E5E61] dark:text-slate-400 space-y-2">
-                <Loader2 className="w-6 h-6 animate-spin text-[#08482D] dark:text-[#DAE7C7] mx-auto" />
-                <p>Checking status of your applications...</p>
+              <div className="py-8 text-center text-xs text-[#101D32]/75 space-y-2">
+                <Loader2 className="w-6 h-6 animate-spin text-[#F4511E] mx-auto" />
+                <p className="font-medium">Checking status of your applications...</p>
               </div>
             ) : myRequests.length === 0 ? (
-              <div className="py-8 text-center text-xs text-[#5E5E61] dark:text-slate-400 space-y-3">
-                <HelpCircle className="w-8 h-8 text-[#5E5E61]/40 mx-auto" />
-                <p>No volunteering applications found for {currentUser.email}.</p>
+              <div className="py-8 text-center text-xs text-[#101D32]/75 space-y-3">
+                <HelpCircle className="w-8 h-8 text-[#101D32]/40 mx-auto" />
+                <p className="font-medium">No volunteering applications found for {currentUser.email}.</p>
                 <p className="text-[11px] max-w-xs mx-auto">
-                  Browse workshops and click <strong className="text-[#101410] dark:text-white">"Apply as Gate Volunteer"</strong> on any session to request an access pass from the organizer.
+                  Browse workshops and click <strong className="text-[#101410]">"Apply as Gate Volunteer"</strong> on any session to request an access pass from the organizer.
                 </p>
                 <button
                   onClick={() => navigateTo('workshops')}
-                  className="px-4 py-2 bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] border border-[#DAE7C7] dark:border-[#2d4d3a] rounded-xl font-heading font-semibold text-xs hover:bg-[#DCE4D6] transition-colors inline-flex items-center gap-1.5"
+                  className="px-4 py-2 bg-[#FFF5E9] hover:bg-[#FFD6B0] text-[#101D32] border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] rounded-xl font-heading font-bold text-xs transition-all inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>Explore Workshops</span>
                   <ArrowRight className="w-3 h-3" />
@@ -651,32 +653,32 @@ export const VolunteerGatePortal: React.FC = () => {
                 {myRequests.map((req) => (
                   <div
                     key={req.id}
-                    className="p-3.5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] bg-[#F5F8EF] dark:bg-[#18281f] space-y-2 text-xs"
+                    className="p-4 rounded-2xl border-2 border-[#101D32] bg-[#FFF5E9] space-y-2 text-xs shadow-[2px_2px_0px_0px_#101D32]"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="font-heading font-bold text-[#101410] dark:text-white leading-snug">
+                      <div className="font-heading font-black text-[#101410] leading-snug">
                         {req.assignedWorkshopTitle || 'Assigned Workshop'}
                       </div>
                       <span
-                        className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 border border-[#101D32] ${
                           req.status === 'ACTIVE'
-                            ? 'bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] border border-[#DAE7C7] dark:border-[#2d4d3a]'
+                            ? 'bg-[#FFD6B0] text-[#101D32]'
                             : req.status === 'REJECTED'
-                            ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
-                            : 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                            ? 'bg-rose-100 text-rose-700'
+                            : 'bg-amber-100 text-amber-800'
                         }`}
                       >
                         {req.status === 'ACTIVE' ? 'APPROVED' : req.status === 'REJECTED' ? 'REJECTED' : 'PENDING'}
                       </span>
                     </div>
 
-                    <div className="text-[11px] text-[#5E5E61] dark:text-slate-400">
-                      Organizer: <strong className="text-[#101410] dark:text-white">{req.organizerName || 'Host'}</strong>
+                    <div className="text-[11px] text-[#101D32]/75 font-medium">
+                      Organizer: <strong className="text-[#101410]">{req.organizerName || 'Host'}</strong>
                     </div>
 
                     {req.status === 'ACTIVE' && req.accessCode && (
-                      <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#203a2c] flex items-center justify-between gap-2">
-                        <div className="font-mono font-bold text-xs text-[#08482D] dark:text-[#DAE7C7]">
+                      <div className="pt-2 border-t-2 border-[#101D32] flex items-center justify-between gap-2">
+                        <div className="font-mono font-black text-xs text-[#F4511E]">
                           {req.accessCode}
                         </div>
                         <button
@@ -691,22 +693,22 @@ export const VolunteerGatePortal: React.FC = () => {
                               setAccessError(res.error || 'Failed to verify code');
                             }
                           }}
-                          className="px-2.5 py-1 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-lg text-[11px] font-heading font-semibold transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+                          className="px-3 py-1 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-lg text-[11px] font-heading font-extrabold border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all flex items-center gap-1 cursor-pointer"
                         >
-                          <KeyRound className="w-3 h-3 text-[#DAE7C7]" />
+                          <KeyRound className="w-3 h-3 text-white" />
                           <span>Unlock Scanner</span>
                         </button>
                       </div>
                     )}
 
                     {req.status === 'PENDING_APPROVAL' && (
-                      <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                      <p className="text-[10px] text-amber-700 font-medium">
                         Waiting for organizer review. Refresh once notified or approved.
                       </p>
                     )}
 
                     {req.status === 'REJECTED' && (
-                      <p className="text-[10px] text-rose-600 dark:text-rose-400">
+                      <p className="text-[10px] text-rose-700 font-medium">
                         Application was declined by the workshop organizer.
                       </p>
                     )}
@@ -722,26 +724,24 @@ export const VolunteerGatePortal: React.FC = () => {
 
   // 3. Active Gate Scanner Station
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 transition-colors duration-200">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
       {/* Volunteer Gate Hero Header */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[#08482D] rounded-3xl p-5 sm:p-8 text-white shadow-xl border border-[#0b5435] flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6 relative overflow-hidden"
+        className="bg-[#101D32] rounded-3xl p-6 sm:p-8 text-white shadow-[6px_6px_0px_0px_#101D32] border-2 border-[#101D32] flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6 relative overflow-hidden"
       >
-        <div className="absolute -right-8 -top-8 w-44 h-44 bg-[#DAE7C7]/15 rounded-full blur-2xl pointer-events-none" />
-
         <div className="space-y-2 relative z-10">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 text-xs font-heading font-semibold text-[#08482D] bg-[#DAE7C7] px-3 py-1 rounded-full shadow-sm">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#08482D]" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#101D32] bg-[#FFD6B0] px-3 py-1 rounded-full border border-[#101D32] shadow-[2px_2px_0px_0px_#101D32]">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#F4511E]" />
               <span>Authorized Gate Attendant Station</span>
             </span>
-            </div>
-          <h1 className="text-xl sm:text-3xl font-heading font-bold tracking-tight text-white">
+          </div>
+          <h1 className="text-xl sm:text-3xl font-heading font-black tracking-tight text-white">
             Gate Scanner: {currentVolunteer?.name || 'Volunteer Attendant'}
           </h1>
-          <div className="text-xs sm:text-sm text-[#DAE7C7]/90 flex flex-wrap items-center gap-2">
+          <div className="text-xs sm:text-sm text-slate-300 flex flex-wrap items-center gap-2">
             <span>Appointed by: <strong className="text-white">{currentVolunteer?.organizerName}</strong></span>
             <span>•</span>
             <span>Code: <strong className="font-mono bg-white/20 px-1.5 py-0.5 rounded text-white">{currentVolunteer?.accessCode}</strong></span>
@@ -754,11 +754,11 @@ export const VolunteerGatePortal: React.FC = () => {
             {currentVolunteer?.phoneNumber && (
               <>
                 <span>•</span>
-                <span className="font-mono text-xs font-semibold">{currentVolunteer.phoneNumber}</span>
+                <span className="font-mono text-xs font-bold">{currentVolunteer.phoneNumber}</span>
               </>
             )}
           </div>
-          <p className="text-xs text-[#DAE7C7]/75 max-w-xl">
+          <p className="text-xs text-slate-300 max-w-xl font-medium">
             Locked to session: <strong className="text-white">{currentVolunteer?.assignedWorkshopTitle}</strong>.
             Participants must present their 1-time digital ticket pass for verification.
           </p>
@@ -767,17 +767,17 @@ export const VolunteerGatePortal: React.FC = () => {
         <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-end shrink-0 relative z-10">
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2.5 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-colors"
+            className="p-2.5 rounded-xl border-2 border-white bg-white/10 text-white hover:bg-white/20 transition-all shadow-[2px_2px_0px_0px_#101D32]"
             title={soundEnabled ? 'Mute Scan Sound' : 'Enable Scan Sound'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-[#DAE7C7]" /> : <VolumeX className="w-4 h-4 text-white/50" />}
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-[#FFD6B0]" /> : <VolumeX className="w-4 h-4 text-white/50" />}
           </button>
           <button
             onClick={() => {
               logoutVolunteer();
               navigateTo('home');
             }}
-            className="px-4 py-2.5 bg-rose-600/90 hover:bg-rose-600 text-white font-heading font-semibold text-xs rounded-xl transition-colors flex items-center gap-2 shadow-md shadow-rose-900/30"
+            className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-heading font-extrabold text-xs rounded-xl border-2 border-white shadow-[2px_2px_0px_0px_#101D32] transition-all flex items-center gap-2 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Exit Station</span>
@@ -787,51 +787,51 @@ export const VolunteerGatePortal: React.FC = () => {
 
       {/* Gate Station Counters */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-[#14231b] p-4 sm:p-5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center font-bold shrink-0">
-            <Users className="w-5 h-5" />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-[#FFF5E9] text-[#101D32] border-2 border-[#101D32] flex items-center justify-center font-bold shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+            <Users className="w-5 h-5 text-[#F4511E]" />
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-heading font-bold text-[#101410] dark:text-white font-mono">
+            <div className="text-xl sm:text-2xl font-heading font-black text-[#101410] font-mono">
               {workshopRegistrations.length}
             </div>
-            <div className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-medium">Session Capacity Enrolled</div>
+            <div className="text-[11px] text-[#101D32]/75 font-bold">Session Capacity Enrolled</div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#14231b] p-4 sm:p-5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-[#DAE7C7] dark:bg-[#1f3d2d] text-[#08482D] dark:text-[#a8d38d] flex items-center justify-center font-bold shrink-0">
-            <CheckCircle className="w-5 h-5" />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-[#FFD6B0] text-[#101D32] border-2 border-[#101D32] flex items-center justify-center font-bold shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+            <CheckCircle className="w-5 h-5 text-[#101D32]" />
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] font-mono">
+            <div className="text-xl sm:text-2xl font-heading font-black text-[#101410] font-mono">
               {attendedCount}
             </div>
-            <div className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-medium">Admitted at Gate</div>
+            <div className="text-[11px] text-[#101D32]/75 font-bold">Admitted at Gate</div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#14231b] p-4 sm:p-5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
-            <Clock className="w-5 h-5" />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-[#FFF5E9] text-[#F4511E] border-2 border-[#101D32] flex items-center justify-center font-bold shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+            <Clock className="w-5 h-5 text-[#F4511E]" />
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-heading font-bold text-amber-600 dark:text-amber-400 font-mono">
+            <div className="text-xl sm:text-2xl font-heading font-black text-[#F4511E] font-mono">
               {pendingCount}
             </div>
-            <div className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-medium">Pending Entry</div>
+            <div className="text-[11px] text-[#101D32]/75 font-bold">Pending Entry</div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#14231b] p-4 sm:p-5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center font-bold shrink-0">
-            <Scan className="w-5 h-5" />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-[#FFD6B0] text-[#101D32] border-2 border-[#101D32] flex items-center justify-center font-bold shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+            <Scan className="w-5 h-5 text-[#101D32]" />
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] font-mono">
+            <div className="text-xl sm:text-2xl font-heading font-black text-[#101410] font-mono">
               {currentVolunteer?.totalScanned || scanHistory.filter((s) => s.status === 'GRANTED').length}
             </div>
-            <div className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-medium">Verified by You</div>
+            <div className="text-[11px] text-[#101D32]/75 font-bold">Verified by You</div>
           </div>
         </div>
       </div>
@@ -839,17 +839,17 @@ export const VolunteerGatePortal: React.FC = () => {
       {/* Main Scanner Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 Cols): High-Tech Viewfinder & Scan Modes */}
-        <div className="lg:col-span-2 bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm p-6 space-y-6">
+        <div className="lg:col-span-2 bg-white rounded-3xl border-2 border-[#101D32] shadow-[6px_6px_0px_0px_#101D32] p-6 space-y-6">
           {/* Mode Tabs */}
-          <div className="flex items-center justify-between border-b border-[#DCE4D6] dark:border-[#203a2c] pb-4">
+          <div className="flex items-center justify-between border-b-2 border-[#101D32] pb-4">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setActiveTab('camera')}
-                className={`px-3.5 py-1.5 rounded-xl font-heading font-semibold text-xs flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl font-heading font-bold text-xs flex items-center gap-1.5 border-2 border-[#101D32] transition-all ${
                   activeTab === 'camera'
-                    ? 'bg-[#08482D] text-white shadow-sm'
-                    : 'text-[#5E5E61] dark:text-slate-400 hover:bg-[#F5F8EF] dark:hover:bg-[#18281f]'
+                    ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
+                    : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
                 }`}
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -859,10 +859,10 @@ export const VolunteerGatePortal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('upload')}
-                className={`px-3.5 py-1.5 rounded-xl font-heading font-semibold text-xs flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl font-heading font-bold text-xs flex items-center gap-1.5 border-2 border-[#101D32] transition-all ${
                   activeTab === 'upload'
-                    ? 'bg-[#08482D] text-white shadow-sm'
-                    : 'text-[#5E5E61] dark:text-slate-400 hover:bg-[#F5F8EF] dark:hover:bg-[#18281f]'
+                    ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
+                    : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
                 }`}
               >
                 <UploadCloud className="w-3.5 h-3.5" />
@@ -872,10 +872,10 @@ export const VolunteerGatePortal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('manual')}
-                className={`px-3.5 py-1.5 rounded-xl font-heading font-semibold text-xs flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl font-heading font-bold text-xs flex items-center gap-1.5 border-2 border-[#101D32] transition-all ${
                   activeTab === 'manual'
-                    ? 'bg-[#08482D] text-white shadow-sm'
-                    : 'text-[#5E5E61] dark:text-slate-400 hover:bg-[#F5F8EF] dark:hover:bg-[#18281f]'
+                    ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
+                    : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
                 }`}
               >
                 <Keyboard className="w-3.5 h-3.5" />
@@ -884,12 +884,12 @@ export const VolunteerGatePortal: React.FC = () => {
             </div>
 
             {/* Date bypass toggle for demo */}
-            <label className="flex items-center gap-1.5 text-[11px] text-[#5E5E61] cursor-pointer">
+            <label className="flex items-center gap-1.5 text-[11px] text-[#101D32] font-bold cursor-pointer">
               <input
                 type="checkbox"
                 checked={allowBypass}
                 onChange={(e) => setAllowBypass(e.target.checked)}
-                className="rounded border-[#DCE4D6] text-[#08482D] focus:ring-[#08482D]"
+                className="rounded border-2 border-[#101D32] text-[#F4511E] focus:ring-[#F4511E]"
               />
               <span>Demo Date Bypass</span>
             </label>
@@ -899,7 +899,7 @@ export const VolunteerGatePortal: React.FC = () => {
           {activeTab === 'camera' && (
             <div className="space-y-3">
               {/* Camera Scanner Viewport */}
-              <div className="relative rounded-3xl overflow-hidden bg-slate-950 aspect-video max-h-[420px] flex items-center justify-center border-2 border-[#DCE4D6] dark:border-[#203a2c] shadow-2xl select-none group">
+              <div className="relative rounded-3xl overflow-hidden bg-slate-950 aspect-video max-h-[420px] flex items-center justify-center border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] select-none group">
                 {/* Video Element */}
                 <video
                   ref={videoRef}
@@ -908,23 +908,22 @@ export const VolunteerGatePortal: React.FC = () => {
                   muted
                 />
 
-                {/* Precision Corner-Bracketed Laser Viewfinder Overlay */}
+                {/* Laser Viewfinder Overlay */}
                 {cameraActive && !cameraLoading && (
                   <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-4">
-                    {/* Viewfinder Reticle Frame */}
-                    <div className="w-64 h-64 sm:w-72 sm:h-72 border border-[#DAE7C7]/40 rounded-3xl relative transition-all">
+                    <div className="w-64 h-64 sm:w-72 sm:h-72 border border-[#FFD6B0]/40 rounded-3xl relative transition-all">
                       {/* Corner Brackets */}
-                      <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#DAE7C7] rounded-tl-2xl -mt-1 -ml-1 shadow-[0_0_12px_rgba(218,231,199,0.8)]" />
-                      <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#DAE7C7] rounded-tr-2xl -mt-1 -mr-1 shadow-[0_0_12px_rgba(218,231,199,0.8)]" />
-                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#DAE7C7] rounded-bl-2xl -mb-1 -ml-1 shadow-[0_0_12px_rgba(218,231,199,0.8)]" />
-                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#DAE7C7] rounded-br-2xl -mb-1 -mr-1 shadow-[0_0_12px_rgba(218,231,199,0.8)]" />
+                      <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#F4511E] rounded-tl-2xl -mt-1 -ml-1 shadow-[0_0_12px_rgba(244,81,30,0.8)]" />
+                      <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#F4511E] rounded-tr-2xl -mt-1 -mr-1 shadow-[0_0_12px_rgba(244,81,30,0.8)]" />
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#F4511E] rounded-bl-2xl -mb-1 -ml-1 shadow-[0_0_12px_rgba(244,81,30,0.8)]" />
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#F4511E] rounded-br-2xl -mb-1 -mr-1 shadow-[0_0_12px_rgba(244,81,30,0.8)]" />
 
-                      {/* Smooth Vertical Laser Sweep Bar */}
-                      <div className="absolute left-2 right-2 h-1 bg-gradient-to-r from-transparent via-[#DAE7C7] to-transparent shadow-[0_0_15px_rgba(218,231,199,1)] animate-laser-sweep rounded-full" />
+                      {/* Smooth Laser Sweep Bar */}
+                      <div className="absolute left-2 right-2 h-1 bg-gradient-to-r from-transparent via-[#F4511E] to-transparent shadow-[0_0_15px_rgba(244,81,30,1)] animate-laser-sweep rounded-full" />
 
                       {/* Center Crosshair */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-40">
-                        <Focus className="w-10 h-10 text-[#DAE7C7] animate-pulse" />
+                        <Focus className="w-10 h-10 text-[#FFD6B0] animate-pulse" />
                       </div>
                     </div>
                   </div>
@@ -937,9 +936,9 @@ export const VolunteerGatePortal: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleToggleFlash}
-                        className={`p-2 rounded-xl text-xs font-heading font-medium backdrop-blur-md border transition-all shadow-lg flex items-center gap-1.5 ${
+                        className={`p-2 rounded-xl text-xs font-heading font-bold backdrop-blur-md border transition-all shadow-lg flex items-center gap-1.5 ${
                           flashOn
-                            ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold'
+                            ? 'bg-amber-400 text-slate-950 border-amber-300'
                             : 'bg-slate-900/80 hover:bg-slate-800 text-white border-slate-700/80'
                         }`}
                         title={flashOn ? 'Turn Flashlight Off' : 'Turn Flashlight On (Low Light Boost)'}
@@ -952,10 +951,10 @@ export const VolunteerGatePortal: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleSwitchCamera}
-                      className="px-3 py-1.5 bg-slate-900/80 hover:bg-slate-800 text-white rounded-xl text-xs font-heading font-medium backdrop-blur-md border border-slate-700/80 flex items-center gap-1.5 transition-colors shadow-lg"
+                      className="px-3 py-1.5 bg-slate-900/80 hover:bg-slate-800 text-white rounded-xl text-xs font-heading font-bold backdrop-blur-md border border-slate-700/80 flex items-center gap-1.5 transition-colors shadow-lg"
                       title="Switch Camera Device"
                     >
-                      <SwitchCamera className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                      <SwitchCamera className="w-3.5 h-3.5 text-[#FFD6B0]" />
                       <span className="hidden sm:inline">Flip Camera</span>
                     </button>
                   </div>
@@ -964,8 +963,8 @@ export const VolunteerGatePortal: React.FC = () => {
                 {/* Camera Loading Overlay */}
                 {cameraLoading && (
                   <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-xs text-slate-300 space-y-3 z-30">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#DAE7C7]" />
-                    <p className="font-heading font-semibold">Starting instant QR scanner...</p>
+                    <Loader2 className="w-8 h-8 animate-spin text-[#FFD6B0]" />
+                    <p className="font-heading font-bold">Starting instant QR scanner...</p>
                   </div>
                 )}
 
@@ -977,7 +976,7 @@ export const VolunteerGatePortal: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => startCamera()}
-                      className="px-4 py-2 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-xl font-heading font-semibold text-xs transition-colors"
+                      className="px-4 py-2 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-xl font-heading font-extrabold text-xs border-2 border-[#101D32] transition-colors"
                     >
                       Retry Camera
                     </button>
@@ -986,12 +985,12 @@ export const VolunteerGatePortal: React.FC = () => {
               </div>
 
               {/* Viewfinder instructions */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-[#5E5E61] dark:text-slate-400 px-1">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-[#101D32]/75 px-1 font-medium">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#08482D] dark:bg-[#a8d38d] animate-ping inline-block" />
+                  <span className="w-2 h-2 rounded-full bg-[#F4511E] animate-ping inline-block" />
                   <span>Ultra-Fast QR Engine Active · Millisecond instant detection</span>
                 </span>
-                <span className="font-mono text-[#5E5E61] dark:text-emerald-400 text-[10px]">
+                <span className="font-mono text-[#F4511E] font-bold text-[10px]">
                   Multi-Orientation & Inverted Pass Compatible
                 </span>
               </div>
@@ -1000,17 +999,17 @@ export const VolunteerGatePortal: React.FC = () => {
 
           {/* TAB 2: UPLOAD PASS */}
           {activeTab === 'upload' && (
-            <div className="border-2 border-dashed border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-8 text-center space-y-3 bg-[#F5F8EF]/50 dark:bg-[#18281f]/20">
-              <UploadCloud className="w-12 h-12 text-[#08482D] dark:text-[#DAE7C7] mx-auto" />
+            <div className="border-2 border-dashed border-[#101D32] rounded-3xl p-8 text-center space-y-3 bg-[#FFF5E9]">
+              <UploadCloud className="w-12 h-12 text-[#F4511E] mx-auto" />
               <div>
-                <h4 className="font-heading font-semibold text-[#101410] dark:text-white text-sm">
+                <h4 className="font-heading font-black text-[#101410] text-sm">
                   Upload Attendee QR Ticket Pass
                 </h4>
-                <p className="text-xs text-[#5E5E61] dark:text-slate-400 mt-1">
+                <p className="text-xs text-[#101D32]/75 mt-1 font-medium">
                   Drag and drop a screenshot or image of the pass (PNG, JPG, WebP)
                 </p>
               </div>
-              <label className="inline-block px-5 py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-white font-heading font-semibold text-xs rounded-xl cursor-pointer transition-colors shadow-sm">
+              <label className="inline-block px-5 py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-extrabold text-xs rounded-xl cursor-pointer border-2 border-[#101D32] shadow-[3px_3px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] transition-all">
                 Browse Pass Image
                 <input
                   type="file"
@@ -1034,7 +1033,7 @@ export const VolunteerGatePortal: React.FC = () => {
               }}
               className="space-y-3"
             >
-              <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-white">
+              <label className="block text-xs font-heading font-bold text-[#101410]">
                 Ticket Code / Barcode Scanner Input
               </label>
               <div className="flex gap-2">
@@ -1043,17 +1042,17 @@ export const VolunteerGatePortal: React.FC = () => {
                   value={ticketInput}
                   onChange={(e) => setTicketInput(e.target.value)}
                   placeholder="e.g. TKT-B792A14-9201"
-                  className="flex-1 px-3.5 py-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] font-mono text-xs text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+                  className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] font-mono text-xs text-[#101D32] font-bold focus:outline-none focus:bg-white shadow-[2px_2px_0px_0px_#101D32]"
                 />
                 <button
                   type="submit"
                   disabled={verifying || !ticketInput.trim()}
-                  className="px-5 py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] disabled:opacity-50 text-white font-heading font-semibold text-xs rounded-xl shadow-md transition-colors"
+                  className="px-5 py-2.5 bg-[#F4511E] hover:bg-[#E84316] disabled:opacity-50 text-white font-heading font-extrabold text-xs rounded-xl border-2 border-[#101D32] shadow-[3px_3px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer"
                 >
                   Verify Entry
                 </button>
               </div>
-              <p className="text-[11px] text-[#5E5E61] dark:text-slate-400">
+              <p className="text-[11px] text-[#101D32]/75 font-medium">
                 Supports USB handheld laser barcode scanners. Point-and-scan directly types into this field.
               </p>
             </form>
@@ -1064,21 +1063,21 @@ export const VolunteerGatePortal: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`p-4 rounded-2xl border text-xs space-y-1.5 ${
+              className={`p-4 rounded-2xl border-2 border-[#101D32] text-xs space-y-1.5 shadow-[4px_4px_0px_0px_#101D32] ${
                 result.status === 'success'
-                  ? 'bg-[#E8F0DF] dark:bg-[#1a3325] border-[#DAE7C7] dark:border-[#2d4d3a] text-[#08482D] dark:text-[#DAE7C7]'
-                  : 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-100'
+                  ? 'bg-white text-[#101D32]'
+                  : 'bg-rose-50 border-rose-500 text-rose-900'
               }`}
             >
-              <div className="flex items-center gap-2 font-heading font-bold text-sm">
+              <div className="flex items-center gap-2 font-heading font-black text-sm">
                 {result.status === 'success' ? (
-                  <CheckCircle className="w-5 h-5 text-[#08482D] dark:text-[#a8d38d] shrink-0" />
+                  <CheckCircle className="w-5 h-5 text-[#F4511E] shrink-0" />
                 ) : (
                   <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
                 )}
                 <span>{result.status === 'success' ? 'ENTRY GRANTED' : 'ENTRY DENIED'}</span>
               </div>
-              <p className="leading-relaxed pl-7">{result.message}</p>
+              <p className="leading-relaxed pl-7 font-bold">{result.message}</p>
               {result.registration && (
                 <div className="pl-7 pt-1 font-medium text-[11px]">
                   Participant: <strong>{result.registration.participantName}</strong> ({result.registration.participantEmail})
@@ -1089,21 +1088,21 @@ export const VolunteerGatePortal: React.FC = () => {
         </div>
 
         {/* Right Column (1 Col): Live Gate Scan Feed */}
-        <div className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#DCE4D6] dark:border-[#203a2c] pb-3">
-            <h3 className="font-heading font-bold text-[#101410] dark:text-white text-xs flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+        <div className="bg-white rounded-3xl border-2 border-[#101D32] shadow-[6px_6px_0px_0px_#101D32] p-6 space-y-4">
+          <div className="flex items-center justify-between border-b-2 border-[#101D32] pb-3">
+            <h3 className="font-heading font-black text-[#101410] text-xs flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-[#F4511E]" />
               <span>Gate Scan Feed</span>
             </h3>
-            <span className="text-[10px] text-[#5E5E61] dark:text-slate-400 font-mono font-semibold">
+            <span className="text-[10px] text-[#101D32]/75 font-mono font-bold">
               {scanHistory.length} recorded
             </span>
           </div>
 
           {scanHistory.length === 0 ? (
-            <div className="py-12 text-center text-[#5E5E61] dark:text-slate-400 text-xs space-y-2">
-              <Scan className="w-8 h-8 text-[#5E5E61]/30 dark:text-slate-700 mx-auto" />
-              <p>No passes scanned yet in this session.</p>
+            <div className="py-12 text-center text-[#101D32]/60 text-xs space-y-2">
+              <Scan className="w-8 h-8 text-[#101D32]/30 mx-auto" />
+              <p className="font-bold">No passes scanned yet in this session.</p>
               <p className="text-[10px]">Scanned passes will appear in this real-time log.</p>
             </div>
           ) : (
@@ -1111,32 +1110,32 @@ export const VolunteerGatePortal: React.FC = () => {
               {scanHistory.map((item) => (
                 <div
                   key={item.id}
-                  className={`p-2.5 rounded-xl border flex items-start justify-between gap-2 ${
+                  className={`p-3 rounded-xl border-2 border-[#101D32] flex items-start justify-between gap-2 shadow-[2px_2px_0px_0px_#101D32] ${
                     item.status === 'GRANTED'
-                      ? 'bg-[#E8F0DF]/60 dark:bg-[#1a3325]/50 border-[#DAE7C7] dark:border-[#2d4d3a]'
-                      : 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60'
+                      ? 'bg-[#FFF5E9]'
+                      : 'bg-rose-50 border-rose-400'
                   }`}
                 >
                   <div>
-                    <div className="font-heading font-bold text-[#101410] dark:text-white">
+                    <div className="font-heading font-black text-[#101410]">
                       {item.participantName}
                     </div>
-                    <div className="font-mono text-[10px] text-[#5E5E61] dark:text-slate-400">
+                    <div className="font-mono text-[10px] text-[#101D32]/75 font-bold">
                       {item.ticketCode}
                     </div>
-                    <div className="text-[10px] text-[#5E5E61] dark:text-slate-400 mt-0.5">{item.message}</div>
+                    <div className="text-[10px] text-[#101D32]/75 mt-0.5 font-medium">{item.message}</div>
                   </div>
                   <div className="text-right shrink-0">
                     <span
-                      className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                      className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[#101D32] ${
                         item.status === 'GRANTED'
-                          ? 'bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7]'
-                          : 'bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300'
+                          ? 'bg-[#FFD6B0] text-[#101D32]'
+                          : 'bg-rose-100 text-rose-700'
                       }`}
                     >
                       {item.status}
                     </span>
-                    <div className="text-[10px] text-[#5E5E61] dark:text-slate-400 font-mono mt-1">{item.timestamp}</div>
+                    <div className="text-[10px] text-[#101D32]/75 font-mono mt-1 font-bold">{item.timestamp}</div>
                   </div>
                 </div>
               ))}
@@ -1146,32 +1145,32 @@ export const VolunteerGatePortal: React.FC = () => {
       </div>
 
       {/* Assigned Workshop Attendee Roster (Read-Only Gate Reference) */}
-      <div className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCE4D6] dark:border-[#203a2c] pb-3">
+      <div className="bg-white rounded-3xl border-2 border-[#101D32] shadow-[6px_6px_0px_0px_#101D32] p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#101D32] pb-3">
           <div>
-            <h3 className="font-heading font-bold text-[#101410] dark:text-white text-xs">
+            <h3 className="font-heading font-black text-[#101410] text-xs">
               Session Attendee Roster ({workshopRegistrations.length})
             </h3>
-            <p className="text-[11px] text-[#5E5E61] dark:text-slate-400">
+            <p className="text-[11px] text-[#101D32]/75 font-medium">
               Reference list of confirmed attendees for {currentVolunteer?.assignedWorkshopTitle}.
             </p>
           </div>
 
           <div className="relative min-w-[220px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#5E5E61] dark:text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#101D32]/60" />
             <input
               type="text"
               value={searchRoster}
               onChange={(e) => setSearchRoster(e.target.value)}
               placeholder="Filter by name, email, ticket..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-[#101D32] font-medium shadow-[2px_2px_0px_0px_#101D32] focus:outline-none focus:bg-white"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c]">
+        <div className="overflow-x-auto rounded-2xl border-2 border-[#101D32]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F5F8EF] dark:bg-[#18281f] text-[#5E5E61] dark:text-emerald-400 border-b border-[#DCE4D6] dark:border-[#203a2c] font-heading font-semibold uppercase tracking-wider text-[11px]">
+            <thead className="bg-[#FFF5E9] text-[#101D32] border-b-2 border-[#101D32] font-heading font-black uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-4">Participant</th>
                 <th className="py-3 px-4">Ticket Pass Code</th>
@@ -1179,29 +1178,31 @@ export const VolunteerGatePortal: React.FC = () => {
                 <th className="py-3 px-4 text-right">Quick Scan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#DCE4D6]/70 dark:divide-[#22392c] text-[#101410] dark:text-slate-200">
+            <tbody className="divide-y-2 divide-[#101D32]/20 text-[#101D32]">
               {filteredRoster.map((reg) => {
                 const isAttended = reg.status === 'ATTENDED' || reg.verified;
                 return (
-                  <tr key={reg.id} className="hover:bg-[#F5F8EF]/60 dark:hover:bg-[#1b2b22] transition-colors">
+                  <tr key={reg.id} className="hover:bg-[#FFF5E9]/50 transition-colors">
                     <td className="py-3 px-4">
-                      <div className="font-heading font-bold text-[#101410] dark:text-white">
+                      <div className="font-heading font-black text-[#101410]">
                         {reg.participantName}
                       </div>
-                      <div className="text-[#5E5E61] dark:text-slate-400 font-mono text-[11px]">{reg.participantEmail}</div>
+                      <div className="text-[#101D32]/75 font-mono text-[11px]">{reg.participantEmail}</div>
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-[#08482D] dark:text-[#DAE7C7]">
-                      {reg.ticketCode || `TKT-${reg.id.substring(0, 8).toUpperCase()}`}
+                    <td className="py-3 px-4 font-mono font-bold text-[#101D32]">
+                      <span className="bg-[#FFD6B0] px-2 py-0.5 rounded border border-[#101D32]">
+                        {reg.ticketCode || `TKT-${reg.id.substring(0, 8).toUpperCase()}`}
+                      </span>
                     </td>
                     <td className="py-3 px-4">
                       {isAttended ? (
-                        <span className="inline-flex items-center gap-1 text-[#08482D] dark:text-[#DAE7C7] font-semibold text-[11px] bg-[#E8F0DF] dark:bg-[#1a3325] px-2 py-0.5 rounded-full border border-[#DAE7C7] dark:border-[#2d4d3a]">
-                          <CheckCircle className="w-3 h-3 text-[#08482D] dark:text-[#a8d38d]" />
+                        <span className="inline-flex items-center gap-1 text-[#101D32] font-bold text-[11px] bg-[#FFD6B0] px-2.5 py-0.5 rounded-full border border-[#101D32]">
+                          <CheckCircle className="w-3 h-3 text-[#F4511E]" />
                           <span>Attended</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[#08482D] dark:text-[#DAE7C7] font-semibold text-[11px] bg-[#F5F8EF] dark:bg-[#18281f] px-2 py-0.5 rounded-full border border-[#DCE4D6] dark:border-[#22392c]">
-                          <Clock className="w-3 h-3 text-[#08482D] dark:text-[#a8d38d]" />
+                        <span className="inline-flex items-center gap-1 text-[#101D32] font-bold text-[11px] bg-[#FFF5E9] px-2.5 py-0.5 rounded-full border border-[#101D32]">
+                          <Clock className="w-3 h-3 text-[#F4511E]" />
                           <span>Pending Entry</span>
                         </span>
                       )}
@@ -1211,9 +1212,9 @@ export const VolunteerGatePortal: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => processTicketVerification(reg.ticketCode || reg.id)}
-                          className="px-2.5 py-1 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-lg text-xs font-heading font-semibold transition-colors inline-flex items-center gap-1 shadow-sm"
+                          className="px-3 py-1 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-lg text-xs font-heading font-extrabold border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all inline-flex items-center gap-1"
                         >
-                          <Scan className="w-3 h-3 text-[#DAE7C7]" />
+                          <Scan className="w-3 h-3 text-white" />
                           <span>Scan Pass</span>
                         </button>
                       )}

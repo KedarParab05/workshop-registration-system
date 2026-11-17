@@ -9,9 +9,7 @@ import {
   Phone,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   Building2,
-  GraduationCap,
   HelpCircle,
   ArrowRight,
 } from 'lucide-react';
@@ -94,16 +92,16 @@ export const ContactPage: React.FC = () => {
           HEADER
       ───────────────────────────────────────────────────────────── */}
       <section className="text-center max-w-2xl mx-auto space-y-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DAE7C7] text-[#08482D] text-xs font-heading font-bold">
-          <Mail className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-[#FFD6B0] border border-[#101D32] text-[#101D32] text-xs font-heading font-extrabold uppercase tracking-wider shadow-[2px_2px_0px_0px_#101D32]">
+          <Mail className="w-3.5 h-3.5 text-[#F4511E]" />
           <span>Get in Touch</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-medium text-[#101410] dark:text-[#f0f5ee] tracking-tight break-words px-2">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-[#101410] tracking-tight break-words px-2">
           Contact the Project Team
         </h1>
 
-        <p className="text-sm sm:text-base text-[#5E5E61] dark:text-slate-300 leading-relaxed font-sans">
+        <p className="text-sm sm:text-base text-[#101D32]/80 leading-relaxed font-sans">
           Have questions about hosting an academic workshop, scheduling physical computer labs, or deploying Kaushalya for your campus department? Reach out to our coordination team.
         </p>
       </section>
@@ -111,57 +109,57 @@ export const ContactPage: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────
           MAIN CONTENT GRID: FORM + CAMPUS COORDINATION INFO
       ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start font-sans">
         {/* Left Column: Interactive Form */}
-        <div className="lg:col-span-7 bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+        <div className="lg:col-span-7 bg-white border-2 border-[#101D32] rounded-2xl p-6 sm:p-10 shadow-[4px_4px_0px_0px_#101D32] space-y-6">
           {submitted ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.25 }}
-              className="p-8 rounded-2xl bg-[#E8F0DF] dark:bg-[#1a3325] border border-[#DAE7C7] dark:border-[#2d4d3a] text-center space-y-3"
+              className="p-8 rounded-xl bg-[#FFF5E9] border-2 border-[#101D32] text-center space-y-3"
             >
-              <div className="w-12 h-12 rounded-full bg-[#08482D] text-[#DAE7C7] flex items-center justify-center mx-auto shadow-sm">
-                <CheckCircle2 className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-lg bg-[#F4511E] text-white border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
-              <h2 className="font-heading font-bold text-lg text-[#08482D] dark:text-[#DAE7C7]">
+              <h2 className="font-heading font-extrabold text-lg text-[#101410]">
                 Thank you for your message!
               </h2>
-              <p className="text-xs sm:text-sm text-[#08482D]/90 dark:text-slate-300 max-w-md mx-auto leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#101D32]/80 max-w-md mx-auto leading-relaxed">
                 Your inquiry has been successfully received and recorded in our institutional logs. Our campus coordination team will review and reply to your university email address.
               </p>
               <div className="pt-2">
                 <button
                   onClick={() => setSubmitted(false)}
-                  className="px-5 py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-white font-heading font-bold text-xs rounded-xl shadow-md transition-all inline-flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-bold text-xs rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                  <Send className="w-3.5 h-3.5 text-white" />
                   <span>Send another message</span>
                 </button>
               </div>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="border-b border-[#DCE4D6] dark:border-[#203a2c] pb-3">
-                <h2 className="text-lg font-heading font-bold text-[#101410] dark:text-white">
+              <div className="border-b-2 border-[#101D32]/10 pb-3">
+                <h2 className="text-lg font-heading font-extrabold text-[#101410]">
                   Send an Inquiry
                 </h2>
-                <p className="text-xs text-[#5E5E61] dark:text-slate-400">
+                <p className="text-xs text-[#101D32]/70">
                   Fill out the form below. All communications are logged for administrative auditability.
                 </p>
               </div>
 
               {errorMsg && (
-                <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-lg bg-[#FFD6B0] border-2 border-[#101D32] text-[#101D32] text-xs flex items-start gap-2 font-semibold">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#E84316]" />
                   <span className="leading-snug">{errorMsg}</span>
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="contact-name" className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1.5">
-                    Your Name <span className="text-rose-500">*</span>
+                  <label htmlFor="contact-name" className="block text-xs font-heading font-bold text-[#101410] mb-1.5">
+                    Your Name <span className="text-[#E84316]">*</span>
                   </label>
                   <input
                     id="contact-name"
@@ -171,13 +169,13 @@ export const ContactPage: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Omkar Parelkar"
-                    className="w-full px-3.5 py-2.5 rounded-xl text-xs border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] disabled:opacity-50"
+                    className="w-full px-3.5 py-2.5 rounded-lg text-xs border-2 border-[#101D32] bg-white text-[#101410] focus:outline-none focus:ring-2 focus:ring-[#F4511E] disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="contact-email" className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1.5">
-                    University Email <span className="text-rose-500">*</span>
+                  <label htmlFor="contact-email" className="block text-xs font-heading font-bold text-[#101410] mb-1.5">
+                    University Email <span className="text-[#E84316]">*</span>
                   </label>
                   <input
                     id="contact-email"
@@ -187,14 +185,14 @@ export const ContactPage: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. mca26.omkar.parelkar@gnims.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl text-xs border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] disabled:opacity-50"
+                    className="w-full px-3.5 py-2.5 rounded-lg text-xs border-2 border-[#101D32] bg-white text-[#101410] focus:outline-none focus:ring-2 focus:ring-[#F4511E] disabled:opacity-50"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="contact-message" className="block text-xs font-heading font-semibold text-[#101410] dark:text-white mb-1.5">
-                  Message / Inquiry <span className="text-rose-500">*</span>
+                <label htmlFor="contact-message" className="block text-xs font-heading font-bold text-[#101410] mb-1.5">
+                  Message / Inquiry <span className="text-[#E84316]">*</span>
                 </label>
                 <textarea
                   id="contact-message"
@@ -204,21 +202,21 @@ export const ContactPage: React.FC = () => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Tell us about your workshop proposal, department requirements, or technical inquiry..."
-                  className="w-full px-3.5 py-2.5 rounded-xl text-xs border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D] disabled:opacity-50"
+                  className="w-full px-3.5 py-2.5 rounded-lg text-xs border-2 border-[#101D32] bg-white text-[#101410] focus:outline-none focus:ring-2 focus:ring-[#F4511E] disabled:opacity-50"
                 />
               </div>
 
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-[11px] text-[#5E5E61] dark:text-slate-400">
-                  Maintained by Department of Computer Science & Engineering.
+                <span className="text-[11px] text-[#101D32]/70 font-medium">
+                  Maintained by Department of Computer Science &amp; Engineering.
                 </span>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-[#08482D] hover:bg-[#0c5c3b] text-white font-heading font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-bold text-xs rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                  <Send className="w-3.5 h-3.5 text-white" />
                   <span>{loading ? 'Submitting...' : 'Send Message'}</span>
                 </button>
               </div>
@@ -228,44 +226,44 @@ export const ContactPage: React.FC = () => {
 
         {/* Right Column: Campus Details & Office Hours */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#E8F0DF]/60 dark:bg-[#14231b]/60 border border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-6 sm:p-8 space-y-5 transition-colors">
-            <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#08482D] dark:text-[#DAE7C7]">
+          <div className="bg-[#FFF5E9] border-2 border-[#101D32] rounded-2xl p-6 sm:p-8 space-y-5 shadow-[4px_4px_0px_0px_#101D32]">
+            <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#101D32] bg-[#FFD6B0] border border-[#101D32] px-2.5 py-1 rounded-md inline-block">
               Campus Coordination Desk
             </span>
 
             <div className="space-y-4 text-xs">
               <div className="flex items-start gap-3">
-                <Building2 className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0 mt-0.5" />
+                <Building2 className="w-4 h-4 text-[#F4511E] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block text-[#101410] dark:text-white font-heading font-semibold">
+                  <strong className="block text-[#101410] font-heading font-extrabold">
                     Master of Computer Applications (MCA)
                   </strong>
-                  <span className="text-[#5E5E61] dark:text-slate-300">
+                  <span className="text-[#101D32]/80">
                     Guru Nanak Institute of Management Studies (GNIMS)
                   </span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-[#F4511E] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block text-[#101410] dark:text-white font-heading font-semibold">
+                  <strong className="block text-[#101410] font-heading font-extrabold">
                     Campus Location
                   </strong>
-                  <span className="text-[#5E5E61] dark:text-slate-300">
+                  <span className="text-[#101D32]/80">
                     Guru Nanak Institute of Management Studies, Kings Circle, Matunga East, Mumbai, Maharashtra 400019
                   </span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0 mt-0.5" />
+                <Phone className="w-4 h-4 text-[#F4511E] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block text-[#101410] dark:text-white font-heading font-semibold">
+                  <strong className="block text-[#101410] font-heading font-extrabold">
                     Direct Contact / Helpline
                   </strong>
-                  <span className="text-[#5E5E61] dark:text-slate-300 flex items-center gap-1.5">
-                    <a href="tel:+912224043928" className="font-semibold text-[#08482D] dark:text-[#DAE7C7] hover:underline">
+                  <span className="text-[#101D32]/80 flex items-center gap-1.5">
+                    <a href="tel:+912224043928" className="font-bold text-[#F4511E] hover:underline">
                       +91 (022) 2404 3928
                     </a>
                     <span>(Academic Desk)</span>
@@ -274,32 +272,31 @@ export const ContactPage: React.FC = () => {
               </div>
 
               <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7] shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-[#F4511E] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block text-[#101410] dark:text-white font-heading font-semibold">
+                  <strong className="block text-[#101410] font-heading font-extrabold">
                     Coordinator Hours
                   </strong>
-                  <span className="text-[#5E5E61] dark:text-slate-300">
+                  <span className="text-[#101D32]/80">
                     Monday – Saturday: 09:00 AM – 06:00 PM IST
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-[#DCE4D6] dark:border-[#203a2c]">
-              <div className="flex items-center gap-2 text-[11px] text-[#08482D] dark:text-[#DAE7C7] font-semibold">
-                <Sparkles className="w-3.5 h-3.5" />
+            <div className="pt-2 border-t-2 border-[#101D32]/10">
+              <div className="flex items-center gap-2 text-[11px] text-[#101D32] font-bold">
                 <span>Typical response time: within 24 academic hours</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#14231b] border border-[#DCE4D6] dark:border-[#203a2c] rounded-3xl p-6 sm:p-8 space-y-3.5 shadow-xs">
-            <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-white flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-[#08482D] dark:text-[#DAE7C7]" />
+          <div className="bg-white border-2 border-[#101D32] rounded-2xl p-6 sm:p-8 space-y-3.5 shadow-[4px_4px_0px_0px_#101D32]">
+            <h3 className="text-sm font-heading font-extrabold text-[#101410] flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-[#F4511E]" />
               <span>Looking for Quick Answers?</span>
             </h3>
-            <p className="text-xs text-[#5E5E61] dark:text-slate-400 leading-relaxed">
+            <p className="text-xs text-[#101D32]/80 leading-relaxed">
               Before sending an inquiry, check our comprehensive Frequently Asked Questions covering pricing, Razorpay checkout, passes, and gate check-in.
             </p>
             <button
@@ -310,7 +307,7 @@ export const ContactPage: React.FC = () => {
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }, 150);
               }}
-              className="text-xs font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] hover:underline inline-flex items-center gap-1.5 pt-1"
+              className="text-xs font-heading font-bold text-[#F4511E] hover:underline inline-flex items-center gap-1.5 pt-1 cursor-pointer"
             >
               <span>View Homepage FAQ</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -321,4 +318,3 @@ export const ContactPage: React.FC = () => {
     </div>
   );
 };
-

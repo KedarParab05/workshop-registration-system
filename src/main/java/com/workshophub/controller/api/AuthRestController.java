@@ -6,6 +6,7 @@ import com.workshophub.model.enums.AccountStatus;
 import com.workshophub.model.enums.UserRole;
 import com.workshophub.repository.UserRepository;
 import com.workshophub.service.UserService;
+import com.workshophub.util.ValidationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * REST API for authentication: email/password login, registration, profile, and demo personas.
@@ -27,6 +29,24 @@ public class AuthRestController {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+
+    // Rate Limiting for failed login attempts (Brute-Force Protection)
+    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final long LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes lockout
+
+    private static class FailedAttemptRecord {
+        int count;
+        long lockedUntil;
+        long lastAttemptTime;
+
+        FailedAttemptRecord(long now) {
+            this.count = 1;
+            this.lastAttemptTime = now;
+            this.lockedUntil = 0;
+        }
+    }
+
+    private final Map<String, FailedAttemptRecord> failedLoginAttempts = new ConcurrentHashMap<>();
 
     public AuthRestController(UserService userService,
                               UserRepository userRepository,
@@ -74,6 +94,7 @@ public class AuthRestController {
     /**
      * POST /api/auth/login
      * Authenticates user with email + password, returns JWT token.
+     * Enforces rate limiting against brute force and generic error messages to prevent enumeration.
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
@@ -85,17 +106,32 @@ public class AuthRestController {
                 return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Email and password are required."));
             }
 
-            Optional<User> userOpt = userService.findByEmail(email.trim().toLowerCase());
+            String clientKey = email.trim().toLowerCase();
+            long now = System.currentTimeMillis();
+
+            // Check brute-force lockout status
+            FailedAttemptRecord record = failedLoginAttempts.get(clientKey);
+            if (record != null && record.lockedUntil > now) {
+                long remainingMins = Math.max(1, (record.lockedUntil - now) / 60000);
+                return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
+                        "success", false,
+                        "error", "Too many failed login attempts. Please try again in " + remainingMins + " minutes."
+                ));
+            }
+
+            Optional<User> userOpt = userService.findByEmail(clientKey);
             if (userOpt.isEmpty()) {
+                trackFailedAttempt(clientKey, now);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("success", false, "error", "No account found with this email address."));
+                        .body(Map.of("success", false, "error", "Invalid email or password."));
             }
 
             User user = userOpt.get();
 
             if (user.getPasswordHash() != null && !passwordEncoder.matches(password, user.getPasswordHash())) {
+                trackFailedAttempt(clientKey, now);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("success", false, "error", "Incorrect password. Please try again."));
+                        .body(Map.of("success", false, "error", "Invalid email or password."));
             }
 
             if (user.getAccountStatus() != null && "SUSPENDED".equals(user.getAccountStatus().name())) {
@@ -103,19 +139,36 @@ public class AuthRestController {
                         .body(Map.of("success", false, "error", "Your account has been suspended."));
             }
 
+            // Reset failed attempts on successful login
+            failedLoginAttempts.remove(clientKey);
+
             String roleName = user.getRole() != null ? user.getRole().name() : "PARTICIPANT";
             String token = jwtUtil.generateToken(user.getEmail(), roleName, user.getId());
 
             return ResponseEntity.ok(buildAuthResponse(token, user));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "error", e.getMessage() != null ? e.getMessage() : "Login failed."));
+                    .body(Map.of("success", false, "error", "Login failed. Please try again."));
         }
+    }
+
+    private void trackFailedAttempt(String key, long now) {
+        failedLoginAttempts.compute(key, (k, existing) -> {
+            if (existing == null || now - existing.lastAttemptTime > LOCKOUT_DURATION_MS) {
+                return new FailedAttemptRecord(now);
+            }
+            existing.count++;
+            existing.lastAttemptTime = now;
+            if (existing.count >= MAX_FAILED_ATTEMPTS) {
+                existing.lockedUntil = now + LOCKOUT_DURATION_MS;
+            }
+            return existing;
+        });
     }
 
     /**
      * POST /api/auth/register
-     * Creates new user account in MongoDB and returns JWT token.
+     * Creates new user account in MongoDB with strict backend validation.
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
@@ -133,11 +186,9 @@ public class AuthRestController {
             UserRole role = "ORGANIZER".equalsIgnoreCase(roleStr) ? UserRole.ORGANIZER 
                           : "VOLUNTEER".equalsIgnoreCase(roleStr) ? UserRole.VOLUNTEER 
                           : UserRole.PARTICIPANT;
-            User user = userService.registerUser(fullName, email, password, role, department);
-            if (phoneNumber != null && !phoneNumber.isBlank()) {
-                user.setPhoneNumber(phoneNumber.trim());
-                userRepository.save(user);
-            }
+
+            User user = userService.registerUser(fullName, email, password, role, department, phoneNumber);
+
             String roleName = user.getRole() != null ? user.getRole().name() : "PARTICIPANT";
             String token = jwtUtil.generateToken(user.getEmail(), roleName, user.getId());
 
@@ -171,7 +222,7 @@ public class AuthRestController {
 
     /**
      * PUT /api/auth/profile
-     * Updates user's fullName or department in MongoDB.
+     * Updates user's fullName, department, and phone number in MongoDB with strict validation.
      */
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> body,
@@ -183,20 +234,27 @@ public class AuthRestController {
             String token = authHeader.substring(7);
             String email = jwtUtil.extractEmail(token);
             User user = userService.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-            if (body.containsKey("fullName") && body.get("fullName") != null && !body.get("fullName").isBlank()) {
-                user.setFullName(body.get("fullName").trim());
+            if (body.containsKey("fullName")) {
+                user.setFullName(ValidationUtils.validateFullName(body.get("fullName")));
             }
             if (body.containsKey("department")) {
-                user.setDepartment(body.get("department"));
+                user.setDepartment(body.get("department") != null ? body.get("department").trim() : null);
             }
             if (body.containsKey("phoneNumber")) {
-                user.setPhoneNumber(body.get("phoneNumber"));
+                String rawPhone = body.get("phoneNumber");
+                if (rawPhone != null && !rawPhone.isBlank()) {
+                    user.setPhoneNumber(ValidationUtils.validateAndCleanIndianPhone(rawPhone));
+                } else {
+                    user.setPhoneNumber(null);
+                }
             }
             user.setUpdatedAt(java.time.LocalDateTime.now());
             User saved = userRepository.save(user);
             return ResponseEntity.ok(Map.of("success", true, "user", safeUser(saved)));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage() != null ? e.getMessage() : "Failed to update profile."));
         }
     }
 
@@ -211,10 +269,6 @@ public class AuthRestController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Email is required."));
         }
         User user = userService.findByEmail(email.trim().toLowerCase()).orElse(null);
-        if (user != null && user.getRole() == UserRole.SUPER_ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of("success", false, "error", "Administrative accounts must sign in using verified credentials."));
-        }
         if (user == null) {
             // Auto-provision demo persona if not yet seeded (never auto-provision super admin)
             String cleanEmail = email.trim().toLowerCase();

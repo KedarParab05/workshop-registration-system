@@ -1,56 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,600,700,800&f[]=satoshi@400,500,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
-  --font-sans: 'Manrope', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Neue Machina', 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Instrument Serif', Georgia, Cambria, 'Times New Roman', serif;
+  --font-sans: 'Satoshi', 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Cabinet Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Satoshi', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  --color-primary: #F4511E;
+  --color-primary-hover: #E84316;
+  --color-cream: #FFF5E9;
+  --color-peach: #FFD6B0;
+  --color-navy: #101D32;
+  --color-white: #FFFFFF;
 }
 
 :root {
   color-scheme: light;
-  --bg-warm: #F5F8EF;
-  --color-forest: #08482D;
-  --color-forest-hover: #0c5c3b;
-  --color-mint: #DAE7C7;
-  --color-mint-subtle: #EDF4E5;
-  --color-sage: #E8F0DF;
-  --color-sage-border: #DCE4D6;
-  --color-ink: #101410;
-  --color-ink-muted: #5E5E61;
-
-  /* Architectural Grid Variables (Crisp & Visible in Light Mode) */
-  --grid-line-hero: rgba(8, 72, 45, 0.08);
-  --grid-line-subtle: rgba(8, 72, 45, 0.04);
-  --grid-line-footer: rgba(218, 231, 199, 0.06);
-  --grid-size: 44px;
-}
-
-:root.dark {
-  color-scheme: dark;
-  --bg-warm: #0a130e;
-  --color-forest: #10442b;
-  --color-forest-hover: #165637;
-  --color-mint: #254432;
-  --color-mint-subtle: #162a1f;
-  --color-sage: #132219;
-  --color-sage-border: #22382b;
-  --color-ink: #f0f5ee;
-  --color-ink-muted: #95ad9e;
-
-  /* Architectural Grid Variables (Luminous Mint & Subtle in Dark Mode) */
-  --grid-line-hero: rgba(218, 231, 199, 0.07);
-  --grid-line-subtle: rgba(218, 231, 199, 0.035);
-  --grid-line-footer: rgba(218, 231, 199, 0.04);
-  --grid-size: 44px;
+  --bg-cream: #FFF5E9;
+  --color-primary: #F4511E;
+  --color-primary-hover: #E84316;
+  --color-peach: #FFD6B0;
+  --color-navy: #101D32;
+  --color-white: #FFFFFF;
 }
 
 html {
   scroll-behavior: smooth;
+  background-color: #FFF5E9;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -59,105 +37,125 @@ html {
   }
 }
 
-@media (max-width: 640px) {
-  :root {
-    --grid-size: 32px;
-    --grid-line-hero: rgba(8, 72, 45, 0.05);
-    --grid-line-subtle: rgba(8, 72, 45, 0.03);
-  }
-
-  :root.dark {
-    --grid-size: 32px;
-    --grid-line-hero: rgba(218, 231, 199, 0.04);
-    --grid-line-subtle: rgba(218, 231, 199, 0.025);
-  }
-}
-
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #F5F8EF;
-  color: #101410;
+  background-color: #FFF5E9;
+  color: #101D32;
   overflow-x: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-:root.dark body {
-  background-color: #0a130e;
-  color: #f0f5ee;
-}
-
-/* Theme Consistency Focus Rings */
+/* Theme Focus Rings */
 *:focus-visible {
-  outline: 2px solid #08482D;
+  outline: 2px solid #F4511E;
   outline-offset: 2px;
-}
-
-:root.dark *:focus-visible {
-  outline-color: #DAE7C7;
 }
 
 h1, h2, h3, h4, h5, h6, .font-heading {
   font-family: var(--font-heading);
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
 }
 
-.font-serif {
-  font-family: var(--font-serif);
+/* Neo-Brutalist Border & Shadows */
+.neo-border {
+  border: 2px solid #101D32;
 }
 
-.font-display {
-  font-family: var(--font-display);
+.neo-border-dashed {
+  border: 2px dashed #101D32;
 }
 
-/* Crisp Architectural CSS Grid Background Patterns */
-.grid-background,
-.grid-background-hero {
-  background-image:
-    linear-gradient(to right, var(--grid-line-hero) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line-hero) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
+.neo-shadow {
+  box-shadow: 4px 4px 0px 0px #101D32;
 }
 
-.grid-background-subtle {
-  background-image:
-    linear-gradient(to right, var(--grid-line-subtle) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line-subtle) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
+.neo-shadow-lg {
+  box-shadow: 8px 8px 0px 0px #101D32;
 }
 
-.grid-background-footer {
-  background-image:
-    linear-gradient(to right, var(--grid-line-footer) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line-footer) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
+.neo-shadow-xl {
+  box-shadow: 12px 12px 0px 0px #101D32;
 }
 
-/* Custom Soft-Mint scrollbar */
+/* Neo-Brutalist Physical Press Buttons */
+.neo-btn {
+  transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.neo-btn:hover {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px #101D32 !important;
+}
+
+.neo-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px #101D32 !important;
+}
+
+.neo-btn-8 {
+  transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.neo-btn-8:hover {
+  transform: translate(4px, 4px);
+  box-shadow: 4px 4px 0px 0px #101D32 !important;
+}
+
+.neo-btn-8:active {
+  transform: translate(8px, 8px);
+  box-shadow: 0px 0px 0px 0px #101D32 !important;
+}
+
+/* 32px x 32px Radial Dot Pattern (~10% opacity) */
+.dot-pattern {
+  background-image: radial-gradient(circle, #101D32 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
+}
+
+.dot-pattern-orange {
+  background-image: radial-gradient(circle, #F4511E 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
+}
+
+/* Continuous Marquee Animation */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 24s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Custom Neo-Brutalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #FFF5E9;
+  border-left: 2px solid #101D32;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5c1;
-  border-radius: 9999px;
-}
-
-:root.dark ::-webkit-scrollbar-thumb {
-  background: #233d2e;
+  background: #FFD6B0;
+  border: 2px solid #101D32;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a386;
+  background: #F4511E;
 }
 
-/* Scanner Laser Sweep Animation */
+/* Scanner Laser Sweep Animation (Preserved for Volunteer Scanner) */
 @keyframes scanner-laser-sweep {
   0% {
     top: 6%;
@@ -180,12 +178,12 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* Scanner Viewfinder Pulse Glow */
 @keyframes scanner-glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 16px rgba(8, 72, 45, 0.35), inset 0 0 16px rgba(8, 72, 45, 0.2);
-    border-color: rgba(34, 197, 94, 0.85);
+    box-shadow: 0 0 16px rgba(244, 81, 30, 0.4), inset 0 0 16px rgba(244, 81, 30, 0.2);
+    border-color: rgba(244, 81, 30, 0.9);
   }
   50% {
-    box-shadow: 0 0 32px rgba(8, 72, 45, 0.65), inset 0 0 28px rgba(8, 72, 45, 0.35);
-    border-color: rgba(74, 222, 128, 1);
+    box-shadow: 0 0 32px rgba(244, 81, 30, 0.7), inset 0 0 28px rgba(244, 81, 30, 0.4);
+    border-color: rgba(232, 67, 22, 1);
   }
 }
 
@@ -198,7 +196,7 @@ button, a {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Clean Print Styles for QR Ticket Passes */
+/* Print Styles */
 @media print {
   body {
     background: #ffffff !important;

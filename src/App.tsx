@@ -72,7 +72,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F8EF] dark:bg-[#0b140e] font-sans text-[#101410] dark:text-[#f0f5ee] selection:bg-[#DAE7C7] selection:text-[#08482D] transition-colors duration-200 w-full max-w-full overflow-x-clip relative">
+    <div className="min-h-screen flex flex-col bg-[#FFF5E9] font-sans text-[#101D32] selection:bg-[#FFD6B0] selection:text-[#101D32] transition-colors duration-200 w-full max-w-full overflow-x-clip relative">
       <Navbar
         onOpenAuth={() => setAuthModalOpen(true)}
         onOpenRoleSelector={() => setRoleModalOpen(true)}
@@ -89,21 +89,21 @@ const MainContent: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className={`pointer-events-auto p-3.5 rounded-2xl border shadow-xl flex items-start gap-2.5 text-xs backdrop-blur-md ${
+              className={`pointer-events-auto p-3.5 rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-start gap-2.5 text-xs ${
                 alert.type === 'success'
-                  ? 'bg-[#08482D] text-[#F5F8EF] border-[#DAE7C7]/40 shadow-[#08482D]/20'
+                  ? 'bg-[#101D32] text-white shadow-[4px_4px_0px_0px_#F4511E]'
                   : alert.type === 'error'
-                  ? 'bg-rose-950/95 text-rose-100 border-rose-800 shadow-rose-950/20'
-                  : 'bg-[#14231b]/95 text-[#f0f5ee] border-[#233d2e] shadow-black/20'
+                  ? 'bg-[#F4511E] text-white'
+                  : 'bg-[#FFD6B0] text-[#101D32] font-semibold'
               }`}
             >
-              {alert.type === 'success' && <CheckCircle2 className="w-4 h-4 text-[#DAE7C7] shrink-0 mt-0.5" />}
-              {alert.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />}
-              {alert.type === 'info' && <Info className="w-4 h-4 text-[#DAE7C7] shrink-0 mt-0.5" />}
+              {alert.type === 'success' && <CheckCircle2 className="w-4 h-4 text-[#F4511E] shrink-0 mt-0.5" />}
+              {alert.type === 'error' && <AlertCircle className="w-4 h-4 text-white shrink-0 mt-0.5" />}
+              {alert.type === 'info' && <Info className="w-4 h-4 text-[#101D32] shrink-0 mt-0.5" />}
               <div className="flex-1 leading-snug">{alert.message}</div>
               <button
                 onClick={() => dismissAlert(alert.id)}
-                className="p-0.5 text-white/60 hover:text-white"
+                className="p-0.5 opacity-70 hover:opacity-100 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>

@@ -6,15 +6,12 @@ import {
   Users,
   CheckCircle,
   XCircle,
-  Calendar,
-  Sparkles,
   Scan,
   QrCode,
   ShieldCheck,
   MapPin,
   Clock,
   Camera,
-  Layers,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { QRVerifierModal } from './QRVerifierModal';
@@ -118,54 +115,50 @@ export const WorkshopRegistrations: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 transition-colors duration-200">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Top Banner: Gate Verification Command Station */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[#08482D] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-[#0b5435] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden"
+        className="bg-[#101D32] rounded-3xl p-6 sm:p-8 text-white shadow-[6px_6px_0px_0px_#101D32] border-2 border-[#101D32] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden"
       >
-        <div className="absolute -right-8 -top-8 w-40 h-40 bg-[#DAE7C7]/15 rounded-full blur-2xl pointer-events-none" />
-
         <div className="space-y-2 relative z-10">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 text-xs font-heading font-semibold text-[#08482D] bg-[#DAE7C7] px-3 py-1 rounded-full shadow-sm">
-              <Scan className="w-3.5 h-3.5 text-[#08482D]" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#101D32] bg-[#FFD6B0] px-3 py-1 rounded-full border border-[#101D32] shadow-[2px_2px_0px_0px_#101D32]">
+              <Scan className="w-3.5 h-3.5 text-[#F4511E]" />
               <span>Gate Verification Console</span>
             </span>
-            </div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-white">
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-white">
             Official Gate Scanner & Attendee Roster
           </h1>
-          <p className="text-xs sm:text-sm text-[#DAE7C7]/80 max-w-xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
             Verify attendees on the day of their workshop. Passes are validated strictly via the camera gate scanner to ensure single-use integrity and venue matching.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full sm:w-auto relative z-10">
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+          <button
             onClick={() => handleLaunchScanner()}
-            className="px-6 py-3 bg-[#DAE7C7] hover:bg-[#c9ddb0] text-[#08482D] font-heading font-bold text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2.5 transition-all"
+            className="px-6 py-3 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-extrabold text-sm rounded-2xl border-2 border-[#101D32] shadow-[3px_3px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center gap-2.5 transition-all cursor-pointer"
           >
-            <Camera className="w-5 h-5 text-[#08482D]" />
+            <Camera className="w-5 h-5 text-white" />
             <span>Launch Camera Scanner</span>
-          </motion.button>
+          </button>
         </div>
       </motion.div>
 
       {/* Gate Station Selection & Real-Time Counters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Gate Selection Card */}
-        <div className="md:col-span-2 bg-white dark:bg-[#14231b] p-5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm space-y-2 transition-colors">
-          <label className="block text-xs font-heading font-semibold text-[#101410] dark:text-[#E8F0DF]">
+        <div className="md:col-span-2 bg-white p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] space-y-2">
+          <label className="block text-xs font-heading font-bold text-[#101410]">
             Operating Gate For Workshop:
           </label>
           <select
             value={selectedWorkshopId}
             onChange={(e) => setSelectedWorkshopId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+            className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-[#101D32] text-xs font-bold shadow-[2px_2px_0px_0px_#101D32] focus:outline-none focus:bg-white"
           >
             <option value="ALL">All Hosted Workshops (Multi-Gate Mode)</option>
             {myWorkshops.map((ws) => (
@@ -175,14 +168,14 @@ export const WorkshopRegistrations: React.FC = () => {
             ))}
           </select>
           {activeWorkshop && (
-            <div className="pt-1 flex items-center gap-3 text-[11px] text-[#5E5E61] dark:text-emerald-400">
+            <div className="pt-1 flex items-center gap-3 text-[11px] text-[#101D32]/75 font-medium">
               <span className="flex items-center gap-1 truncate">
-                <MapPin className="w-3 h-3 text-[#08482D] dark:text-[#DAE7C7] shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                 <span className="truncate">{activeWorkshop.venueAddress || activeWorkshop.venue}</span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1 shrink-0">
-                <Clock className="w-3 h-3 text-[#08482D] dark:text-[#DAE7C7]" />
+                <Clock className="w-3.5 h-3.5 text-[#F4511E] shrink-0" />
                 <span>{activeWorkshop.startTime} - {activeWorkshop.endTime}</span>
               </span>
             </div>
@@ -190,46 +183,46 @@ export const WorkshopRegistrations: React.FC = () => {
         </div>
 
         {/* Counter: Attended / Verified at Gate */}
-        <div className="bg-white dark:bg-[#14231b] p-5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex items-center gap-3.5 transition-colors">
-          <div className="w-11 h-11 rounded-xl bg-[#E8F0DF] dark:bg-[#1a3325] text-[#08482D] dark:text-[#DAE7C7] flex items-center justify-center font-bold shrink-0">
-            <CheckCircle className="w-5 h-5" />
+        <div className="bg-white p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-xl bg-[#FFD6B0] text-[#101D32] border-2 border-[#101D32] flex items-center justify-center font-bold shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+            <CheckCircle className="w-6 h-6 text-[#101D32]" />
           </div>
           <div>
-            <div className="text-2xl font-heading font-bold text-[#08482D] dark:text-[#DAE7C7] font-mono">
+            <div className="text-2xl font-heading font-black text-[#101D32] font-mono">
               {totalAttended}
             </div>
-            <div className="text-[11px] text-[#5E5E61] dark:text-emerald-400 font-medium">Verified at Gate</div>
+            <div className="text-[11px] text-[#101D32]/75 font-bold">Verified at Gate</div>
           </div>
         </div>
 
         {/* Counter: Pending Entry */}
-        <div className="bg-white dark:bg-[#14231b] p-5 rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm flex items-center gap-3.5 transition-colors">
-          <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
-            <Clock className="w-5 h-5" />
+        <div className="bg-white p-5 rounded-2xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-xl bg-[#FFF5E9] text-[#F4511E] border-2 border-[#101D32] flex items-center justify-center font-bold shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+            <Clock className="w-6 h-6 text-[#F4511E]" />
           </div>
           <div>
-            <div className="text-2xl font-heading font-bold text-amber-600 dark:text-amber-400 font-mono">
+            <div className="text-2xl font-heading font-black text-[#F4511E] font-mono">
               {pendingScan}
             </div>
-            <div className="text-[11px] text-[#5E5E61] dark:text-slate-400 font-medium">Pending Scan Entry</div>
+            <div className="text-[11px] text-[#101D32]/75 font-bold">Pending Scan Entry</div>
           </div>
         </div>
       </div>
 
       {/* Main Table: Attendee Roster with Strict Gate Verification */}
-      <div className="bg-white dark:bg-[#14231b] rounded-3xl border border-[#DCE4D6] dark:border-[#203a2c] shadow-sm p-6 space-y-6 transition-colors">
+      <div className="bg-white rounded-3xl border-2 border-[#101D32] shadow-[6px_6px_0px_0px_#101D32] p-6 space-y-6">
         {/* Table Filters & Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DCE4D6] dark:border-[#203a2c] pb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[#5E5E61] dark:text-emerald-400">Status:</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#101D32] pb-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-bold text-[#101D32]">Status:</span>
             {(['ALL', 'CONFIRMED', 'ATTENDED', 'CANCELLED'] as const).map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-heading font-semibold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-heading font-bold border-2 border-[#101D32] transition-all ${
                   statusFilter === st
-                    ? 'bg-[#08482D] text-white dark:bg-[#DAE7C7] dark:text-[#08482D]'
-                    : 'text-[#5E5E61] hover:bg-[#F5F8EF] dark:hover:bg-[#18281f]'
+                    ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
+                    : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
                 }`}
               >
                 {st === 'ALL'
@@ -245,21 +238,21 @@ export const WorkshopRegistrations: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <div className="relative min-w-[220px]">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5E5E61] dark:text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#101D32]/60" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search name, email, ticket code..."
-                className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-[#DCE4D6] dark:border-[#22392c] bg-[#F5F8EF] dark:bg-[#18281f] text-[#101410] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#08482D]"
+                placeholder="Search name, email, ticket..."
+                className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-[#101D32] font-medium shadow-[2px_2px_0px_0px_#101D32] focus:outline-none focus:bg-white"
               />
             </div>
 
             <button
               onClick={exportCSV}
-              className="px-3.5 py-2 bg-[#E8F0DF] dark:bg-[#1a3325] hover:bg-[#DCE4D6] dark:hover:bg-[#224431] text-[#08482D] dark:text-[#DAE7C7] rounded-xl font-heading font-semibold text-xs flex items-center gap-1.5 transition-colors shrink-0"
+              className="px-3.5 py-2 bg-white hover:bg-[#FFD6B0] text-[#101D32] rounded-xl font-heading font-bold text-xs border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] transition-all flex items-center gap-1.5 shrink-0"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 text-[#F4511E]" />
               <span>Export CSV</span>
             </button>
           </div>
@@ -267,17 +260,17 @@ export const WorkshopRegistrations: React.FC = () => {
 
         {/* Attendee Table */}
         {filteredRegistrations.length === 0 ? (
-          <div className="border border-dashed border-[#DCE4D6] dark:border-[#203a2c] rounded-2xl p-12 text-center space-y-2">
-            <Users className="w-10 h-10 text-[#5E5E61]/50 dark:text-emerald-700 mx-auto" />
-            <h3 className="text-sm font-heading font-bold text-[#101410] dark:text-white">No Attendees Found</h3>
-            <p className="text-xs text-[#5E5E61] dark:text-slate-400 max-w-sm mx-auto">
+          <div className="border-2 border-dashed border-[#101D32] rounded-2xl p-12 text-center space-y-2 bg-[#FFF5E9]/50">
+            <Users className="w-10 h-10 text-[#101D32]/40 mx-auto" />
+            <h3 className="text-sm font-heading font-black text-[#101410]">No Attendees Found</h3>
+            <p className="text-xs text-[#101D32]/75 max-w-sm mx-auto font-medium">
               No participants match the selected workshop or search criteria.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-[#DCE4D6] dark:border-[#203a2c]">
+          <div className="overflow-x-auto rounded-2xl border-2 border-[#101D32]">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F5F8EF] dark:bg-[#18281f] text-[#5E5E61] dark:text-emerald-400 border-b border-[#DCE4D6] dark:border-[#203a2c] font-heading font-semibold uppercase tracking-wider text-[11px]">
+              <thead className="bg-[#FFF5E9] text-[#101D32] border-b-2 border-[#101D32] font-heading font-black uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="py-3.5 px-4">Participant Details</th>
                   <th className="py-3.5 px-4">Ticket Pass Code</th>
@@ -288,67 +281,67 @@ export const WorkshopRegistrations: React.FC = () => {
                   <th className="py-3.5 px-4 text-right">Verification Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#DCE4D6]/70 dark:divide-[#22392c] text-[#101410] dark:text-slate-200">
+              <tbody className="divide-y-2 divide-[#101D32]/20 text-[#101D32]">
                 {filteredRegistrations.map((reg) => {
                   const ws = workshops.find((w) => w.id === reg.workshopId);
                   const isAttended = reg.status === 'ATTENDED' || reg.verified;
                   const isConfirmed = reg.status === 'CONFIRMED' && !isAttended;
 
                   return (
-                    <tr key={reg.id} className="hover:bg-[#F5F8EF]/60 dark:hover:bg-[#1b2b22] transition-colors">
+                    <tr key={reg.id} className="hover:bg-[#FFF5E9]/50 transition-colors">
                       {/* Participant */}
                       <td className="py-3.5 px-4">
-                        <div className="font-heading font-bold text-[#101410] dark:text-white">
+                        <div className="font-heading font-black text-[#101410]">
                           {reg.participantName}
                         </div>
-                        <div className="text-[#5E5E61] dark:text-slate-400 font-mono text-[11px]">
+                        <div className="text-[#101D32]/75 font-mono text-[11px]">
                           {reg.participantEmail}
                         </div>
                       </td>
 
                       {/* Ticket Code */}
                       <td className="py-3.5 px-4">
-                        <span className="font-mono font-bold text-[#08482D] dark:text-[#DAE7C7] bg-[#E8F0DF] dark:bg-[#1a3325] px-2 py-0.5 rounded-md text-[11px] border border-[#DAE7C7] dark:border-[#2d4d3a]">
+                        <span className="font-mono font-bold text-[#101D32] bg-[#FFD6B0] px-2 py-0.5 rounded-md text-[11px] border border-[#101D32]">
                           {reg.ticketCode || `TKT-${reg.id.substring(0, 8).toUpperCase()}`}
                         </span>
                       </td>
 
                       {/* Workshop */}
-                      <td className="py-3.5 px-4 text-[#101410] dark:text-slate-200 font-medium max-w-xs">
-                        <div className="truncate">{ws?.title || 'Workshop'}</div>
-                        <div className="text-[11px] text-[#5E5E61] dark:text-slate-400">{ws?.date} • {ws?.venue}</div>
+                      <td className="py-3.5 px-4 text-[#101D32] font-medium max-w-xs">
+                        <div className="truncate font-bold">{ws?.title || 'Workshop'}</div>
+                        <div className="text-[11px] text-[#101D32]/75">{ws?.date} • {ws?.venue}</div>
                       </td>
 
                       {/* Payment */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border border-[#101D32] ${
                           reg.pricingTypeSnapshot === 'PAID'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
-                            : 'bg-[#E8F0DF] dark:bg-[#1f382a] text-[#08482D] dark:text-[#DAE7C7] border border-[#DCE4D6] dark:border-[#284837]'
+                            ? 'bg-[#FFD6B0] text-[#101D32]'
+                            : 'bg-[#FFF5E9] text-[#101D32]'
                         }`}>
                           {reg.pricingTypeSnapshot === 'PAID' ? `₹${reg.amount} (${reg.paymentStatus || 'PAID'})` : 'FREE'}
                         </span>
                       </td>
 
                       {/* Registered Date */}
-                      <td className="py-3.5 px-4 text-[#5E5E61] dark:text-slate-400 font-mono text-[11px] whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-[#101D32]/75 font-mono text-[11px] whitespace-nowrap font-medium">
                         {reg.registeredAt?.split('T')[0]}
                       </td>
 
                       {/* Status */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {isAttended ? (
-                          <span className="inline-flex items-center gap-1 text-[#08482D] dark:text-[#DAE7C7] font-semibold text-xs bg-[#E8F0DF] dark:bg-[#1b2f23] px-2.5 py-0.5 rounded-full border border-[#DAE7C7] dark:border-[#2d4d3a]">
-                            <CheckCircle className="w-3.5 h-3.5 text-[#08482D] dark:text-[#a8d38d]" />
-                            <span>Attended (Gate Verified)</span>
+                          <span className="inline-flex items-center gap-1.5 text-[#101D32] font-bold text-xs bg-[#FFD6B0] px-3 py-1 rounded-full border-2 border-[#101D32]">
+                            <CheckCircle className="w-3.5 h-3.5 text-[#F4511E]" />
+                            <span>Attended (Verified)</span>
                           </span>
                         ) : isConfirmed ? (
-                          <span className="inline-flex items-center gap-1 text-[#08482D] dark:text-[#DAE7C7] font-semibold text-xs bg-[#F5F8EF] dark:bg-[#18281f] px-2.5 py-0.5 rounded-full border border-[#DCE4D6] dark:border-[#22392c]">
-                            <ShieldCheck className="w-3.5 h-3.5 text-[#08482D] dark:text-[#a8d38d]" />
+                          <span className="inline-flex items-center gap-1.5 text-[#101D32] font-bold text-xs bg-[#FFF5E9] px-3 py-1 rounded-full border-2 border-[#101D32]">
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#101D32]" />
                             <span>Pending Gate Scan</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-slate-400 font-semibold text-xs bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-slate-500 font-bold text-xs bg-slate-100 px-3 py-1 rounded-full border border-slate-300">
                             <XCircle className="w-3.5 h-3.5" /> Cancelled
                           </span>
                         )}
@@ -359,18 +352,18 @@ export const WorkshopRegistrations: React.FC = () => {
                         {ws && (
                           <button
                             onClick={() => setViewTicketData({ registration: reg, workshop: ws })}
-                            className="px-2.5 py-1 text-[#08482D] dark:text-[#DAE7C7] hover:bg-[#E8F0DF] dark:hover:bg-[#1b2f23] rounded-lg text-xs font-heading font-semibold inline-flex items-center gap-1"
+                            className="px-3 py-1 text-[#101D32] hover:bg-[#FFD6B0] rounded-lg text-xs font-heading font-bold border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] inline-flex items-center gap-1 transition-all"
                           >
-                            <QrCode className="w-3.5 h-3.5" />
+                            <QrCode className="w-3.5 h-3.5 text-[#F4511E]" />
                             <span>View Pass</span>
                           </button>
                         )}
                         {isConfirmed && (
                           <button
                             onClick={() => handleLaunchScanner(reg.workshopId)}
-                            className="px-3 py-1 bg-[#08482D] hover:bg-[#0c5c3b] text-white rounded-lg text-xs font-heading font-semibold transition-colors inline-flex items-center gap-1 shadow-sm"
+                            className="px-3 py-1 bg-[#F4511E] hover:bg-[#E84316] text-white rounded-lg text-xs font-heading font-extrabold border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all inline-flex items-center gap-1"
                           >
-                            <Scan className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                            <Scan className="w-3.5 h-3.5 text-white" />
                             <span>Scan at Gate</span>
                           </button>
                         )}

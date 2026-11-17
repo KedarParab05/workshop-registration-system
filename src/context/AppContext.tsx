@@ -285,18 +285,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const token = getToken();
       const isExplicitlyLoggedOut = localStorage.getItem('wh_logged_out') === 'true';
 
-      const isElevated = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ORGANIZER';
+      const storedRole = (() => {
+        try {
+          const u = JSON.parse(localStorage.getItem('wh_user') || '{}');
+          return u.role || localStorage.getItem('wh_role_selected') || currentUser?.role;
+        } catch {
+          return currentUser?.role;
+        }
+      })();
+      const isElevated = storedRole === 'SUPER_ADMIN' || storedRole === 'ORGANIZER';
+
       const [wsRes, regRes, auditRes, usersRes, volRes, meRes] = await Promise.allSettled([
         apiFetch('/api/workshops?all=true'),
         token ? apiFetch('/api/registrations') : Promise.resolve(null),
         token && isElevated ? apiFetch('/api/admin/audit-logs') : Promise.resolve(null),
-        token && isElevated ? apiFetch('/api/auth/users') : Promise.resolve(null),
+        token ? apiFetch('/api/auth/users') : Promise.resolve(null),
         token && isElevated ? apiFetch('/api/volunteers') : Promise.resolve(null),
         token && !isExplicitlyLoggedOut ? apiFetch('/api/auth/me') : Promise.resolve(null),
       ]);
 
       // 1. Workshops
-      if (wsRes.status === 'fulfilled' && wsRes.value.ok) {
+      if (wsRes.status === 'fulfilled' && wsRes.value?.ok) {
         const wsData = await wsRes.value.json();
         if (wsData.success && Array.isArray(wsData.data)) {
           const savedCreds = (() => {
@@ -316,7 +325,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // 2. Registrations
-      if (regRes.status === 'fulfilled' && regRes.value.ok) {
+      if (regRes.status === 'fulfilled' && regRes.value?.ok) {
         const regData = await regRes.value.json();
         if (regData.success && Array.isArray(regData.registrations)) {
           setRegistrations(regData.registrations);
@@ -325,7 +334,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // 3. Audit logs
-      if (auditRes.status === 'fulfilled' && auditRes.value.ok) {
+      if (auditRes.status === 'fulfilled' && auditRes.value?.ok) {
         const auditData = await auditRes.value.json();
         if (auditData.success && Array.isArray(auditData.auditLogs)) {
           setAuditLogs(auditData.auditLogs);
@@ -334,7 +343,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // 4. Users
-      if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
+      if (usersRes.status === 'fulfilled' && usersRes.value?.ok) {
         const usersData = await usersRes.value.json();
         if (usersData.success && Array.isArray(usersData.users)) {
           setUsers(usersData.users);
@@ -343,7 +352,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // 5. Volunteers
-      if (volRes.status === 'fulfilled' && volRes.value.ok) {
+      if (volRes.status === 'fulfilled' && volRes.value?.ok) {
         const volData = await volRes.value.json();
         if (volData.success && Array.isArray(volData.volunteers)) {
           setVolunteers(volData.volunteers);
@@ -546,6 +555,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.setItem('wh_user', JSON.stringify(data.user));
           localStorage.setItem('wh_current_user_email', data.user.email);
           localStorage.setItem('wh_role_selected', data.user.role);
+          await refreshData();
           showAlert(
             `Signed in as ${
               data.user.role === 'ORGANIZER'
@@ -588,6 +598,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.setItem('wh_user', JSON.stringify(data.user));
           localStorage.setItem('wh_current_user_email', data.user.email);
           localStorage.setItem('wh_role_selected', data.user.role);
+          await refreshData();
           showAlert(`Welcome back, ${data.user.fullName}!`, 'success');
           if (data.user.role === 'SUPER_ADMIN') {
             navigateTo('admin-dashboard');
@@ -1433,7 +1444,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               paymentAttemptId: orderData.paymentAttemptId,
             },
             theme: {
-              color: '#08482D', // Deep forest green
+              color: '#F4511E', // Primary Orange
             },
             handler: async (response: {
               razorpay_payment_id: string;

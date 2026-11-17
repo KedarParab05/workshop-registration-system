@@ -11,9 +11,9 @@ import {
   Copy,
   Check,
   Navigation,
-  Sparkles,
   AlertTriangle,
   CheckCircle2,
+  GraduationCap,
 } from 'lucide-react';
 import { Registration, Workshop } from '../../types';
 
@@ -86,7 +86,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       width: 320,
       margin: 1,
       color: {
-        dark: '#08482D',
+        dark: '#101D32',
         light: '#ffffff',
       },
       errorCorrectionLevel: 'H',
@@ -120,7 +120,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  // Generate self-contained downloadable HTML matching the exact ticket format
+  // Generate self-contained downloadable HTML matching Neo-Brutalist format
   const handleDownload = () => {
     const html = `<!DOCTYPE html>
 <html>
@@ -131,8 +131,8 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #eef2eb;
-      color: #101410;
+      background: #FFF5E9;
+      color: #101D32;
       padding: 40px 20px;
       display: flex;
       justify-content: center;
@@ -142,66 +142,83 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
     .ticket-container {
       width: 820px;
       background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 16px 40px rgba(8, 72, 45, 0.12);
+      border-radius: 16px;
+      box-shadow: 8px 8px 0px 0px #101D32;
       display: flex;
       position: relative;
       overflow: hidden;
-      border: 1px solid #dce4d6;
+      border: 2px solid #101D32;
     }
     .main-pass {
       flex: 1;
       padding: 32px 36px;
       position: relative;
       display: flex;
-      flex-col;
+      flex-direction: column;
       justify-content: space-between;
     }
     .badge-corner {
       position: absolute;
       top: 0;
       right: 0;
-      background: #08482D;
+      background: #F4511E;
       color: #ffffff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       letter-spacing: 1px;
       text-transform: uppercase;
-      padding: 10px 28px 10px 24px;
-      border-bottom-left-radius: 18px;
+      padding: 8px 24px;
+      border-bottom-left-radius: 12px;
+      border-bottom: 2px solid #101D32;
+      border-left: 2px solid #101D32;
     }
     .brand-header {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 20px;
+    }
+    .brand-logo-sq {
+      width: 32px;
+      height: 32px;
+      background: #F4511E;
+      border: 2px solid #101D32;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
     }
     .brand-title {
       font-size: 20px;
       font-weight: 900;
-      color: #08482D;
+      color: #101D32;
       line-height: 1.1;
+      letter-spacing: -0.5px;
     }
     .brand-sub {
       font-size: 10px;
-      color: #5E5E61;
+      color: #101D32;
       letter-spacing: 1px;
       text-transform: uppercase;
-      font-weight: 600;
+      font-weight: 700;
+      opacity: 0.7;
     }
     .ws-title {
       font-size: 26px;
       font-weight: 900;
-      color: #101410;
+      color: #101D32;
       line-height: 1.2;
       margin-bottom: 4px;
-      max-width: 80%;
+      letter-spacing: -0.5px;
+      max-width: 82%;
     }
     .ws-tagline {
-      font-size: 14px;
+      font-size: 13px;
       font-style: italic;
-      color: #08482D;
-      font-weight: 600;
+      color: #F4511E;
+      font-weight: 700;
       margin-bottom: 20px;
     }
     .info-list {
@@ -219,43 +236,48 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
     .icon-badge {
       width: 28px;
       height: 28px;
-      border-radius: 50%;
-      background: #08482D;
-      color: #DAE7C7;
+      border-radius: 6px;
+      background: #FFD6B0;
+      border: 2px solid #101D32;
+      color: #101D32;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 13px;
       flex-shrink: 0;
+      font-weight: bold;
     }
     .info-label {
-      font-weight: 700;
-      color: #101410;
+      font-weight: 800;
+      color: #101D32;
     }
     .attendee-box {
-      background: #E8F0DF;
-      border-radius: 14px;
+      background: #FFF5E9;
+      border: 2px solid #101D32;
+      border-radius: 12px;
       padding: 14px 18px;
       margin-bottom: 18px;
+      box-shadow: 3px 3px 0px 0px #101D32;
       max-width: 420px;
     }
     .attendee-label {
       font-size: 11px;
-      color: #4a5e4e;
-      font-weight: 600;
+      color: #101D32;
+      opacity: 0.8;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .attendee-name {
       font-size: 18px;
       font-weight: 900;
-      color: #101410;
+      color: #101D32;
       margin: 2px 0;
     }
     .attendee-id {
       font-size: 12px;
-      color: #08482D;
-      font-weight: 700;
+      color: #F4511E;
+      font-weight: 800;
       font-family: monospace;
     }
     .main-footer {
@@ -264,14 +286,15 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       align-items: flex-end;
     }
     .happy-learning {
-      font-size: 18px;
-      font-style: italic;
-      font-weight: 700;
-      color: #08482D;
+      font-size: 16px;
+      font-weight: 900;
+      color: #F4511E;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     .perforation {
       width: 0;
-      border-right: 2px dashed #cfdac6;
+      border-right: 2px dashed #101D32;
       position: relative;
     }
     .cutout-top {
@@ -281,8 +304,8 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #eef2eb;
-      border: 1px solid #dce4d6;
+      background: #FFF5E9;
+      border: 2px solid #101D32;
     }
     .cutout-bottom {
       position: absolute;
@@ -291,12 +314,12 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #eef2eb;
-      border: 1px solid #dce4d6;
+      background: #FFF5E9;
+      border: 2px solid #101D32;
     }
     .ticket-stub {
       width: 260px;
-      background: #fbfdf9;
+      background: #FFF5E9;
       padding: 28px 24px;
       display: flex;
       flex-direction: column;
@@ -305,11 +328,13 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       text-align: center;
     }
     .ticket-id-pill {
-      background: #08482D;
+      background: #101D32;
       color: #ffffff;
-      border-radius: 12px;
+      border: 2px solid #101D32;
+      border-radius: 8px;
       padding: 8px 14px;
       width: 100%;
+      box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.2);
     }
     .ticket-id-label {
       font-size: 10px;
@@ -325,11 +350,11 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
     }
     .qr-frame {
       background: #ffffff;
-      border: 1px solid #dce4d6;
-      border-radius: 14px;
+      border: 2px solid #101D32;
+      border-radius: 12px;
       padding: 10px;
       margin: 14px 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      box-shadow: 4px 4px 0px 0px #101D32;
     }
     .qr-frame img {
       width: 140px;
@@ -338,12 +363,14 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
     }
     .scan-title {
       font-size: 13px;
-      font-weight: 800;
-      color: #101410;
+      font-weight: 900;
+      color: #101D32;
+      text-transform: uppercase;
     }
     .scan-sub {
-      font-size: 10px;
-      color: #5E5E61;
+      font-size: 11px;
+      color: #101D32;
+      opacity: 0.7;
       margin-top: 2px;
     }
     .stub-brand {
@@ -353,20 +380,21 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       margin-top: 14px;
     }
     .stub-brand-text {
-      font-size: 12px;
-      font-weight: 800;
-      color: #08482D;
+      font-size: 13px;
+      font-weight: 900;
+      color: #101D32;
       text-align: left;
     }
     .stub-brand-sub {
       font-size: 8px;
-      color: #5E5E61;
+      color: #101D32;
+      opacity: 0.7;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     @media print {
       body { background: #ffffff; padding: 0; }
-      .ticket-container { box-shadow: none; border: 1px solid #999; }
+      .ticket-container { box-shadow: none; border: 2px solid #101D32; }
       .cutout-top, .cutout-bottom { display: none; }
     }
   </style>
@@ -377,9 +405,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       <div class="badge-corner">Workshop Pass</div>
       <div>
         <div class="brand-header">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="#08482D">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-          </svg>
+          <div class="brand-logo-sq">K</div>
           <div>
             <div class="brand-title">Kaushalya • WorkshopHub</div>
             <div class="brand-sub">Learn • Build • Grow</div>
@@ -437,9 +463,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
       </div>
 
       <div class="stub-brand">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#08482D">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-        </svg>
+        <div class="brand-logo-sq" style="width: 24px; height: 24px; font-size: 11px;">K</div>
         <div>
           <div class="stub-brand-text">Kaushalya</div>
           <div class="stub-brand-sub">Learn • Build • Grow</div>
@@ -465,7 +489,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#08482D]/60 backdrop-blur-md print:hidden"
+          className="fixed inset-0 bg-[#101D32]/70 backdrop-blur-sm print:hidden"
         />
 
         {/* Modal Wrapper */}
@@ -479,7 +503,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
           {/* Close Button at top corner */}
           <button
             onClick={onClose}
-            className="absolute -top-11 right-0 sm:right-2 p-2 rounded-full text-white/90 hover:text-white hover:bg-white/15 transition-colors print:hidden cursor-pointer flex items-center gap-1.5 text-xs font-heading font-semibold"
+            className="absolute -top-11 right-0 sm:right-2 p-2 rounded-lg text-white hover:bg-white/20 transition-colors print:hidden cursor-pointer flex items-center gap-1.5 text-xs font-heading font-bold"
             aria-label="Close pass"
           >
             <span>Close</span>
@@ -490,13 +514,13 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
           {(isCancelled || isAttended) && (
             <div className="mb-3 print:hidden">
               {isCancelled ? (
-                <div className="flex items-center gap-2.5 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 shadow-md">
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+                <div className="flex items-center gap-2.5 p-3 bg-[#FFD6B0] border-2 border-[#101D32] rounded-xl text-xs text-[#101D32] shadow-[4px_4px_0px_0px_#101D32] font-semibold">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-[#E84316]" />
                   <span><strong>Registration Cancelled:</strong> This pass has been relinquished and is no longer valid.</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2.5 p-3 bg-[#E8F0DF] border border-[#DAE7C7] rounded-2xl text-xs text-[#08482D] shadow-md">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#08482D]" />
+                <div className="flex items-center gap-2.5 p-3 bg-[#FFF5E9] border-2 border-[#101D32] rounded-xl text-xs text-[#101D32] shadow-[4px_4px_0px_0px_#101D32] font-semibold">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#F4511E]" />
                   <span><strong>Ticket Verified:</strong> Check-in was confirmed at gate reception.</span>
                 </div>
               )}
@@ -506,87 +530,74 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
           {/* ═════════════════ AUTHENTIC PHYSICAL PASS CONTAINER ═════════════════ */}
           <div
             ref={ticketRef}
-            className="relative bg-white rounded-3xl shadow-2xl border border-[#DCE4D6] overflow-hidden flex flex-col md:flex-row print:shadow-none print:border print:rounded-none"
+            className="relative bg-white rounded-2xl shadow-[8px_8px_0px_0px_#101D32] border-2 border-[#101D32] overflow-hidden flex flex-col md:flex-row print:shadow-none print:border-2 print:border-[#101D32] print:rounded-none"
           >
             {/* ── LEFT: Main Pass Section ── */}
             <div className="flex-1 p-6 sm:p-8 relative flex flex-col justify-between overflow-hidden">
               {/* Top-Right Angled Badge */}
               <div className="absolute top-0 right-0 overflow-hidden pointer-events-none">
-                <div className="bg-[#08482D] text-[#F5F8EF] text-[11px] font-heading font-extrabold uppercase tracking-wider py-1.5 px-6 rounded-bl-2xl shadow-sm">
+                <div className="bg-[#F4511E] text-white text-[11px] font-heading font-extrabold uppercase tracking-wider py-1.5 px-6 rounded-bl-xl border-b-2 border-l-2 border-[#101D32]">
                   Workshop Pass
                 </div>
               </div>
 
               {/* Top: Brand Header */}
               <div>
-                <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-[#E8F0DF] flex items-center justify-center text-[#08482D] shrink-0">
-                    <svg className="w-5 h-5 text-[#08482D]" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                    </svg>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-md bg-[#F4511E] border-2 border-[#101D32] flex items-center justify-center text-white shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+                    <GraduationCap className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm sm:text-base font-heading font-black text-[#08482D] tracking-tight leading-none">
+                    <div className="text-sm sm:text-base font-heading font-black text-[#101D32] tracking-tight leading-none">
                       Kaushalya • WorkshopHub
                     </div>
-                    <div className="text-[9px] font-heading font-semibold text-[#5E5E61] uppercase tracking-wider mt-0.5">
+                    <div className="text-[9px] font-heading font-bold text-[#101D32]/70 uppercase tracking-wider mt-0.5">
                       Learn • Build • Grow
                     </div>
                   </div>
                 </div>
 
-                {/* Title + Tech Graphic Row */}
+                {/* Title Row */}
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
-                    <h1 className="text-xl sm:text-2xl font-heading font-black text-[#101410] leading-tight pr-4">
+                    <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-[#101D32] tracking-tight leading-tight pr-4">
                       {workshop.title}
                     </h1>
-                    <div className="text-xs sm:text-sm italic font-heading font-semibold text-[#08482D] mt-1">
+                    <div className="text-xs sm:text-sm italic font-heading font-bold text-[#F4511E] mt-1">
                       {tagline}
-                    </div>
-                  </div>
-
-                  {/* Tech Graphic: Laptop with Code Screen */}
-                  <div className="hidden sm:flex relative w-20 h-16 shrink-0 items-center justify-center">
-                    <div className="absolute inset-0 bg-[#E8F0DF] rounded-2xl blur-xs transform scale-95" />
-                    <div className="relative z-10 flex flex-col items-center">
-                      <div className="w-14 h-9 bg-[#101410] rounded-t-md border-2 border-[#08482D] flex items-center justify-center shadow-sm">
-                        <span className="text-[#DAE7C7] font-mono text-[9px] font-bold">&lt;/&gt;</span>
-                      </div>
-                      <div className="w-18 h-1 bg-[#08482D] rounded-b-sm shadow-xs" />
                     </div>
                   </div>
                 </div>
 
-                {/* Logistics List (Date, Time, Venue) with Circular Green Badges */}
-                <div className="space-y-2.5 text-xs text-[#101410] mb-5">
+                {/* Logistics List (Date, Time, Venue) */}
+                <div className="space-y-2.5 text-xs text-[#101D32] mb-5 font-sans">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shrink-0 shadow-xs">
-                      <Calendar className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                    <div className="w-7 h-7 rounded-md bg-[#FFD6B0] border-2 border-[#101D32] text-[#101D32] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+                      <Calendar className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <span className="font-heading font-bold text-[#101410]">Date:</span>{' '}
-                      <span className="text-[#2b3a2f] font-medium">{formattedDate}</span>
+                      <span className="font-heading font-bold text-[#101D32]">Date:</span>{' '}
+                      <span className="text-[#101D32]/90 font-medium">{formattedDate}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shrink-0 shadow-xs">
-                      <Clock className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                    <div className="w-7 h-7 rounded-md bg-[#FFD6B0] border-2 border-[#101D32] text-[#101D32] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+                      <Clock className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <span className="font-heading font-bold text-[#101410]">Time:</span>{' '}
-                      <span className="text-[#2b3a2f] font-medium">{workshop.startTime} – {workshop.endTime}</span>
+                      <span className="font-heading font-bold text-[#101D32]">Time:</span>{' '}
+                      <span className="text-[#101D32]/90 font-medium">{workshop.startTime} – {workshop.endTime}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#08482D] text-[#DAE7C7] flex items-center justify-center shrink-0 shadow-xs">
-                      <MapPin className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                    <div className="w-7 h-7 rounded-md bg-[#FFD6B0] border-2 border-[#101D32] text-[#101D32] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_#101D32]">
+                      <MapPin className="w-3.5 h-3.5" />
                     </div>
                     <div className="truncate">
-                      <span className="font-heading font-bold text-[#101410]">Venue:</span>{' '}
-                      <span className="text-[#2b3a2f] font-medium">
+                      <span className="font-heading font-bold text-[#101D32]">Venue:</span>{' '}
+                      <span className="text-[#101D32]/90 font-medium">
                         {workshop.onlineMode ? 'Online Studio / Webcast' : workshop.venue}
                         {workshop.venueAddress && !workshop.onlineMode && ` (${workshop.venueAddress})`}
                       </span>
@@ -594,60 +605,51 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
                   </div>
                 </div>
 
-                {/* Mint Attendee Info Card */}
-                <div className="bg-[#E8F0DF] border border-[#DAE7C7] rounded-2xl p-3.5 sm:p-4 max-w-md shadow-xs">
-                  <div className="text-[10px] uppercase font-heading font-bold text-[#445b49] tracking-wider">
+                {/* Neo-Brutalist Attendee Info Card */}
+                <div className="bg-[#FFF5E9] border-2 border-[#101D32] rounded-xl p-3.5 sm:p-4 max-w-md shadow-[4px_4px_0px_0px_#101D32]">
+                  <div className="text-[10px] uppercase font-heading font-bold text-[#101D32]/70 tracking-wider">
                     Attendee Name:
                   </div>
-                  <div className="text-base sm:text-lg font-heading font-extrabold text-[#101410] mt-0.5">
+                  <div className="text-base sm:text-lg font-heading font-extrabold text-[#101D32] mt-0.5">
                     {registration.participantName}
                   </div>
-                  <div className="text-xs font-mono font-bold text-[#08482D] mt-1 flex items-center gap-2">
+                  <div className="text-xs font-mono font-bold text-[#F4511E] mt-1 flex items-center gap-2">
                     <span>Registration ID: {ticketCode}</span>
                     <button
                       type="button"
                       onClick={handleCopyCode}
-                      className="p-1 hover:bg-black/5 rounded-md cursor-pointer print:hidden"
+                      className="p-1 hover:bg-[#FFD6B0] border border-[#101D32] rounded cursor-pointer print:hidden transition-colors"
                       title="Copy ID"
                     >
-                      {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5 text-[#08482D]" />}
+                      {copiedCode ? <Check className="w-3.5 h-3.5 text-[#101D32]" /> : <Copy className="w-3.5 h-3.5 text-[#101D32]" />}
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Row: Happy Learning + Skyline Silhouette */}
+              {/* Bottom Row */}
               <div className="mt-4 pt-2 flex items-end justify-between relative">
-                <div className="text-lg font-heading font-bold italic text-[#08482D]">
+                <div className="text-sm sm:text-base font-heading font-extrabold uppercase tracking-wider text-[#F4511E]">
                   Happy Learning!
                 </div>
-
-                {/* University Skyline Silhouette */}
-                <svg
-                  className="w-44 sm:w-56 h-9 text-[#08482D]/15 fill-current pointer-events-none"
-                  viewBox="0 0 200 36"
-                  preserveAspectRatio="none"
-                >
-                  <path d="M0,36 L0,28 L6,28 L6,20 L10,20 L10,16 L14,16 L14,20 L18,20 L18,28 L24,28 L24,24 L28,24 L28,12 L32,6 L36,12 L36,24 L42,24 L42,28 L48,28 L48,18 L54,18 L54,14 L60,14 L60,18 L66,18 L66,28 L74,28 L74,10 L80,4 L86,10 L86,28 L94,28 L94,20 L102,20 L102,28 L110,28 L110,14 L116,14 L116,8 L122,8 L122,14 L130,14 L130,28 L138,28 L138,22 L144,22 L144,12 L150,6 L156,12 L156,22 L164,22 L164,28 L172,28 L172,16 L178,16 L178,28 L186,28 L186,18 L192,18 L192,36 Z" />
-                </svg>
               </div>
             </div>
 
             {/* ── Perforation Divider with Half-Circle Cutouts ── */}
             <div className="relative flex md:flex-col items-center justify-center">
               {/* Dashed line */}
-              <div className="w-full md:w-0 md:h-full border-t-2 md:border-t-0 md:border-r-2 border-dashed border-[#cfdac6]" />
+              <div className="w-full md:w-0 md:h-full border-t-2 md:border-t-0 md:border-r-2 border-dashed border-[#101D32]" />
               {/* Top Notch Cutout */}
-              <div className="hidden md:block absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#08482D]/60 border border-[#DCE4D6] shadow-inner z-20 pointer-events-none print:hidden" />
+              <div className="hidden md:block absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#101D32] border-2 border-[#101D32] z-20 pointer-events-none print:hidden" />
               {/* Bottom Notch Cutout */}
-              <div className="hidden md:block absolute -bottom-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#08482D]/60 border border-[#DCE4D6] shadow-inner z-20 pointer-events-none print:hidden" />
+              <div className="hidden md:block absolute -bottom-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#101D32] border-2 border-[#101D32] z-20 pointer-events-none print:hidden" />
             </div>
 
             {/* ── RIGHT: Tear-off Stub Section ── */}
-            <div className="w-full md:w-64 bg-[#fbfdf9] p-6 sm:p-7 flex flex-col items-center justify-between text-center border-t md:border-t-0 border-[#DCE4D6]">
+            <div className="w-full md:w-64 bg-[#FFF5E9] p-6 sm:p-7 flex flex-col items-center justify-between text-center border-t md:border-t-0 border-[#101D32]">
               {/* Ticket ID Pill */}
-              <div className="w-full bg-[#08482D] text-white rounded-xl py-2 px-3 shadow-xs">
-                <div className="text-[10px] font-heading font-semibold uppercase tracking-wider text-[#DAE7C7]/90">
+              <div className="w-full bg-[#101D32] text-white rounded-lg py-2 px-3 border-2 border-[#101D32] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
+                <div className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#FFD6B0]">
                   Ticket ID
                 </div>
                 <div className="text-xs sm:text-sm font-mono font-black tracking-widest text-white mt-0.5">
@@ -656,7 +658,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
               </div>
 
               {/* Centered QR Code */}
-              <div className="my-4 p-2 bg-white rounded-2xl shadow-sm border border-[#DCE4D6]">
+              <div className="my-4 p-2.5 bg-white rounded-xl shadow-[4px_4px_0px_0px_#101D32] border-2 border-[#101D32]">
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
@@ -664,7 +666,7 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
                     className="w-36 h-36 sm:w-40 sm:h-40 object-contain mx-auto"
                   />
                 ) : (
-                  <div className="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center text-[10px] text-[#5E5E61]">
+                  <div className="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center text-[10px] text-[#101D32]">
                     Generating pass...
                   </div>
                 )}
@@ -672,26 +674,24 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
 
               {/* Scan at Entry instructions */}
               <div className="mb-2">
-                <div className="text-xs font-heading font-black text-[#101410] uppercase tracking-wide">
+                <div className="text-xs font-heading font-black text-[#101D32] uppercase tracking-wide">
                   Scan at Entry
                 </div>
-                <div className="text-[10px] text-[#5E5E61] mt-0.5">
+                <div className="text-[10px] text-[#101D32]/70 font-medium mt-0.5">
                   Show this QR code for verification
                 </div>
               </div>
 
               {/* Bottom Brand Stamp */}
-              <div className="pt-3 border-t border-[#DCE4D6]/70 w-full flex items-center justify-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-[#E8F0DF] flex items-center justify-center text-[#08482D] shrink-0">
-                  <svg className="w-3.5 h-3.5 text-[#08482D]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-                  </svg>
+              <div className="pt-3 border-t-2 border-[#101D32]/20 w-full flex items-center justify-center gap-2">
+                <div className="w-5 h-5 rounded bg-[#F4511E] border border-[#101D32] flex items-center justify-center text-white shrink-0">
+                  <GraduationCap className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div className="text-left">
-                  <div className="text-[11px] font-heading font-black text-[#08482D] leading-tight">
+                  <div className="text-[11px] font-heading font-black text-[#101D32] leading-tight">
                     Kaushalya
                   </div>
-                  <div className="text-[8px] font-heading font-semibold text-[#5E5E61] uppercase tracking-wider">
+                  <div className="text-[8px] font-heading font-bold text-[#101D32]/70 uppercase tracking-wider">
                     Learn • Build • Grow
                   </div>
                 </div>
@@ -700,20 +700,20 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
           </div>
 
           {/* ═════════════════ ACTION TOOLBAR ═════════════════ */}
-          <div className="mt-4 p-3 bg-white/95 dark:bg-[#121f17]/95 backdrop-blur-md rounded-2xl border border-[#DCE4D6] dark:border-[#233d2e] shadow-lg flex flex-wrap items-center justify-between gap-2.5 print:hidden">
+          <div className="mt-4 p-3 bg-[#FFF5E9] rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] flex flex-wrap items-center justify-between gap-2.5 print:hidden">
             <div className="flex items-center gap-2 flex-1 sm:flex-initial">
               <button
                 type="button"
                 onClick={handlePrint}
-                className="flex-1 sm:flex-initial py-2.5 px-4 bg-[#08482D] hover:bg-[#0c5c3b] text-white text-xs font-heading font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 sm:flex-initial py-2.5 px-4 bg-[#F4511E] hover:bg-[#E84316] text-white text-xs font-heading font-bold rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#101D32] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5 text-[#DAE7C7]" />
+                <Printer className="w-3.5 h-3.5 text-white" />
                 <span>Print Pass</span>
               </button>
               <button
                 type="button"
                 onClick={handleDownload}
-                className="flex-1 sm:flex-initial py-2.5 px-4 bg-white dark:bg-[#1b2b22] border border-[#DCE4D6] dark:border-[#233d2e] hover:bg-[#E8F0DF] text-[#08482D] dark:text-[#DAE7C7] text-xs font-heading font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 sm:flex-initial py-2.5 px-4 bg-white hover:bg-[#FFD6B0] text-[#101D32] text-xs font-heading font-bold rounded-lg border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#101D32] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Save Pass</span>
@@ -726,16 +726,16 @@ export const QRTicketModal: React.FC<QRTicketModalProps> = ({
                   href={gpsMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="py-2.5 px-3 bg-[#F5F8EF] dark:bg-[#1b2b22] hover:bg-[#E8F0DF] text-[#08482D] dark:text-[#DAE7C7] border border-[#DCE4D6] dark:border-[#233d2e] text-xs font-heading font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+                  className="py-2.5 px-3 bg-white hover:bg-[#FFD6B0] text-[#101D32] border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] text-xs font-heading font-bold rounded-lg transition-all flex items-center gap-1.5"
                 >
-                  <Navigation className="w-3.5 h-3.5 text-[#08482D]" />
+                  <Navigation className="w-3.5 h-3.5 text-[#F4511E]" />
                   <span>GPS Directions</span>
                 </a>
               )}
               <button
                 type="button"
                 onClick={onClose}
-                className="py-2.5 px-4 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-[#5E5E61] dark:text-[#8ba895] text-xs font-heading font-bold rounded-xl transition-colors cursor-pointer"
+                className="py-2.5 px-4 bg-transparent hover:bg-[#101D32]/10 text-[#101D32] text-xs font-heading font-bold rounded-lg border-2 border-transparent hover:border-[#101D32] transition-colors cursor-pointer"
               >
                 Done
               </button>
