@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://workshop-registration-system-9fbd.onrender.com/api/:match*"
+      "destination": "https://kaushalya-oauu.onrender.com/api/:match*"
     },
     {
       "source": "/(.*)",
