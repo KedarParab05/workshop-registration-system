@@ -22,7 +22,7 @@
       (function() {
         try {
           // Immediate background wakeup ping to eliminate backend cold-start delays
-          fetch("https://workshop-registration-system-9fbd.onrender.com/api/auth/health", {
+          fetch("https://workshop-registration-system-9fbd.onrender.com/api/workshops", {
             method: "GET",
             mode: "cors",
             keepalive: true

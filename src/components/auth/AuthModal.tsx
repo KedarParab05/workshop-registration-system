@@ -164,15 +164,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }
         setErrorMsg('Server is currently synchronizing. Please try again or use Instant Demo Login.');
       } else if (res.status === 502 || res.status === 503 || res.status === 504) {
-        setErrorMsg("We couldn't connect to the server. Please try again.");
-      } else if (data.error) {
-        setErrorMsg(data.error);
-      } else {
-        setErrorMsg('Something went wrong. Please try again shortly.');
-      }
-    } catch (err: any) {
-      if (err?.name === 'AbortError') {
-        // Timeout — try local fallback for known demo accounts so cold starts don't block evaluators
         const localMatched = users.find((u) => u.email?.toLowerCase() === trimmedEmail);
         if (localMatched) {
           applyBackendUser(localMatched);
@@ -180,7 +171,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           onClose();
           return;
         }
-        setErrorMsg('Server is taking longer than usual. Please try again in a moment.');
+        setErrorMsg("Server is waking up. Please try again in a moment.");
+      } else if (data.error) {
+        setErrorMsg(data.error);
+      } else {
+        setErrorMsg('Something went wrong. Please try again shortly.');
+      }
+    } catch (err: any) {
+      const localMatched = users.find((u) => u.email?.toLowerCase() === trimmedEmail);
+      if (localMatched) {
+        applyBackendUser(localMatched);
+        showAlert(`Welcome back, ${localMatched.fullName}!`, 'success');
+        onClose();
+        return;
+      }
+      if (err?.name === 'AbortError') {
+        setErrorMsg('Server is taking longer than usual to wake up. Please try again in a moment.');
       } else {
         setErrorMsg("We couldn't connect to the server. Please try again.");
       }
