@@ -9,7 +9,7 @@ const path = require('path');
 const outDir = path.join(__dirname, '..', 'public', 'icons');
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
-// Beautiful SVG logo — dark green gradient + stylised "K" + accent dot
+// Beautiful SVG logo — orange gradient + stylised "K" + accent dot
 function makeSVG(size, maskable = false) {
   const pad = maskable ? 0 : Math.round(size * 0.08);
   const inner = size - pad * 2;
@@ -23,11 +23,11 @@ function makeSVG(size, maskable = false) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a2e14"/>
-      <stop offset="100%" stop-color="#165a2d"/>
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#ea580c"/>
     </linearGradient>
     <linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
       <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
     </linearGradient>
     <filter id="shadow">
@@ -42,7 +42,7 @@ function makeSVG(size, maskable = false) {
   <rect x="${pad}" y="${pad}" width="${inner}" height="${Math.round(inner*0.5)}" rx="${r}" ry="${r}" fill="url(#shine)"/>
 
   <!-- Decorative ring -->
-  <circle cx="${cx}" cy="${cy}" r="${Math.round(size*0.36)}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="${Math.round(size*0.012)}"/>
+  <circle cx="${cx}" cy="${cy}" r="${Math.round(size*0.36)}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="${Math.round(size*0.012)}"/>
 
   <!-- Letter K -->
   <text
@@ -57,9 +57,9 @@ function makeSVG(size, maskable = false) {
     letter-spacing="-${Math.round(size*0.01)}"
   >K</text>
 
-  <!-- Green accent dot -->
-  <circle cx="${cx}" cy="${dotY}" r="${dotR}" fill="#4ade80"/>
-  <circle cx="${cx}" cy="${dotY}" r="${Math.round(dotR*0.5)}" fill="rgba(255,255,255,0.4)"/>
+  <!-- Orange accent dot -->
+  <circle cx="${cx}" cy="${dotY}" r="${dotR}" fill="#fed7aa"/>
+  <circle cx="${cx}" cy="${dotY}" r="${Math.round(dotR*0.5)}" fill="rgba(255,255,255,0.5)"/>
 </svg>`;
 }
 
