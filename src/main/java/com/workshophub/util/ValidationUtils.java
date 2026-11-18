@@ -18,6 +18,7 @@ public final class ValidationUtils {
      * - Exactly 10 digits
      * - Numeric characters only
      * - Starts with 6, 7, 8, or 9
+     * - Gracefully cleans +91, 91, 0, spaces, and hyphens
      */
     public static String validateAndCleanIndianPhone(String input) {
         if (input == null || input.trim().isEmpty()) {
@@ -28,29 +29,26 @@ public final class ValidationUtils {
 
         // Reject if letters exist
         if (trimmed.matches(".*[a-zA-Z].*")) {
-            throw new IllegalArgumentException("Phone number cannot contain letters or special characters.");
+            throw new IllegalArgumentException("Phone number cannot contain letters.");
         }
 
-        // Clean prefix if user sent with +91 or leading 0
+        // Clean prefix if user sent with +91 or leading 0, plus any spaces, hyphens, parens
         String digitsOnly = trimmed.replaceAll("\\D", "");
-        if (trimmed.startsWith("+91") && digitsOnly.length() == 12 && digitsOnly.startsWith("91")) {
+        if (digitsOnly.length() == 12 && digitsOnly.startsWith("91")) {
             digitsOnly = digitsOnly.substring(2);
-        } else if (trimmed.startsWith("0") && digitsOnly.length() == 11) {
+        } else if (digitsOnly.length() == 11 && digitsOnly.startsWith("0")) {
             digitsOnly = digitsOnly.substring(1);
         }
 
-        // Check if any non-digit special characters were inside
-        String cleanedCheck = trimmed.replaceFirst("^\\+91[\\s-]*", "").replaceFirst("^0", "");
-        if (!cleanedCheck.matches("^\\d+$")) {
-            throw new IllegalArgumentException("Phone number cannot contain letters or special characters.");
+        if (digitsOnly.length() < 10) {
+            throw new IllegalArgumentException("Phone number is too short (" + digitsOnly.length() + "/10 digits). Please enter 10 digits.");
         }
-
-        if (digitsOnly.length() != 10) {
-            throw new IllegalArgumentException("Phone number must contain exactly 10 digits.");
+        if (digitsOnly.length() > 10) {
+            throw new IllegalArgumentException("Phone number is too long (" + digitsOnly.length() + " digits). Please enter 10 digits.");
         }
 
         if (!INDIAN_PHONE_PATTERN.matcher(digitsOnly).matches()) {
-            throw new IllegalArgumentException("Please enter a valid Indian mobile number.");
+            throw new IllegalArgumentException("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.");
         }
 
         return digitsOnly;

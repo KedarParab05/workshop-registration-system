@@ -42,7 +42,7 @@ export default defineConfig({
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/workshop-registration-system-9fbd\.onrender\.com\/api\/.*/i,
+            urlPattern: /^https:\/\/.*\.onrender\.com\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',

@@ -191,7 +191,9 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
                   <label className="block font-heading font-bold text-[#101D32]">
                     Volunteer Mobile (10 Digits)
                   </label>
-                  <span className="text-[10px] text-[#101D32]/60 font-mono">Indian Format (+91)</span>
+                  <span className={`text-[10px] font-mono font-bold ${phoneNumber.replace(/\D/g, '').length === 10 ? 'text-emerald-700' : 'text-[#101D32]/60'}`}>
+                    {phoneNumber.replace(/\D/g, '').length}/10 digits
+                  </span>
                 </div>
                 <div className="relative flex items-center">
                   <span className="absolute left-3.5 text-xs font-bold text-[#101D32]/70 select-none">
@@ -199,11 +201,17 @@ export const AssignVolunteerModal: React.FC<AssignVolunteerModalProps> = ({
                   </span>
                   <input
                     type="tel"
-                    maxLength={10}
+                    maxLength={16}
                     value={phoneNumber.replace(/^\+91\s*/, '')}
                     onChange={(e) => {
-                      const onlyNums = e.target.value.replace(/\D/g, '').slice(0, 10);
-                      setPhoneNumber(onlyNums);
+                      let val = e.target.value;
+                      let digits = val.replace(/\D/g, '');
+                      if (digits.startsWith('91') && digits.length > 10) {
+                        digits = digits.substring(2);
+                      } else if (digits.startsWith('0') && digits.length > 10) {
+                        digits = digits.substring(1);
+                      }
+                      setPhoneNumber(digits.slice(0, 10));
                       if (error) setError('');
                     }}
                     placeholder="9820012345"

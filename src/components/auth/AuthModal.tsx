@@ -525,7 +525,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <label className="block text-xs font-heading font-bold text-[#101D32]">
                     Mobile Phone Number *
                   </label>
-                  <span className="text-[10px] text-[#101D32]/70 font-mono font-bold">10 digits Indian mobile</span>
+                  <span className={`text-[10px] font-mono font-bold ${phoneNumber.length === 10 ? 'text-emerald-700' : 'text-[#101D32]/70'}`}>
+                    {phoneNumber.length}/10 digits
+                  </span>
                 </div>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none text-[#101D32] font-bold text-xs">
@@ -535,11 +537,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="tel"
                     value={phoneNumber}
-                    maxLength={10}
+                    maxLength={16}
                     onChange={(e) => {
-                      // Only allow numeric input
-                      const raw = e.target.value.replace(/\D/g, '');
-                      setPhoneNumber(raw);
+                      let val = e.target.value;
+                      let digits = val.replace(/\D/g, '');
+                      // Auto-clean pasted country code +91 or 91
+                      if (digits.startsWith('91') && digits.length > 10) {
+                        digits = digits.substring(2);
+                      } else if (digits.startsWith('0') && digits.length > 10) {
+                        digits = digits.substring(1);
+                      }
+                      setPhoneNumber(digits.slice(0, 10));
                       setErrorMsg('');
                     }}
                     placeholder="9876543210"
@@ -548,7 +556,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   />
                 </div>
                 <p className="text-[10px] text-[#101D32]/70 mt-1">
-                  Must start with 6, 7, 8, or 9 and contain exactly 10 digits.
+                  Enter 10-digit mobile number (starts with 6, 7, 8, or 9).
                 </p>
               </div>
 

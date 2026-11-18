@@ -7,7 +7,7 @@
  * Validates standard Indian mobile phone numbers:
  * - Exactly 10 digits
  * - Starts with 6, 7, 8, or 9
- * - Numeric characters only (no alphabets, special characters, or internal spaces)
+ * - Numeric characters only (gracefully handles +91, 91, 0 prefixes, spaces, and hyphens)
  */
 export function validateIndianPhone(input: string): { isValid: boolean; error?: string; cleanPhone?: string } {
   if (!input || !input.trim()) {
@@ -18,31 +18,31 @@ export function validateIndianPhone(input: string): { isValid: boolean; error?: 
 
   // Check for any alphabetical characters
   if (/[a-zA-Z]/.test(trimmed)) {
-    return { isValid: false, error: 'Phone number cannot contain letters or special characters.' };
+    return { isValid: false, error: 'Phone number cannot contain letters.' };
   }
 
-  // Remove valid international prefix if user typed +91 or 91 with separator
+  // Remove valid international prefix, spaces, dashes, parens
   let digitsOnly = trimmed.replace(/\D/g, '');
 
-  if (trimmed.startsWith('+91') && digitsOnly.length === 12 && digitsOnly.startsWith('91')) {
+  // Strip country code +91 or 91 (12 digits)
+  if (digitsOnly.length === 12 && digitsOnly.startsWith('91')) {
     digitsOnly = digitsOnly.substring(2);
-  } else if (trimmed.startsWith('0') && digitsOnly.length === 11) {
+  } else if (digitsOnly.length === 11 && digitsOnly.startsWith('0')) {
+    // Strip leading 0 (11 digits)
     digitsOnly = digitsOnly.substring(1);
   }
 
-  // Reject if any non-digit special characters existed outside acceptable + prefix
-  const cleanedCheck = trimmed.replace(/^\+91[\s-]*/, '').replace(/^0/, '');
-  if (/[^0-9]/.test(cleanedCheck)) {
-    return { isValid: false, error: 'Phone number cannot contain letters or special characters.' };
+  if (digitsOnly.length < 10) {
+    return { isValid: false, error: `Phone number is too short (${digitsOnly.length}/10 digits). Please enter 10 digits.` };
   }
 
-  if (digitsOnly.length !== 10) {
-    return { isValid: false, error: 'Phone number must contain exactly 10 digits.' };
+  if (digitsOnly.length > 10) {
+    return { isValid: false, error: `Phone number is too long (${digitsOnly.length} digits). Please enter 10 digits.` };
   }
 
   const indianMobileRegex = /^[6-9]\d{9}$/;
   if (!indianMobileRegex.test(digitsOnly)) {
-    return { isValid: false, error: 'Please enter a valid Indian mobile number.' };
+    return { isValid: false, error: 'Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.' };
   }
 
   return { isValid: true, cleanPhone: digitsOnly };

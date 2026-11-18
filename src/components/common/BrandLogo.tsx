@@ -1,6 +1,9 @@
 import React from 'react';
 import { GraduationCap } from 'lucide-react';
 
+export const KAUSHALYA_LOGO_URL =
+  'https://res.cloudinary.com/dr59elrhw/image/upload/v1794634835/kessknblaoupdmy9wqgv.png';
+
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg';
   showTagline?: boolean;
