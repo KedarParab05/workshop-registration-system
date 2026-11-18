@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2e14"/>
+      <stop offset="100%" stop-color="#165a2d"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="rgba(0,0,0,0.4)"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect x="14" y="14" width="152" height="152" rx="32" ry="32" fill="url(#bg)"/>
+
+  <!-- Subtle shine overlay -->
+  <rect x="14" y="14" width="152" height="76" rx="32" ry="32" fill="url(#shine)"/>
+
+  <!-- Decorative ring -->
+  <circle cx="90" cy="90" r="65" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+
+  <!-- Letter K -->
+  <text
+    x="90"
+    y="118"
+    font-family="'Segoe UI', 'Arial Black', Arial, sans-serif"
+    font-weight="800"
+    font-size="79"
+    fill="white"
+    text-anchor="middle"
+    filter="url(#shadow)"
+    letter-spacing="-2"
+  >K</text>
+
+  <!-- Green accent dot -->
+  <circle cx="90" cy="129" r="8" fill="#4ade80"/>
+  <circle cx="90" cy="129" r="4" fill="rgba(255,255,255,0.4)"/>
+</svg>
