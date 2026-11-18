@@ -124,6 +124,9 @@ public class WorkshopService {
         if (confirmedAttendees > 0) {
             if (existing.getPricingType() != updatedData.getPricingType()) {
                 updatedData.setPricingType(existing.getPricingType());
+                if (existing.getPricingType() == PricingType.PAID && (updatedData.getPrice() == null || updatedData.getPrice() <= 0)) {
+                    updatedData.setPrice(existing.getPrice());
+                }
             }
         }
 
@@ -149,8 +152,13 @@ public class WorkshopService {
         existing.setRegistrationDeadline(updatedData.getRegistrationDeadline());
         existing.setLearningOutcomes(updatedData.getLearningOutcomes());
         existing.setStatus(updatedData.getStatus());
-        existing.setPricingType(updatedData.getPricingType());
-        existing.setPrice(updatedData.getPrice());
+        if (updatedData.getPricingType() == PricingType.FREE || (updatedData.getPrice() != null && updatedData.getPrice() == 0.0)) {
+            existing.setPricingType(PricingType.FREE);
+            existing.setPrice(0.0);
+        } else {
+            existing.setPricingType(PricingType.PAID);
+            existing.setPrice(updatedData.getPrice() != null && updatedData.getPrice() > 0 ? updatedData.getPrice() : 199.0);
+        }
         existing.setCurrency(updatedData.getCurrency() != null ? updatedData.getCurrency() : "INR");
         existing.setPayeeVpa(updatedData.getPayeeVpa());
         existing.setPayeeName(updatedData.getPayeeName());

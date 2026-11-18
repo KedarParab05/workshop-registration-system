@@ -11,6 +11,11 @@ export const BANNER_DEVOPS_DOCKER = '/assets/images/devops-docker-workshop-banne
 export const BANNER_SYSTEM_ARCH = '/assets/images/system-architecture-workshop-banner.jpg';
 
 export const normalizeBannerUrl = (url?: string, workshop?: { id?: string; title?: string }): string => {
+  // 0. If url is already a Cloudinary CDN image, HTTPS web URL, or base64 data, preserve it directly!
+  if (url && (url.includes('cloudinary.com') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:'))) {
+    return url;
+  }
+
   const title = (workshop?.title || '').toLowerCase();
   const id = (workshop?.id || '').toLowerCase();
   const u = (url || '').toLowerCase();

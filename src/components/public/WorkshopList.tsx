@@ -230,7 +230,7 @@ export const WorkshopList: React.FC = () => {
                     {workshop.category}
                   </div>
                   <div className="absolute top-3 right-3 text-[11px] font-mono font-extrabold px-2.5 py-1 rounded-md shadow-[2px_2px_0px_0px_#101D32] shrink-0 whitespace-nowrap bg-[#F4511E] text-white border border-[#101D32]">
-                    ₹{workshop.price || 199}
+                    {workshop.pricingType === 'FREE' || !workshop.price ? 'FREE' : `₹${workshop.price}`}
                   </div>
                   {seats.isFull && (
                     <div className="absolute inset-0 bg-[#101D32]/80 backdrop-blur-xs flex items-center justify-center">
