@@ -17,6 +17,7 @@ import {
   LogIn,
   UserPlus,
   ShieldAlert,
+  Shield,
   ChevronDown,
   ChevronUp,
   CheckCircle2,
@@ -1016,9 +1017,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {/* ─────────────────────────────────────────────────────────────
-              EVALUATOR QUICK ACCESS (STUDENT PERSONAS)
+              EVALUATOR QUICK ACCESS — ADMIN + STUDENT PERSONAS
           ───────────────────────────────────────────────────────────── */}
-          <div className="mt-5 pt-4 border-t-2 border-[#101D32] space-y-2">
+          <div className="mt-5 pt-4 border-t-2 border-[#101D32] space-y-3">
+            {/* Platform Administrator credentials card */}
+            <div className="rounded-xl border-2 border-[#F4511E] bg-[#FFF5E9] p-3 flex items-start gap-3 shadow-[2px_2px_0px_#101D32]">
+              <div className="mt-0.5 w-8 h-8 rounded-lg bg-[#F4511E] border-2 border-[#101D32] flex items-center justify-center flex-shrink-0">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] font-heading font-extrabold uppercase tracking-wider text-[#101D32]">Platform Administrator</span>
+                  <span className="text-[9px] font-mono font-bold bg-[#F4511E] text-white px-1.5 py-0.5 rounded border border-[#101D32]">ADMIN</span>
+                </div>
+                <div className="space-y-0.5">
+                  <div className="text-[10px] font-mono text-[#101D32]/80">
+                    <span className="font-bold text-[#101D32]">ID:</span> admin@workshophub.edu
+                  </div>
+                  <div className="text-[10px] font-mono text-[#101D32]/80">
+                    <span className="font-bold text-[#101D32]">Pass:</span> Admin@Kaushalya2026
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@workshophub.edu');
+                  setPassword('Admin@Kaushalya2026');
+                  setMode('login');
+                  setErrorMsg('');
+                }}
+                className="flex-shrink-0 self-center px-3 py-1.5 text-[10px] font-heading font-bold text-[#101D32] bg-white hover:bg-[#FFD6B0] border-2 border-[#101D32] rounded-lg shadow-[1px_1px_0px_#101D32] active:shadow-none active:translate-x-px active:translate-y-px transition-all cursor-pointer"
+              >
+                Fill Form
+              </button>
+            </div>
+
+            {/* Student Personas header */}
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-heading font-extrabold uppercase tracking-wider text-[#101D32] flex items-center gap-1.5">
                 <KeyRound className="w-3.5 h-3.5 text-[#F4511E]" />
