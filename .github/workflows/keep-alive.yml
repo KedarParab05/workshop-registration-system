@@ -18,7 +18,7 @@ jobs:
       - name: Ping Workshop Hub API
         run: |
           echo "Sending keep-alive ping to Render backend..."
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "https://kaushalya-oauu.onrender.com/api/workshops" || true)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "https://workshop-registration-system-9fbd.onrender.com/api/workshops" || true)
           echo "Render Backend HTTP Status: $STATUS"
           if [ "$STATUS" = "200" ]; then
             echo "Backend is healthy and warm!"

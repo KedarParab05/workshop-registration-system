@@ -3,7 +3,7 @@
  * Automatically attaches JWT Bearer token from localStorage.
  */
 
-const RENDER_BACKEND_URL = 'https://kaushalya-oauu.onrender.com';
+const RENDER_BACKEND_URL = 'https://workshop-registration-system-9fbd.onrender.com';
 
 export const getApiBase = (): string => {
   const envBase = (import.meta.env.VITE_API_BASE || '').trim();
