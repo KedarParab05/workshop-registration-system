@@ -582,21 +582,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         </p>
                       </div>
                     </div>
-                    <div className="p-2.5 bg-white/70 border border-emerald-700/30 rounded-lg text-[11px] text-emerald-900 leading-normal">
-                      <strong>Didn't receive it?</strong> Check your spam/junk folder. The verification link is valid for 1 hour.
+                    <div className="p-2.5 bg-amber-50 border border-amber-600/40 rounded-lg text-[11px] text-amber-950 leading-relaxed font-sans">
+                      <strong className="text-amber-900 font-bold block mb-0.5">&#9888; Don't see it in your Inbox?</strong>
+                      Please check your <strong>Spam / Junk</strong> folder or <strong>Promotions</strong> tab. Automated verification links can sometimes be filtered there by Gmail.
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('login');
-                      setErrorMsg('');
-                    }}
-                    className="w-full py-2.5 bg-white hover:bg-[#FFD6B0] text-[#101D32] font-heading font-bold text-xs rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all cursor-pointer"
-                  >
-                    Back to Sign In
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForgotSuccessMsg('');
+                      }}
+                      className="flex-1 py-2.5 bg-[#FFD6B0] hover:bg-[#ffc490] text-[#101D32] font-heading font-bold text-xs rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all cursor-pointer text-center"
+                    >
+                      Resend Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('login');
+                        setErrorMsg('');
+                        setForgotSuccessMsg('');
+                      }}
+                      className="flex-1 py-2.5 bg-white hover:bg-[#FFF5E9] text-[#101D32] font-heading font-bold text-xs rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all cursor-pointer text-center"
+                    >
+                      Back to Sign In
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <>

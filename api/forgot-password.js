@@ -17,7 +17,6 @@ async function getDb() {
 }
 
 export default async function handler(req, res) {
-  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -72,60 +71,66 @@ export default async function handler(req, res) {
     const resetUrl = `${baseUrl.replace(/\/+$/, '')}/?resetToken=${token}&email=${encodeURIComponent(user.email)}`;
 
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
+      service: 'gmail',
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS
       }
     });
 
-    const recipientName = user.fullName || 'Learner';
+    const recipientName = user.fullName || 'User';
 
-    const htmlContent = `
+    const textBody = `Hello ${recipientName},
+
+A password reset request was made for your Kaushalya Workshop account (${user.email}).
+
+To set a new password, open this secure link in your browser:
+${resetUrl}
+
+This link is valid for 1 hour. If you did not make this request, you can ignore this email.
+
+Best regards,
+Kaushalya Academic Skills & Workshop Hub`;
+
+    const htmlBody = `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Password Reset</title>
+    <title>Reset Your Password</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #FFF5E9; padding: 24px; color: #101D32; margin: 0;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; background: #ffffff; border: 2px solid #101D32; border-radius: 16px; box-shadow: 6px 6px 0px #101D32; overflow: hidden;">
+<body style="font-family: Arial, sans-serif; background-color: #FFF5E9; padding: 20px; color: #101D32; margin: 0;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 580px; margin: 0 auto; background: #ffffff; border: 2px solid #101D32; border-radius: 14px; box-shadow: 4px 4px 0px #101D32;">
         <tr>
-            <td style="background-color: #F4511E; padding: 28px 24px; text-align: center; border-bottom: 2px solid #101D32;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Kaushalya</h1>
-                <p style="color: #FFF5E9; margin: 6px 0 0; font-size: 13px; font-weight: bold; letter-spacing: 0.5px;">Academic Skills & Workshop Hub</p>
+            <td style="background-color: #F4511E; padding: 22px; text-align: center; border-radius: 12px 12px 0 0;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Kaushalya</h1>
+                <p style="color: #FFF5E9; margin: 4px 0 0; font-size: 13px;">Workshop Registration Hub</p>
             </td>
         </tr>
         <tr>
-            <td style="padding: 36px 32px;">
-                <h2 style="font-size: 20px; font-weight: 800; color: #101D32; margin-top: 0; margin-bottom: 12px;">
-                    Password Reset Request
-                </h2>
-                <p style="font-size: 14px; line-height: 1.6; color: #101D32; margin-bottom: 20px;">
-                    Hello <strong>${recipientName}</strong>,
+            <td style="padding: 28px 24px;">
+                <h2 style="font-size: 18px; color: #101D32; margin-top: 0;">Password Reset Verification</h2>
+                <p style="font-size: 14px; line-height: 1.5; color: #101D32;">Hello <strong>${recipientName}</strong>,</p>
+                <p style="font-size: 14px; line-height: 1.5; color: #334155;">
+                    We received a request to reset your password for account <strong>${user.email}</strong>. Click the link below to choose a new password:
                 </p>
-                <p style="font-size: 14px; line-height: 1.6; color: #334155; margin-bottom: 24px;">
-                    We received a request to reset the password for your Kaushalya account associated with <strong>${user.email}</strong>. Click the button below to verify your account and set a new password:
-                </p>
-                <div style="text-align: center; margin: 32px 0;">
-                    <a href="${resetUrl}" style="background-color: #F4511E; color: #ffffff; padding: 14px 32px; font-size: 14px; font-weight: 800; text-decoration: none; border-radius: 12px; border: 2px solid #101D32; box-shadow: 4px 4px 0px #101D32; display: inline-block;">
+                <div style="text-align: center; margin: 28px 0;">
+                    <a href="${resetUrl}" style="background-color: #F4511E; color: #ffffff; padding: 12px 28px; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 8px; border: 2px solid #101D32; display: inline-block;">
                         Reset My Password &rarr;
                     </a>
                 </div>
-                <div style="background-color: #FFF5E9; border: 2px solid #101D32; border-radius: 10px; padding: 14px 16px; margin: 24px 0; font-size: 12px; line-height: 1.5; color: #101D32;">
-                    <strong>&#9888; Security Notice:</strong> This reset link will automatically expire in <strong>1 hour</strong>. If you did not request a password reset, you can safely disregard this email &mdash; your existing password remains safe and unchanged.
-                </div>
-                <p style="font-size: 12px; color: #64748B; line-height: 1.5; margin-top: 24px; word-break: break-all;">
-                    If the button above does not work, copy and paste this link into your web browser:<br>
-                    <a href="${resetUrl}" style="color: #F4511E; text-decoration: underline;">${resetUrl}</a>
+                <p style="font-size: 12px; color: #64748B; line-height: 1.5; word-break: break-all;">
+                    Or copy-paste this direct URL into your browser:<br>
+                    <a href="${resetUrl}" style="color: #F4511E;">${resetUrl}</a>
                 </p>
+                <div style="background-color: #FFF5E9; border: 1px solid #101D32; border-radius: 8px; padding: 12px; margin-top: 20px; font-size: 12px; color: #101D32;">
+                    <strong>Security Note:</strong> This reset link will expire in <strong>1 hour</strong>. If you did not request this, you can safely ignore this email.
+                </div>
             </td>
         </tr>
         <tr>
-            <td style="background-color: #101D32; padding: 18px 24px; text-align: center; color: #FFF5E9; font-size: 11px;">
-                &copy; 2026 Kaushalya Academic Hub. All rights reserved.
+            <td style="background-color: #101D32; padding: 14px; text-align: center; color: #FFF5E9; font-size: 11px; border-radius: 0 0 12px 12px;">
+                Kaushalya Academic Hub &copy; 2026
             </td>
         </tr>
     </table>
@@ -133,16 +138,20 @@ export default async function handler(req, res) {
 </html>
     `;
 
-    await transporter.sendMail({
-      from: `"Kaushalya Academic Workshops" <${SMTP_USER}>`,
+    const mailResult = await transporter.sendMail({
+      from: `"Kaushalya Hub" <${SMTP_USER}>`,
+      replyTo: SMTP_USER,
       to: user.email,
       subject: 'Reset Your Kaushalya Account Password',
-      html: htmlContent
+      text: textBody,
+      html: htmlBody
     });
+
+    console.log('[ForgotPassword] Mail sent successfully:', mailResult.messageId, 'response:', mailResult.response);
 
     return res.status(200).json({
       success: true,
-      message: `A password reset link has been dispatched to ${user.email}. Please check your email inbox to reset your password.`
+      message: `A password reset link has been dispatched to ${user.email}. Please check your email inbox (and Spam/Junk folder) to reset your password.`
     });
   } catch (err) {
     console.error('Error handling forgot-password:', err);
