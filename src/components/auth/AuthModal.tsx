@@ -348,28 +348,53 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         return;
       }
 
-      // 2. Generate secure reset verification token
-      const token = 'rst_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      const resetLink = `${window.location.origin}/?resetToken=${token}&email=${encodeURIComponent(targetEmail)}`;
+      // 2. Dispatch password reset email via server
+      let dispatched = false;
+      let serverErrorMsg = '';
 
-      // Try server endpoint
+      // Try primary route
       try {
-        await apiFetch('/api/auth/forgot-password', {
+        const res = await fetch('/api/auth/forgot-password', {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: targetEmail }),
         });
-      } catch {}
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+          dispatched = true;
+        } else if (data.error) {
+          serverErrorMsg = data.error;
+        }
+      } catch (e) {
+        console.warn('Primary forgot-password route error:', e);
+      }
 
-      // Store pending reset token locally for verification
-      localStorage.setItem(`wh_reset_${targetEmail}`, JSON.stringify({
-        token,
-        email: targetEmail,
-        expiresAt: Date.now() + 3600000,
-      }));
+      // Fallback to direct serverless route if needed
+      if (!dispatched) {
+        try {
+          const res2 = await fetch('/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: targetEmail }),
+          });
+          const data2 = await res2.json().catch(() => ({}));
+          if (res2.ok && data2.success) {
+            dispatched = true;
+          } else if (data2.error) {
+            serverErrorMsg = data2.error;
+          }
+        } catch (e2) {
+          console.warn('Direct serverless forgot-password route error:', e2);
+        }
+      }
 
-      setForgotSuccessMsg(
-        `We've dispatched a secure password reset link to ${targetEmail}. Please open your email inbox and click the verification link to choose a new password.`
-      );
+      if (dispatched) {
+        setForgotSuccessMsg(
+          `We've dispatched a secure password reset link to ${targetEmail}. Please open your email inbox and click the verification link to choose a new password.`
+        );
+      } else {
+        setErrorMsg(serverErrorMsg || 'Failed to dispatch password reset email. Please try again.');
+      }
     } catch {
       setErrorMsg('Failed to process password reset. Please try again.');
     } finally {

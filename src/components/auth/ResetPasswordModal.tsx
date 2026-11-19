@@ -68,16 +68,55 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
       const cleanEmail = email.trim().toLowerCase();
 
       // 1. Send update request to server endpoint
+      let updated = false;
+      let serverErrorMsg = '';
+
       try {
-        await apiFetch('/api/auth/reset-password', {
+        const res = await fetch('/api/auth/reset-password', {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             token,
             email: cleanEmail,
             newPassword: password,
           }),
         });
-      } catch {}
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+          updated = true;
+        } else if (data.error) {
+          serverErrorMsg = data.error;
+        }
+      } catch (e) {
+        console.warn('Primary reset-password error:', e);
+      }
+
+      if (!updated) {
+        try {
+          const res2 = await fetch('/api/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              token,
+              email: cleanEmail,
+              newPassword: password,
+            }),
+          });
+          const data2 = await res2.json().catch(() => ({}));
+          if (res2.ok && data2.success) {
+            updated = true;
+          } else if (data2.error) {
+            serverErrorMsg = data2.error;
+          }
+        } catch (e2) {
+          console.warn('Direct reset-password error:', e2);
+        }
+      }
+
+      if (!updated && serverErrorMsg) {
+        setErrorMsg(serverErrorMsg);
+        return;
+      }
 
       // 2. Persist new password into database storage in place of old data
       try {
