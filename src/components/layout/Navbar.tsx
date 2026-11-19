@@ -201,7 +201,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {currentUser?.role === 'ORGANIZER' && (
+          {(currentUser?.role === 'ORGANIZER' || currentUser?.role === 'SUPER_ADMIN') && (
             <button
               onClick={() => navigateTo('organizer-dashboard')}
               className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
@@ -537,7 +537,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               )}
 
-              {currentUser?.role === 'ORGANIZER' && (
+              {(currentUser?.role === 'ORGANIZER' || currentUser?.role === 'SUPER_ADMIN') && (
                 <button
                   onClick={() => {
                     navigateTo('organizer-dashboard');

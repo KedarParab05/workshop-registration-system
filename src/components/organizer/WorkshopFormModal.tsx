@@ -80,59 +80,116 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
     razorpayKeyId: '',
   });
 
-  const [bannerTab, setBannerTab] = useState<'preset' | 'upload' | 'url'>('preset');
+  const [bannerTab, setBannerTab] = useState<'upload' | 'preset' | 'url'>('upload');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Process and optimize image file from user's local folder to lightweight sharp data URL
+  const processImageFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (readerEvent) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDimension = 1000;
 
+          if (width > height && width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(readerEvent.target?.result as string);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const optimized = canvas.toDataURL('image/jpeg', 0.82);
+          resolve(optimized);
+        };
+        img.onerror = () => resolve(readerEvent.target?.result as string);
+        img.src = readerEvent.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleDirectFile = async (file: File) => {
     setUploadError('');
     setUploadSuccess(false);
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      setUploadError('Invalid format. Please select a JPG, PNG, or WebP image.');
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Invalid format. Please select an image file (JPG, PNG, WebP, GIF, SVG).');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError('File size exceeds 5MB limit. Please select a smaller image.');
+    if (file.size > 20 * 1024 * 1024) {
+      setUploadError('File size exceeds 20MB limit. Please select a smaller image.');
       return;
     }
 
     setIsUploading(true);
     try {
-      const data = new FormData();
-      data.append('file', file);
-      data.append('folder', 'workshops');
+      // 1. Process directly from local device folder into optimized display URL
+      const localDataUrl = await processImageFile(file);
 
-      const res = await apiFetch('/api/uploads/image', {
-        method: 'POST',
-        body: data,
-      });
+      setFormData((prev) => ({
+        ...prev,
+        bannerImageUrl: localDataUrl,
+        bannerImagePublicId: file.name,
+      }));
+      setUploadSuccess(true);
+      setIsUploading(false);
+      showAlert(`Image "${file.name}" loaded successfully from folder!`, 'success');
 
-      const json = await res.json();
-      if (res.ok && json.success && json.url) {
-        setFormData((prev) => ({
-          ...prev,
-          bannerImageUrl: json.url,
-          bannerImagePublicId: json.publicId,
-        }));
-        setUploadSuccess(true);
-        showAlert('Banner uploaded to Cloudinary CDN successfully!', 'success');
-      } else {
-        setUploadError(json.error || 'Failed to upload image to Cloudinary.');
+      // 2. Also attempt upload to cloud service in background if available
+      try {
+        const data = new FormData();
+        data.append('file', file);
+        data.append('folder', 'workshops');
+
+        const res = await apiFetch('/api/uploads/image', {
+          method: 'POST',
+          body: data,
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          // STRICT CHECK: Only overwrite if it returned a real Cloudinary URL, NEVER fallback static image!
+          if (json.success && json.url && json.url.includes('cloudinary.com')) {
+            setFormData((prev) => ({
+              ...prev,
+              bannerImageUrl: json.url,
+              bannerImagePublicId: json.publicId || file.name,
+            }));
+          }
+        }
+      } catch {
+        // Cloud service unavailable: local image data is already active and ready to save!
       }
     } catch (err: any) {
-      setUploadError(err.message || 'Error communicating with upload service.');
-    } finally {
+      setUploadError(err.message || 'Error loading image from folder.');
       setIsUploading(false);
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await handleDirectFile(file);
   };
 
   useEffect(() => {
@@ -220,10 +277,11 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
     setErrors({});
     setIsSubmitting(true);
 
+    const isFree = formData.pricingType === 'FREE' || Number(formData.price) === 0;
     const submissionData: WorkshopFormData = {
       ...formData,
-      pricingType: formData.pricingType,
-      price: formData.pricingType === 'PAID' ? Number(formData.price) || 0 : 0,
+      pricingType: isFree ? 'FREE' : 'PAID',
+      price: isFree ? 0 : (Number(formData.price) || 0),
     };
 
     try {
@@ -411,8 +469,8 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                         : 'border-transparent text-[#101D32] hover:bg-[#FFD6B0]'
                     }`}
                   >
-                    <Cloud className="w-3 h-3" />
-                    <span>Upload to Cloud</span>
+                    <UploadCloud className="w-3 h-3" />
+                    <span>Upload from Folder</span>
                   </button>
                   <button
                     type="button"
@@ -439,19 +497,62 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                 </div>
               </div>
 
-              {/* Tab 1: Cloudinary Upload */}
+              {/* Tab 1: Local Folder Upload & Cloud Storage */}
               {bannerTab === 'upload' && (
                 <div className="space-y-3 pt-1">
                   <input
                     type="file"
                     ref={fileInputRef}
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/*"
                     onChange={handleFileUpload}
                     className="hidden"
                   />
 
-                  {formData.bannerImageUrl ? (
-                    <div className="relative rounded-xl overflow-hidden border-2 border-[#101D32] bg-[#FFF5E9] p-3 flex flex-col sm:flex-row items-center gap-3">
+                  {/* Upload Box / Action Trigger */}
+                  <div
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const droppedFile = e.dataTransfer.files?.[0];
+                      if (droppedFile) handleDirectFile(droppedFile);
+                    }}
+                    className="border-2 border-dashed border-[#101D32] rounded-xl p-5 text-center bg-[#FFF5E9]/70 hover:bg-[#FFD6B0]/40 transition-all cursor-pointer shadow-inner"
+                  >
+                    {isUploading ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="w-6 h-6 animate-spin text-[#F4511E]" />
+                        <span className="font-heading font-bold text-xs text-[#101D32]">
+                          Processing image from folder...
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 rounded-2xl bg-[#FFD6B0] border-2 border-[#101D32] shadow-[2px_2px_0px_#101D32] flex items-center justify-center">
+                          <UploadCloud className="w-6 h-6 text-[#F4511E]" />
+                        </div>
+                        <div>
+                          <p className="font-heading font-bold text-xs sm:text-sm text-[#101D32]">
+                            Click to Browse Image from Your Folder
+                          </p>
+                          <p className="text-[11px] text-[#101D32]/70 font-medium mt-0.5">
+                            Select any JPG, PNG, WebP, or GIF image from your computer or phone
+                          </p>
+                        </div>
+                        <span className="px-3 py-1 bg-white border border-[#101D32] rounded-lg text-xs font-bold text-[#101D32] shadow-[1px_1px_0px_#101D32] mt-1">
+                          📁 Browse Files...
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Image Preview if Loaded */}
+                  {formData.bannerImageUrl && (
+                    <div className="rounded-xl overflow-hidden border-2 border-[#101D32] bg-white p-3 flex flex-col sm:flex-row items-center gap-3 shadow-[2px_2px_0px_#101D32]">
                       <img
                         src={formData.bannerImageUrl}
                         alt="Current Banner"
@@ -463,59 +564,25 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                       />
                       <div className="flex-1 min-w-0 w-full space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-heading font-extrabold bg-[#FFD6B0] text-[#101D32] border border-[#101D32]">
-                            <CheckCircle2 className="w-3 h-3 text-[#F4511E]" />
-                            <span>Cloudinary CDN Active</span>
-                          </span>
-                          <span className="text-[10px] text-[#101D32]/60 font-mono">
-                            Auto format (f_auto, q_auto)
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-heading font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-600">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            <span>Active Banner Image</span>
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#101D32]/80 font-mono truncate">
-                          {formData.bannerImagePublicId || 'Custom Cloud Image'}
+                        <p className="text-[11px] text-[#101D32]/80 font-mono truncate font-bold">
+                          {formData.bannerImagePublicId || 'Custom Uploaded Image'}
                         </p>
                         <div className="pt-1 flex items-center gap-2">
                           <button
                             type="button"
                             disabled={isUploading}
                             onClick={() => fileInputRef.current?.click()}
-                            className="px-2.5 py-1 rounded-md bg-white border border-[#101D32] text-[11px] font-heading font-bold text-[#101D32] hover:bg-[#FFD6B0] shadow-[1px_1px_0px_#101D32] cursor-pointer"
+                            className="px-2.5 py-1 rounded-md bg-[#FFF5E9] border border-[#101D32] text-[11px] font-heading font-bold text-[#101D32] hover:bg-[#FFD6B0] shadow-[1px_1px_0px_#101D32] cursor-pointer"
                           >
-                            Replace Image
+                            Replace with Another Image
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => !isUploading && fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-[#101D32] rounded-xl p-5 text-center bg-[#FFF5E9]/50 hover:bg-[#FFD6B0]/30 transition-colors cursor-pointer"
-                    >
-                      {isUploading ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="w-6 h-6 animate-spin text-[#F4511E]" />
-                          <span className="font-heading font-bold text-xs text-[#101D32]">
-                            Uploading to Cloudinary CDN...
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-1.5">
-                          <UploadCloud className="w-7 h-7 text-[#F4511E]" />
-                          <p className="font-heading font-bold text-xs text-[#101D32]">
-                            Click or drag to upload custom workshop banner
-                          </p>
-                          <p className="text-[10px] text-[#101D32]/60 font-medium">
-                            Supported: JPG, PNG, WebP · Maximum size: 5MB
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {isUploading && (
-                    <div className="flex items-center gap-2 p-2 bg-[#FFD6B0] border border-[#101D32] rounded-lg text-xs font-bold text-[#101D32]">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#F4511E]" />
-                      <span>Uploading to Cloudinary CDN and generating responsive delivery URLs...</span>
                     </div>
                   )}
 
@@ -826,33 +893,25 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                 </span>
               </div>
 
-              {/* Pricing Lock Warning */}
-              {workshopToEdit && registrations.some(r => r.workshopId === workshopToEdit.id && (r.status === 'CONFIRMED' || r.status === 'ATTENDED')) && (
-                <div className="flex items-start gap-2 p-3 bg-[#FFD6B0] border-2 border-[#101D32] rounded-xl text-xs text-[#101D32] font-medium">
-                  <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#F4511E]" />
-                  <span>Pricing is locked because participants have already registered. Create a new session to change pricing.</span>
-                </div>
-              )}
-
               {/* Free / Paid Toggle */}
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, pricingType: 'FREE', price: 0 })}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-heading font-bold border-2 border-[#101D32] transition-all ${
+                  className={`flex-1 py-3 rounded-xl text-xs font-heading font-extrabold border-2 border-[#101D32] transition-all cursor-pointer ${
                     formData.pricingType === 'FREE'
-                      ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
+                      ? 'bg-[#F4511E] text-white shadow-[3px_3px_0px_0px_#101D32]'
                       : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
                   }`}
                 >
-                  🎁 Free Workshop
+                  🎁 Free Workshop (₹0)
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, pricingType: 'PAID', price: formData.price > 0 ? formData.price : 199 })}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-heading font-bold border-2 border-[#101D32] transition-all ${
+                  className={`flex-1 py-3 rounded-xl text-xs font-heading font-extrabold border-2 border-[#101D32] transition-all cursor-pointer ${
                     formData.pricingType === 'PAID'
-                      ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
+                      ? 'bg-[#F4511E] text-white shadow-[3px_3px_0px_0px_#101D32]'
                       : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
                   }`}
                 >
@@ -862,10 +921,11 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
 
               {/* Free Workshop Info */}
               {formData.pricingType === 'FREE' && (
-                <div className="flex items-start gap-2 p-3 bg-[#FFF5E9] border-2 border-[#101D32] rounded-xl text-xs text-[#101D32] font-medium">
-                  <Check className="w-4 h-4 shrink-0 mt-0.5 text-[#F4511E]" />
+                <div className="flex items-start gap-2.5 p-3.5 bg-emerald-50 border-2 border-emerald-700 text-emerald-950 rounded-xl text-xs font-medium shadow-[2px_2px_0px_#101D32]">
+                  <Check className="w-4 h-4 shrink-0 mt-0.5 text-emerald-700" />
                   <div>
-                    <strong>Free Enrollment</strong>: Participants can register instantly at no cost. No payment gateway required.
+                    <strong className="text-emerald-900 block font-bold">Free Enrollment Active</strong>
+                    Participants can RSVP and reserve seats instantly at no cost. Digital QR entry pass will be generated immediately without payment gateway.
                   </div>
                 </div>
               )}

@@ -29,6 +29,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/workshops/save",
+      "destination": "/api/save-workshop"
+    },
+    {
       "source": "/api/auth/forgot-password",
       "destination": "/api/forgot-password"
     },

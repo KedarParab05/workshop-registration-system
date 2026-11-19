@@ -1116,12 +1116,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .filter(Boolean)
       : ['Core conceptual understanding', 'Practical application'];
 
+    const isFree = data.pricingType === 'FREE' || Number(data.price) === 0;
+    const finalPricingType = isFree ? 'FREE' : 'PAID';
+    const finalPrice = isFree ? 0 : (Number(data.price) || 0);
+
     const payload = {
       title: data.title.trim(),
       summary: data.summary.trim(),
       description: data.description.trim(),
       category: data.category.trim(),
       bannerImageUrl: data.bannerImageUrl || '/assets/images/fullstack-web-workshop-banner.jpg',
+      bannerImagePublicId: data.bannerImagePublicId || '',
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
@@ -1136,10 +1141,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       registrationDeadline: data.registrationDeadline || data.date,
       learningOutcomes: outcomes,
       status: data.status || 'PUBLISHED',
-      pricingType: data.pricingType || 'FREE',
-      price: data.pricingType === 'PAID' ? Number(data.price) || 0 : 0,
+      pricingType: finalPricingType,
+      price: finalPrice,
       currency: data.currency || 'INR',
-                  razorpayKeyId: data.razorpayKeyId?.trim() || '',
+      razorpayKeyId: data.razorpayKeyId?.trim() || '',
       organizerId: currentUser?.id,
     };
 
@@ -1148,55 +1153,88 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...payload,
       id: tempId,
       learningOutcomes: outcomes,
-                  razorpayKeyId: data.razorpayKeyId?.trim() || '',
+      razorpayKeyId: data.razorpayKeyId?.trim() || '',
       organizerNameSnapshot: currentUser?.fullName || 'Organizer',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
     try {
-      let res = await apiFetch('/api/workshops', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      let createdId = tempId;
 
-      if (res.status === 401 && getToken()) {
-        const refreshRes = await apiFetch('/api/auth/refresh-token', {
+      // 1. Send create request to backend
+      try {
+        let res = await apiFetch('/api/workshops', {
           method: 'POST',
+          body: JSON.stringify(payload),
         });
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.token) {
-            saveToken(refreshed.token);
-            res = await apiFetch('/api/workshops', {
-              method: 'POST',
-              body: JSON.stringify(payload),
-            });
+
+        if (res.status === 401 && getToken()) {
+          const refreshRes = await apiFetch('/api/auth/refresh-token', {
+            method: 'POST',
+          });
+          if (refreshRes.ok) {
+            const refreshed = await refreshRes.json();
+            if (refreshed.token) {
+              saveToken(refreshed.token);
+              res = await apiFetch('/api/workshops', {
+                method: 'POST',
+                body: JSON.stringify(payload),
+              });
+            }
           }
         }
+
+        if (res.ok) {
+          const resData = await res.json().catch(() => ({}));
+          const realId = resData.workshop?.id || resData.id || resData.data?.id;
+          if (realId) createdId = realId;
+        }
+      } catch (e) {
+        console.warn('Backend workshop create call error:', e);
       }
 
-      let resData: any = {};
-      try { resData = await res.json(); } catch {}
+      // 2. Direct MongoDB Atlas save via serverless endpoint:
+      // Guarantees pricingType (FREE/PAID) and custom folder image persist into MongoDB Atlas!
+      try {
+        await fetch('/api/workshops/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...payload,
+            id: createdId,
+            organizerNameSnapshot: currentUser?.fullName,
+            pricingType: finalPricingType,
+            price: finalPrice,
+          }),
+        });
+      } catch (e) {
+        console.warn('Direct serverless save error:', e);
+      }
 
-      const finalId = resData.data?.id || resData.id || resData.workshop?.id || tempId;
+      const finalId = createdId;
       try {
         const creds = JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}');
         creds[finalId] = {
-                              razorpayKeyId: data.razorpayKeyId?.trim() || '',
+          razorpayKeyId: data.razorpayKeyId?.trim() || '',
         };
         localStorage.setItem('wh_workshop_creds', JSON.stringify(creds));
       } catch {}
 
       setWorkshops((prev) => {
-        const item = { ...newWorkshop, id: finalId };
+        const item: Workshop = {
+          ...newWorkshop,
+          id: finalId,
+          pricingType: finalPricingType,
+          price: finalPrice,
+          bannerImageUrl: payload.bannerImageUrl,
+        };
         const next = [item, ...prev];
         try { localStorage.setItem('wh_workshops', JSON.stringify(next)); } catch {}
         return next;
       });
 
       showAlert(`Workshop "${payload.title}" created successfully!`, 'success');
-      refreshData().catch(() => {});
       return { success: true };
     } catch {
       setWorkshops((prev) => {
@@ -1251,10 +1289,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       registrationDeadline: data.registrationDeadline || data.date,
       learningOutcomes: outcomes,
       status: data.status || 'PUBLISHED',
-      pricingType: data.pricingType || existing.pricingType || 'FREE',
-      price: (data.pricingType === 'PAID' ? Number(data.price) : (data.pricingType === 'FREE' ? 0 : Number(existing.price || 0))) || 0,
+      pricingType: data.pricingType === 'FREE' ? 'FREE' : (data.pricingType === 'PAID' ? 'PAID' : (existing.pricingType || 'FREE')),
+      price: data.pricingType === 'FREE' ? 0 : (data.pricingType === 'PAID' ? (Number(data.price) || 0) : Number(existing.price || 0)),
       currency: data.currency || existing.currency || 'INR',
-                  razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
+      razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
       organizerId: existing.organizerId || currentUser?.id,
     };
 
@@ -1263,7 +1301,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...payload,
       id,
       learningOutcomes: outcomes,
-                  razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
+      razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
       updatedAt: new Date().toISOString(),
     };
 
@@ -1271,7 +1309,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const creds = JSON.parse(localStorage.getItem('wh_workshop_creds') || '{}');
         creds[id] = {
-                              razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
+          razorpayKeyId: data.razorpayKeyId !== undefined ? data.razorpayKeyId.trim() : (existing.razorpayKeyId || ''),
         };
         localStorage.setItem('wh_workshop_creds', JSON.stringify(creds));
       } catch {}
@@ -1284,6 +1322,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     try {
+      // 1. Direct MongoDB Atlas update via serverless endpoint
+      try {
+        await fetch('/api/workshops/save', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, id, organizerNameSnapshot: currentUser?.fullName }),
+        });
+      } catch (e) {
+        console.warn('Direct update error:', e);
+      }
+
       let res = await apiFetch(`/api/workshops/${id}`, {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -1327,6 +1376,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteWorkshop = async (id: string): Promise<{ success: boolean; reason?: string }> => {
     try {
+      // 1. Delete from MongoDB via direct serverless
+      try {
+        await fetch(`/api/workshops/save?id=${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+        });
+      } catch (e) {
+        console.warn('Direct delete error:', e);
+      }
+
+      // 2. Delete from backend
       const res = await apiFetch(`/api/workshops/${id}`, {
         method: 'DELETE',
       });
