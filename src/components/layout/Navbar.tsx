@@ -10,6 +10,7 @@ import {
   PlusCircle,
   User as UserIcon,
   ShieldAlert,
+  Shield,
   GraduationCap,
   Scan,
   QrCode,
@@ -19,6 +20,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface NavbarProps {
   onOpenAuth: () => void;
+  onOpenAdminAuth?: () => void;
   onOpenRoleSelector?: () => void;
   onOpenProfile?: () => void;
   onOpenContact?: () => void;
@@ -26,6 +28,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth,
+  onOpenAdminAuth,
   onOpenRoleSelector,
   onOpenProfile,
 }) => {
@@ -374,7 +377,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           ) : (
             /* Unauthenticated Buttons */
-            <div className="hidden sm:flex items-center gap-2.5">
+            <div className="hidden sm:flex items-center gap-2">
+              <button
+                onClick={onOpenAdminAuth}
+                className="px-3.5 py-2 text-xs font-heading font-bold text-[#101D32] bg-white hover:bg-[#FFD6B0] rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] flex items-center gap-1.5 transition-all neo-btn cursor-pointer"
+                title="Super Admin Portal"
+              >
+                <Shield className="w-3.5 h-3.5 text-[#F4511E]" />
+                <span>Admin</span>
+              </button>
               <button
                 onClick={onOpenAuth}
                 className="px-4 py-2 text-sm font-heading font-bold text-[#101D32] hover:bg-[#FFD6B0] rounded-xl transition-colors cursor-pointer"
@@ -547,6 +558,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* Mobile Auth CTAs if not logged in */}
               {!currentUser && !currentVolunteer && (
                 <div className="pt-3 border-t-2 border-[#101D32]/15 flex flex-col gap-2">
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenAdminAuth?.();
+                    }}
+                    className="w-full py-2.5 text-center font-bold text-[#101D32] bg-[#FFF5E9] hover:bg-[#FFD6B0] border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Shield className="w-4 h-4 text-[#F4511E]" />
+                    <span>Admin Portal</span>
+                  </button>
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);

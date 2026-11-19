@@ -13,6 +13,7 @@ import { WorkshopDetail } from './components/public/WorkshopDetail';
 import { OurStoryPage } from './components/public/OurStoryPage';
 import { ContactPage } from './components/public/ContactPage';
 import { AuthModal } from './components/auth/AuthModal';
+import { AdminAuthModal } from './components/auth/AdminAuthModal';
 import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { RoleSelectorModal } from './components/common/RoleSelectorModal';
 import { ProfileModal } from './components/common/ProfileModal';
@@ -28,6 +29,7 @@ import { motion, AnimatePresence } from 'motion/react';
 const MainContent: React.FC = () => {
   const { currentUser, currentVolunteer, activePage, alerts, dismissAlert } = useApp();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [authInitialRole, setAuthInitialRole] = useState<'PARTICIPANT' | 'ORGANIZER' | 'VOLUNTEER' | undefined>(undefined);
   const [authInitialEmail, setAuthInitialEmail] = useState<string | undefined>(undefined);
   const [roleModalOpen, setRoleModalOpen] = useState(false);
@@ -97,6 +99,7 @@ const MainContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[#FFF5E9] font-sans text-[#101D32] selection:bg-[#FFD6B0] selection:text-[#101D32] transition-colors duration-200 w-full max-w-full overflow-x-clip relative">
       <Navbar
         onOpenAuth={() => setAuthModalOpen(true)}
+        onOpenAdminAuth={() => setAdminModalOpen(true)}
         onOpenRoleSelector={() => setRoleModalOpen(true)}
         onOpenProfile={() => setProfileModalOpen(true)}
       />
@@ -148,6 +151,10 @@ const MainContent: React.FC = () => {
         onClose={() => setAuthModalOpen(false)}
         initialRole={authInitialRole}
         initialEmail={authInitialEmail}
+      />
+      <AdminAuthModal
+        isOpen={adminModalOpen}
+        onClose={() => setAdminModalOpen(false)}
       />
       <ResetPasswordModal
         isOpen={resetModalOpen}
