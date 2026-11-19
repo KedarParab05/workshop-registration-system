@@ -29,6 +29,7 @@ const MainContent: React.FC = () => {
   const { currentUser, currentVolunteer, activePage, alerts, dismissAlert } = useApp();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authInitialRole, setAuthInitialRole] = useState<'PARTICIPANT' | 'ORGANIZER' | 'VOLUNTEER' | undefined>(undefined);
+  const [authInitialEmail, setAuthInitialEmail] = useState<string | undefined>(undefined);
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
@@ -142,7 +143,12 @@ const MainContent: React.FC = () => {
         onOpenRoleSelector={() => setRoleModalOpen(true)}
       />
 
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialRole={authInitialRole} />
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialRole={authInitialRole}
+        initialEmail={authInitialEmail}
+      />
       <ResetPasswordModal
         isOpen={resetModalOpen}
         token={resetToken}
@@ -151,9 +157,10 @@ const MainContent: React.FC = () => {
           setResetModalOpen(false);
           window.history.replaceState({}, document.title, window.location.pathname);
         }}
-        onSuccess={() => {
+        onSuccess={(email) => {
           setResetModalOpen(false);
           window.history.replaceState({}, document.title, window.location.pathname);
+          setAuthInitialEmail(email);
           setAuthModalOpen(true);
         }}
       />

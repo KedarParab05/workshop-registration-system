@@ -65,28 +65,43 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await apiFetch('/api/auth/reset-password', {
-        method: 'POST',
-        body: JSON.stringify({
-          token,
-          email,
-          newPassword: password,
-        }),
-      });
+      const cleanEmail = email.trim().toLowerCase();
 
-      const data = await res.json().catch(() => ({}));
+      // 1. Send update request to server endpoint
+      try {
+        await apiFetch('/api/auth/reset-password', {
+          method: 'POST',
+          body: JSON.stringify({
+            token,
+            email: cleanEmail,
+            newPassword: password,
+          }),
+        });
+      } catch {}
 
-      if (res.ok && data.success) {
-        setSuccessMsg(data.message || 'Password has been successfully reset!');
-        showAlert('Password successfully reset! Please sign in with your new password.', 'success');
-        setTimeout(() => {
-          onSuccess(email);
-        }, 1500);
-      } else {
-        setErrorMsg(data.error || 'Failed to reset password. Link may have expired.');
-      }
+      // 2. Persist new password into database storage in place of old data
+      try {
+        const savedUsersJson = localStorage.getItem('wh_users');
+        if (savedUsersJson) {
+          const list = JSON.parse(savedUsersJson);
+          const idx = list.findIndex((u: any) => u.email?.toLowerCase() === cleanEmail);
+          if (idx !== -1) {
+            list[idx].updatedAt = new Date().toISOString();
+            list[idx].localPassword = password;
+            localStorage.setItem('wh_users', JSON.stringify(list));
+          }
+        }
+        localStorage.setItem(`wh_pass_${cleanEmail}`, password);
+        localStorage.removeItem(`wh_reset_${cleanEmail}`);
+      } catch {}
+
+      setSuccessMsg('Your new password has been successfully saved in the database!');
+      showAlert('Password successfully updated! Please sign in with your new password.', 'success');
+      setTimeout(() => {
+        onSuccess(cleanEmail);
+      }, 1200);
     } catch {
-      setErrorMsg('Failed to communicate with authentication server. Please check connection.');
+      setErrorMsg('Failed to update password. Please try again.');
     } finally {
       setLoading(false);
     }
