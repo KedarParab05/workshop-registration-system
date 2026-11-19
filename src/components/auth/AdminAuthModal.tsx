@@ -117,7 +117,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -133,7 +133,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose 
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full max-w-md bg-[#FFF5E9] border-3 border-[#101D32] rounded-3xl shadow-[8px_8px_0px_#101D32] overflow-hidden z-10"
+          className="relative w-full max-w-md bg-[#FFF5E9] border-2 sm:border-3 border-[#101D32] rounded-2xl sm:rounded-3xl shadow-[4px_4px_0px_#101D32] sm:shadow-[8px_8px_0px_#101D32] overflow-hidden z-10 my-auto"
         >
           {/* Top Admin Security Header Banner */}
           <div className="bg-[#101D32] text-white p-5 border-b-3 border-[#101D32] relative">

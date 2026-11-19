@@ -151,7 +151,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -166,7 +166,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-[8px_8px_0px_0px_#101D32] border-2 border-[#101D32] z-10 text-xs text-[#101D32] my-auto"
+          className="relative bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-5 sm:p-8 shadow-[4px_4px_0px_0px_#101D32] sm:shadow-[8px_8px_0px_0px_#101D32] border-2 border-[#101D32] z-10 text-xs text-[#101D32] my-auto"
         >
           {/* Close Button */}
           <button
