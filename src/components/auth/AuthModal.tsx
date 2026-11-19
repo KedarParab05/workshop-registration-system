@@ -368,9 +368,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }));
 
       setForgotSuccessMsg(
-        `Registered user verified in database! A password reset verification link has been generated for ${targetEmail}.`
+        `We've dispatched a secure password reset link to ${targetEmail}. Please open your email inbox and click the verification link to choose a new password.`
       );
-      setDirectResetUrl(resetLink);
     } catch {
       setErrorMsg('Failed to process password reset. Please try again.');
     } finally {
@@ -546,38 +545,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               {forgotSuccessMsg ? (
                 <div className="space-y-3">
-                  <div className="p-3.5 bg-emerald-50 border-2 border-emerald-800 text-emerald-950 text-xs font-medium rounded-xl shadow-[3px_3px_0px_0px_#101D32] space-y-2">
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <div className="p-4 bg-emerald-50 border-2 border-emerald-800 text-emerald-950 text-xs font-medium rounded-xl shadow-[3px_3px_0px_0px_#101D32] space-y-2.5">
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                       <div>
-                        <strong className="block font-heading font-bold text-emerald-900 mb-0.5">Password Reset Link Dispatched!</strong>
-                        <span>{forgotSuccessMsg}</span>
+                        <strong className="block font-heading font-extrabold text-emerald-900 text-sm mb-1">
+                          Check Your Email
+                        </strong>
+                        <p className="leading-relaxed text-emerald-900">
+                          {forgotSuccessMsg}
+                        </p>
                       </div>
+                    </div>
+                    <div className="p-2.5 bg-white/70 border border-emerald-700/30 rounded-lg text-[11px] text-emerald-900 leading-normal">
+                      <strong>Didn't receive it?</strong> Check your spam/junk folder. The verification link is valid for 1 hour.
                     </div>
                   </div>
-
-                  {directResetUrl && (
-                    <div className="p-3.5 bg-[#FFF5E9] border-2 border-[#101D32] rounded-xl space-y-2.5 shadow-[3px_3px_0px_0px_#101D32]">
-                      <div className="text-xs font-heading font-extrabold text-[#101D32] flex items-center gap-1.5">
-                        <KeyRound className="w-3.5 h-3.5 text-[#F4511E]" />
-                        <span>Reset Verification Link Generated:</span>
-                      </div>
-                      <p className="text-[11px] text-[#101D32]/80 leading-relaxed font-sans">
-                        Click the button below to verify your account and set a new password. The new password will replace your old password in the database:
-                      </p>
-                      <a
-                        href={directResetUrl}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onClose();
-                          window.location.href = directResetUrl;
-                        }}
-                        className="block w-full text-center py-2.5 bg-[#F4511E] hover:bg-[#E84316] text-white text-xs font-heading font-extrabold rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all cursor-pointer"
-                      >
-                        Verify &amp; Create New Password &rarr;
-                      </a>
-                    </div>
-                  )}
 
                   <button
                     type="button"
