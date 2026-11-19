@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Initializes database cleanly: purges legacy sample personas and ensures bootstrap admin.
@@ -160,13 +161,16 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     /**
-     * Ensures clean super administrator account exists.
+     * Ensures clean super administrator account exists with guaranteed known password.
      */
     private void bootstrapSuperAdmin() {
-        if (userRepository.findByEmailIgnoreCase(adminEmail).isEmpty()) {
-            String initialPass = (adminPassword != null && !adminPassword.isBlank())
-                ? adminPassword.trim()
-                : "DevAdminPass2026!";
+        String defaultPass = "Admin@Kaushalya2026";
+        String initialPass = (adminPassword != null && !adminPassword.isBlank())
+            ? adminPassword.trim()
+            : defaultPass;
+
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(adminEmail);
+        if (existing.isEmpty()) {
             User admin = new User("System Administrator", adminEmail, passwordEncoder.encode(initialPass), UserRole.SUPER_ADMIN);
             admin.setDepartment("Academic Computing Services");
             userRepository.save(admin);
@@ -178,6 +182,13 @@ public class DataInitializer implements CommandLineRunner {
                 admin.getId(),
                 "Initialized clean super administrator account."
             ));
+        } else {
+            // Ensure super admin has valid password hash
+            User admin = existing.get();
+            if (admin.getPasswordHash() == null || admin.getPasswordHash().isBlank()) {
+                admin.setPasswordHash(passwordEncoder.encode(initialPass));
+                userRepository.save(admin);
+            }
         }
     }
 }

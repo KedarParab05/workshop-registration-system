@@ -120,14 +120,10 @@ public class WorkshopService {
                 + " because " + confirmedAttendees + " participants have already registered.");
         }
 
-        // Pricing policy: If attendees exist, keep pricing type stable
-        if (confirmedAttendees > 0) {
-            if (existing.getPricingType() != updatedData.getPricingType()) {
-                updatedData.setPricingType(existing.getPricingType());
-                if (existing.getPricingType() == PricingType.PAID && (updatedData.getPrice() == null || updatedData.getPrice() <= 0)) {
-                    updatedData.setPrice(existing.getPrice());
-                }
-            }
+        // Pricing policy: If organizer sets workshop to FREE, ensure price is 0.0
+        if (updatedData.getPricingType() == PricingType.FREE || (updatedData.getPrice() != null && updatedData.getPrice() == 0.0)) {
+            updatedData.setPricingType(PricingType.FREE);
+            updatedData.setPrice(0.0);
         }
 
         existing.setTitle(updatedData.getTitle());
@@ -152,13 +148,8 @@ public class WorkshopService {
         existing.setRegistrationDeadline(updatedData.getRegistrationDeadline());
         existing.setLearningOutcomes(updatedData.getLearningOutcomes());
         existing.setStatus(updatedData.getStatus());
-        if (updatedData.getPricingType() == PricingType.FREE || (updatedData.getPrice() != null && updatedData.getPrice() == 0.0)) {
-            existing.setPricingType(PricingType.FREE);
-            existing.setPrice(0.0);
-        } else {
-            existing.setPricingType(PricingType.PAID);
-            existing.setPrice(updatedData.getPrice() != null && updatedData.getPrice() > 0 ? updatedData.getPrice() : 199.0);
-        }
+        existing.setPricingType(updatedData.getPricingType());
+        existing.setPrice(updatedData.getPrice());
         existing.setCurrency(updatedData.getCurrency() != null ? updatedData.getCurrency() : "INR");
         existing.setPayeeVpa(updatedData.getPayeeVpa());
         existing.setPayeeName(updatedData.getPayeeName());

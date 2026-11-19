@@ -13,6 +13,7 @@ import { WorkshopDetail } from './components/public/WorkshopDetail';
 import { OurStoryPage } from './components/public/OurStoryPage';
 import { ContactPage } from './components/public/ContactPage';
 import { AuthModal } from './components/auth/AuthModal';
+import { ResetPasswordModal } from './components/auth/ResetPasswordModal';
 import { RoleSelectorModal } from './components/common/RoleSelectorModal';
 import { ProfileModal } from './components/common/ProfileModal';
 import { ParticipantDashboard } from './components/participant/ParticipantDashboard';
@@ -30,6 +31,26 @@ const MainContent: React.FC = () => {
   const [authInitialRole, setAuthInitialRole] = useState<'PARTICIPANT' | 'ORGANIZER' | 'VOLUNTEER' | undefined>(undefined);
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+
+  // Password Reset from Email Link
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+
+  useEffect(() => {
+    // Check for ?resetToken=...&email=... in URL (email verification link)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('resetToken') || params.get('token');
+      const email = params.get('email');
+
+      if (token) {
+        setResetToken(token);
+        setResetEmail(email || '');
+        setResetModalOpen(true);
+      }
+    } catch {}
+  }, []);
 
   const renderCurrentPage = () => {
     switch (activePage) {
@@ -122,6 +143,20 @@ const MainContent: React.FC = () => {
       />
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialRole={authInitialRole} />
+      <ResetPasswordModal
+        isOpen={resetModalOpen}
+        token={resetToken}
+        email={resetEmail}
+        onClose={() => {
+          setResetModalOpen(false);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }}
+        onSuccess={() => {
+          setResetModalOpen(false);
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setAuthModalOpen(true);
+        }}
+      />
       <RoleSelectorModal
         isOpen={roleModalOpen}
         onClose={() => setRoleModalOpen(false)}

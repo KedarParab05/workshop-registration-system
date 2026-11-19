@@ -62,8 +62,8 @@ public class RegistrationService {
             throw new IllegalStateException("Workshop is " + workshop.getStatus() + " and not accepting registrations.");
         }
 
-        // Enforce Pricing Model: Free flow must only register for Free workshops
-        if (workshop.getPricingType() == PricingType.PAID) {
+        // Enforce Pricing Model: Free flow must only register for Free workshops (or workshops with price 0)
+        if (workshop.getPricingType() == PricingType.PAID && workshop.getPrice() != null && workshop.getPrice() > 0) {
             throw new IllegalStateException("This is a paid workshop (₹" + workshop.getPrice() + "). Please complete checkout to register.");
         }
 

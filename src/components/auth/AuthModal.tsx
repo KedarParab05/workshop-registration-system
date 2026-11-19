@@ -48,13 +48,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const { setCurrentUser, showAlert, navigateTo, users } = useApp();
 
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [loading, setLoading] = useState(false);
   const [activeDemoEmail, setActiveDemoEmail] = useState<string | null>(null);
   const [showAllStudents, setShowAllStudents] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Forgot Password Fields
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSuccessMsg, setForgotSuccessMsg] = useState('');
+  const [directResetUrl, setDirectResetUrl] = useState<string | null>(null);
 
   // Form Fields
   const [email, setEmail] = useState('');
@@ -78,6 +84,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setPhoneNumber('');
       setDepartment('');
       setErrorMsg('');
+      setForgotEmail('');
+      setForgotSuccessMsg('');
+      setDirectResetUrl(null);
       setShowPassword(false);
       setShowConfirmPassword(false);
       if (initialRole === 'ORGANIZER') {
@@ -261,6 +270,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setForgotSuccessMsg('');
+    setDirectResetUrl(null);
+
+    const emailCheck = validateEmail(forgotEmail);
+    if (!emailCheck.isValid) {
+      setErrorMsg(emailCheck.error || 'Please enter a valid email address.');
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const res = await apiFetch('/api/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email: forgotEmail.trim().toLowerCase() }),
+      });
+      const data = await parseAuthResponse(res);
+      if (res.ok && data.success) {
+        setForgotSuccessMsg(
+          data.message ||
+            'A password reset verification link has been sent to your email. Please check your inbox and click the link to set a new password.'
+        );
+        if (data.resetUrl) {
+          setDirectResetUrl(data.resetUrl);
+        }
+      } else {
+        setErrorMsg(data.error || 'Failed to request password reset. Please try again.');
+      }
+    } catch {
+      setErrorMsg('Unable to connect to server. Please check your network connection.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   // 1-Click Fast Switch for Evaluators
   const handleDemoSwitch = async (demoEmail: string) => {
     if (loading) return;
@@ -340,48 +386,69 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <BrandLogo size="md" showTagline={true} />
             </div>
             <h2 className="text-xl sm:text-2xl font-heading font-black text-[#101D32]">
-              {mode === 'login' ? 'Sign In to Your Account' : 'Create an Account'}
+              {mode === 'login'
+                ? 'Sign In to Your Account'
+                : mode === 'register'
+                ? 'Create an Account'
+                : 'Reset Your Password'}
             </h2>
             <p className="text-xs text-[#101D32]/80 font-medium">
               {mode === 'login'
                 ? 'Enter your credentials to access your dashboard and passes.'
-                : 'Join the academic skills platform to attend or host workshops.'}
+                : mode === 'register'
+                ? 'Join the academic skills platform to attend or host workshops.'
+                : 'Enter your registered email to receive a password reset verification link.'}
             </p>
           </div>
 
-          {/* Mode Switch Tabs */}
-          <div className="flex rounded-xl bg-[#FFF5E9] p-1 border-2 border-[#101D32] mb-4 shadow-[2px_2px_0px_0px_#101D32]">
-            <button
-              type="button"
-              onClick={() => {
-                setMode('login');
-                setErrorMsg('');
-              }}
-              className={`flex-1 py-2 rounded-lg text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                mode === 'login'
-                  ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32] border border-[#101D32]'
-                  : 'text-[#101D32] hover:bg-[#FFD6B0]'
-              }`}
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode('register');
-                setErrorMsg('');
-              }}
-              className={`flex-1 py-2 rounded-lg text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                mode === 'register'
-                  ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32] border border-[#101D32]'
-                  : 'text-[#101D32] hover:bg-[#FFD6B0]'
-              }`}
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Create Account</span>
-            </button>
-          </div>
+          {/* Mode Switch Tabs (Shown for Login / Register) */}
+          {mode !== 'forgot' ? (
+            <div className="flex rounded-xl bg-[#FFF5E9] p-1 border-2 border-[#101D32] mb-4 shadow-[2px_2px_0px_0px_#101D32]">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setErrorMsg('');
+                }}
+                className={`flex-1 py-2 rounded-lg text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  mode === 'login'
+                    ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32] border border-[#101D32]'
+                    : 'text-[#101D32] hover:bg-[#FFD6B0]'
+                }`}
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('register');
+                  setErrorMsg('');
+                }}
+                className={`flex-1 py-2 rounded-lg text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  mode === 'register'
+                    ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32] border border-[#101D32]'
+                    : 'text-[#101D32] hover:bg-[#FFD6B0]'
+                }`}
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Create Account</span>
+              </button>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setErrorMsg('');
+                }}
+                className="text-xs font-heading font-bold text-[#101D32] hover:text-[#F4511E] flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>&larr; Back to Sign In</span>
+              </button>
+            </div>
+          )}
 
           {/* Error Message */}
           {errorMsg && (
@@ -392,9 +459,112 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {/* ─────────────────────────────────────────────────────────────
-              SIGN IN FORM
+              FORGOT PASSWORD FORM
           ───────────────────────────────────────────────────────────── */}
-          {mode === 'login' ? (
+          {mode === 'forgot' ? (
+            <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+              <div className="p-3 bg-[#FFF5E9] border-2 border-[#101D32] rounded-xl text-xs space-y-1">
+                <div className="flex items-center gap-1.5 font-heading font-bold text-[#101D32]">
+                  <Mail className="w-3.5 h-3.5 text-[#F4511E]" />
+                  <span>Email Verification Link</span>
+                </div>
+                <p className="text-[11px] text-[#101D32]/80 leading-relaxed font-sans">
+                  We'll send a secure password reset link directly to your inbox. No OTP code required.
+                </p>
+              </div>
+
+              {forgotSuccessMsg ? (
+                <div className="space-y-3">
+                  <div className="p-3.5 bg-emerald-50 border-2 border-emerald-800 text-emerald-950 text-xs font-medium rounded-xl shadow-[3px_3px_0px_0px_#101D32] space-y-2">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="block font-heading font-bold text-emerald-900 mb-0.5">Password Reset Link Dispatched!</strong>
+                        <span>{forgotSuccessMsg}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {directResetUrl && (
+                    <div className="p-3 bg-[#FFD6B0] border-2 border-[#101D32] rounded-xl space-y-2 shadow-[2px_2px_0px_0px_#101D32]">
+                      <div className="text-[11px] font-heading font-bold text-[#101D32]">
+                        Evaluator Fast-Track Verification:
+                      </div>
+                      <a
+                        href={directResetUrl}
+                        className="block w-full text-center py-2 bg-[#F4511E] hover:bg-[#E84316] text-white text-xs font-heading font-bold rounded-lg border border-[#101D32] shadow-[2px_2px_0px_0px_#101D32]"
+                      >
+                        Click to Open Reset Password Page &rarr;
+                      </a>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('login');
+                      setErrorMsg('');
+                    }}
+                    className="w-full py-2.5 bg-white hover:bg-[#FFD6B0] text-[#101D32] font-heading font-bold text-xs rounded-xl border-2 border-[#101D32] shadow-[2px_2px_0px_0px_#101D32] transition-all cursor-pointer"
+                  >
+                    Back to Sign In
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-heading font-bold text-[#101D32] mb-1.5">
+                      Your Registered Email Address *
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="email"
+                        value={forgotEmail}
+                        onChange={(e) => {
+                          setForgotEmail(e.target.value);
+                          setErrorMsg('');
+                        }}
+                        placeholder="e.g. participant@university.edu"
+                        className={`${inputCls} pl-10`}
+                        autoFocus
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full py-3 bg-[#F4511E] hover:bg-[#E84316] disabled:opacity-60 text-white font-heading font-extrabold text-xs rounded-xl border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101D32] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {forgotLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    ) : (
+                      <Mail className="w-4 h-4 text-white" />
+                    )}
+                    <span>{forgotLoading ? 'Dispatching Reset Link…' : 'Send Password Reset Link'}</span>
+                  </button>
+
+                  <div className="text-center pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('login');
+                        setErrorMsg('');
+                      }}
+                      className="text-xs text-[#101D32]/80 font-medium hover:text-[#F4511E] hover:underline cursor-pointer"
+                    >
+                      &larr; Remember your password? Sign In
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          ) : mode === 'login' ? (
+            /* ─────────────────────────────────────────────────────────────
+                SIGN IN FORM
+            ───────────────────────────────────────────────────────────── */
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-heading font-bold text-[#101D32] mb-1.5">
@@ -418,9 +588,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-heading font-bold text-[#101D32] mb-1.5">
-                  Password *
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-heading font-bold text-[#101D32]">
+                    Password *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('forgot');
+                      setForgotEmail(email || '');
+                      setErrorMsg('');
+                      setForgotSuccessMsg('');
+                      setDirectResetUrl(null);
+                    }}
+                    className="text-[11px] font-bold text-[#F4511E] hover:underline cursor-pointer"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-[#101D32]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
@@ -765,38 +950,104 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {/* Super Admin */}
-              <button
-                type="button"
-                onClick={() => handleDemoSwitch('admin@workshophub.edu')}
-                disabled={loading}
-                className="p-2.5 rounded-xl border-2 border-[#101D32] bg-white hover:bg-[#FFD6B0] text-left transition-all shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] disabled:opacity-50 cursor-pointer"
-              >
-                <div className="flex items-center gap-1.5 font-heading font-extrabold text-xs text-[#101D32]">
-                  <ShieldAlert className="w-3.5 h-3.5 text-[#F4511E]" />
-                  <span>Super Admin</span>
-                </div>
-                <div className="text-[10px] text-[#101D32]/70 truncate font-mono mt-0.5">
-                  admin@workshophub.edu
-                </div>
-              </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Super Admin Persona Card */}
+              <div className="p-3 rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-left shadow-[2px_2px_0px_0px_#101D32] flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5 font-heading font-extrabold text-xs text-[#101D32]">
+                      <ShieldAlert className="w-3.5 h-3.5 text-[#F4511E]" />
+                      <span>Super Admin</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold bg-[#FFD6B0] text-[#101D32] px-1.5 py-0.5 rounded border border-[#101D32]">
+                      ADMIN
+                    </span>
+                  </div>
 
-              {/* Faculty Organizer */}
-              <button
-                type="button"
-                onClick={() => handleDemoSwitch('vikram.rao@faculty.edu')}
-                disabled={loading}
-                className="p-2.5 rounded-xl border-2 border-[#101D32] bg-white hover:bg-[#FFD6B0] text-left transition-all shadow-[2px_2px_0px_0px_#101D32] hover:translate-x-[1px] hover:translate-y-[1px] disabled:opacity-50 cursor-pointer"
-              >
-                <div className="flex items-center gap-1.5 font-heading font-extrabold text-xs text-[#101D32]">
-                  <Briefcase className="w-3.5 h-3.5 text-[#F4511E]" />
-                  <span>Prof. Vikram Rao</span>
+                  <div className="space-y-1 text-[11px] font-mono bg-white p-2 rounded-lg border border-[#101D32]/30">
+                    <div className="text-[#101D32] truncate">
+                      <span className="text-[#101D32]/60 font-sans font-bold text-[10px]">ID: </span>
+                      <strong className="select-all">admin@workshophub.edu</strong>
+                    </div>
+                    <div className="text-[#101D32] truncate">
+                      <span className="text-[#101D32]/60 font-sans font-bold text-[10px]">Pass: </span>
+                      <strong className="text-[#F4511E] select-all">Admin@Kaushalya2026</strong>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[10px] text-[#101D32]/70 truncate font-mono mt-0.5">
-                  vikram.rao@faculty.edu
+
+                <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-[#101D32]/15">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail('admin@workshophub.edu');
+                      setPassword('Admin@Kaushalya2026');
+                      setMode('login');
+                      setErrorMsg('');
+                    }}
+                    className="flex-1 py-1 px-2 text-[10px] font-heading font-bold text-[#101D32] bg-white hover:bg-[#FFD6B0] border border-[#101D32] rounded-md transition-colors cursor-pointer text-center"
+                  >
+                    Fill Form
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDemoSwitch('admin@workshophub.edu')}
+                    disabled={loading}
+                    className="flex-1 py-1 px-2 text-[10px] font-heading font-bold text-white bg-[#F4511E] hover:bg-[#E84316] border border-[#101D32] rounded-md transition-colors cursor-pointer disabled:opacity-50 text-center shadow-[1px_1px_0px_0px_#101D32]"
+                  >
+                    1-Click Login
+                  </button>
                 </div>
-              </button>
+              </div>
+
+              {/* Faculty Organizer Persona Card */}
+              <div className="p-3 rounded-xl border-2 border-[#101D32] bg-[#FFF5E9] text-left shadow-[2px_2px_0px_0px_#101D32] flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5 font-heading font-extrabold text-xs text-[#101D32]">
+                      <Briefcase className="w-3.5 h-3.5 text-[#F4511E]" />
+                      <span>Prof. Vikram Rao</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold bg-[#FFD6B0] text-[#101D32] px-1.5 py-0.5 rounded border border-[#101D32]">
+                      FACULTY
+                    </span>
+                  </div>
+
+                  <div className="space-y-1 text-[11px] font-mono bg-white p-2 rounded-lg border border-[#101D32]/30">
+                    <div className="text-[#101D32] truncate">
+                      <span className="text-[#101D32]/60 font-sans font-bold text-[10px]">ID: </span>
+                      <strong className="select-all">vikram.rao@faculty.edu</strong>
+                    </div>
+                    <div className="text-[#101D32] truncate">
+                      <span className="text-[#101D32]/60 font-sans font-bold text-[10px]">Pass: </span>
+                      <strong className="text-[#F4511E] select-all">Password123!</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-[#101D32]/15">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail('vikram.rao@faculty.edu');
+                      setPassword('Password123!');
+                      setMode('login');
+                      setErrorMsg('');
+                    }}
+                    className="flex-1 py-1 px-2 text-[10px] font-heading font-bold text-[#101D32] bg-white hover:bg-[#FFD6B0] border border-[#101D32] rounded-md transition-colors cursor-pointer text-center"
+                  >
+                    Fill Form
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDemoSwitch('vikram.rao@faculty.edu')}
+                    disabled={loading}
+                    className="flex-1 py-1 px-2 text-[10px] font-heading font-bold text-white bg-[#F4511E] hover:bg-[#E84316] border border-[#101D32] rounded-md transition-colors cursor-pointer disabled:opacity-50 text-center shadow-[1px_1px_0px_0px_#101D32]"
+                  >
+                    1-Click Login
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Students list expandable */}

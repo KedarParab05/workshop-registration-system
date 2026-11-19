@@ -87,13 +87,6 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const isPricingLocked = Boolean(
-    workshopToEdit &&
-    registrations.some(
-      (r) => r.workshopId === workshopToEdit.id && (r.status === 'CONFIRMED' || r.status === 'ATTENDED')
-    )
-  );
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -101,11 +94,8 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
     setUploadError('');
     setUploadSuccess(false);
 
-    const fileType = (file.type || '').toLowerCase();
-    const fileName = (file.name || '').toLowerCase();
-    const isImageExt = /\.(jpe?g|png|webp|gif|svg)$/i.test(fileName);
-    const isValidMime = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/pjpeg'].includes(fileType);
-    if (!isValidMime && !isImageExt) {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
       setUploadError('Invalid format. Please select a JPG, PNG, or WebP image.');
       return;
     }
@@ -126,60 +116,22 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
         body: data,
       });
 
-      let json: any = null;
-      try {
-        json = await res.json();
-      } catch {}
-
-      if (res.ok && json?.success && json?.url) {
+      const json = await res.json();
+      if (res.ok && json.success && json.url) {
         setFormData((prev) => ({
           ...prev,
           bannerImageUrl: json.url,
-          bannerImagePublicId: json.publicId || '',
+          bannerImagePublicId: json.publicId,
         }));
         setUploadSuccess(true);
         showAlert('Banner uploaded to Cloudinary CDN successfully!', 'success');
       } else {
-        // Safe local fallback preview so organizer is never blocked
-        const reader = new FileReader();
-        reader.onload = (loadEvt) => {
-          const dataUrl = loadEvt.target?.result as string;
-          if (dataUrl) {
-            setFormData((prev) => ({
-              ...prev,
-              bannerImageUrl: dataUrl,
-              bannerImagePublicId: 'local_upload_' + Date.now(),
-            }));
-            setUploadSuccess(true);
-            showAlert('Banner preview loaded.', 'info');
-          }
-        };
-        reader.readAsDataURL(file);
-        const errMsg = json?.error && json.error !== 'Not Found'
-          ? json.error
-          : 'Could not connect to Cloudinary CDN. Local preview active.';
-        setUploadError(errMsg);
+        setUploadError(json.error || 'Failed to upload image to Cloudinary.');
       }
     } catch (err: any) {
-      // Local fallback on network error
-      const reader = new FileReader();
-      reader.onload = (loadEvt) => {
-        const dataUrl = loadEvt.target?.result as string;
-        if (dataUrl) {
-          setFormData((prev) => ({
-            ...prev,
-            bannerImageUrl: dataUrl,
-            bannerImagePublicId: 'local_upload_' + Date.now(),
-          }));
-          setUploadSuccess(true);
-        }
-      };
-      reader.readAsDataURL(file);
-      setUploadError(err.message || 'Error communicating with upload service. Local preview active.');
+      setUploadError(err.message || 'Error communicating with upload service.');
     } finally {
       setIsUploading(false);
-      // Reset input value so re-selecting same file triggers onChange
-      if (e.target) e.target.value = '';
     }
   };
 
@@ -498,7 +450,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
                     className="hidden"
                   />
 
-                  {Boolean(formData.bannerImagePublicId || (formData.bannerImageUrl && (formData.bannerImageUrl.includes('cloudinary.com') || formData.bannerImageUrl.startsWith('data:')))) ? (
+                  {formData.bannerImageUrl ? (
                     <div className="relative rounded-xl overflow-hidden border-2 border-[#101D32] bg-[#FFF5E9] p-3 flex flex-col sm:flex-row items-center gap-3">
                       <img
                         src={formData.bannerImageUrl}
@@ -875,7 +827,7 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
               </div>
 
               {/* Pricing Lock Warning */}
-              {isPricingLocked && (
+              {workshopToEdit && registrations.some(r => r.workshopId === workshopToEdit.id && (r.status === 'CONFIRMED' || r.status === 'ATTENDED')) && (
                 <div className="flex items-start gap-2 p-3 bg-[#FFD6B0] border-2 border-[#101D32] rounded-xl text-xs text-[#101D32] font-medium">
                   <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#F4511E]" />
                   <span>Pricing is locked because participants have already registered. Create a new session to change pricing.</span>
@@ -886,38 +838,23 @@ export const WorkshopFormModal: React.FC<WorkshopFormModalProps> = ({
               <div className="flex gap-2">
                 <button
                   type="button"
-                  disabled={isPricingLocked}
-                  onClick={() => {
-                    setFormData((prev) => ({ ...prev, pricingType: 'FREE', price: 0 }));
-                    setErrors((prev) => {
-                      const next = { ...prev };
-                      delete next.price;
-                      return next;
-                    });
-                  }}
+                  onClick={() => setFormData({ ...formData, pricingType: 'FREE', price: 0 })}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-heading font-bold border-2 border-[#101D32] transition-all ${
                     formData.pricingType === 'FREE'
                       ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
                       : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
-                  } ${isPricingLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                  }`}
                 >
                   🎁 Free Workshop
                 </button>
                 <button
                   type="button"
-                  disabled={isPricingLocked}
-                  onClick={() => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      pricingType: 'PAID',
-                      price: prev.price > 0 ? prev.price : 199,
-                    }));
-                  }}
+                  onClick={() => setFormData({ ...formData, pricingType: 'PAID', price: formData.price > 0 ? formData.price : 199 })}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-heading font-bold border-2 border-[#101D32] transition-all ${
                     formData.pricingType === 'PAID'
                       ? 'bg-[#F4511E] text-white shadow-[2px_2px_0px_0px_#101D32]'
                       : 'bg-white text-[#101D32] hover:bg-[#FFD6B0]'
-                  } ${isPricingLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                  }`}
                 >
                   💳 Paid Workshop
                 </button>

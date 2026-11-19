@@ -330,10 +330,14 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                   onClick={onOpenAuth}
                   className="w-full py-3.5 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-extrabold text-xs rounded-lg border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101D32] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer"
                 >
-                  Sign In to Register &amp; Pay (₹{workshop.price || 199})
+                  {workshop.pricingType === 'PAID' && (workshop.price || 0) > 0
+                    ? `Sign In to Register & Pay (₹${workshop.price})`
+                    : 'Sign In to Register (100% Free)'}
                 </button>
                 <p className="text-[11px] text-center text-[#101D32]/70 font-medium">
-                  Instant access for verified academic accounts.
+                  {workshop.pricingType === 'PAID' && (workshop.price || 0) > 0
+                    ? 'Instant access for verified academic accounts.'
+                    : '100% Free workshop. No payment details required.'}
                 </p>
               </div>
             ) : registrationCheck.allowed ? (
@@ -343,10 +347,14 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                   disabled={isRegistering}
                   className="w-full py-3.5 bg-[#F4511E] hover:bg-[#E84316] text-white font-heading font-extrabold text-xs rounded-lg border-2 border-[#101D32] shadow-[4px_4px_0px_0px_#101D32] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101D32] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-60 cursor-pointer"
                 >
-                  Pay ₹{workshop.price || 199} with Razorpay
+                  {workshop.pricingType === 'PAID' && (workshop.price || 0) > 0
+                    ? `Pay ₹${workshop.price} with Razorpay`
+                    : 'Reserve Your Seat (100% Free)'}
                 </button>
                 <p className="text-[11px] text-center text-[#101D32]/70 font-medium">
-                  Secured with encrypted Razorpay instant checkout.
+                  {workshop.pricingType === 'PAID' && (workshop.price || 0) > 0
+                    ? 'Secured with encrypted Razorpay instant checkout.'
+                    : 'Zero tuition, zero card requirements. Instant verified QR pass.'}
                 </p>
               </div>
             ) : (
@@ -445,11 +453,11 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 </div>
               </div>
 
-              {workshop.pricingType === 'PAID' ? (
+              {workshop.pricingType === 'PAID' && (workshop.price || 0) > 0 ? (
                 <div className="bg-white p-3.5 rounded-xl border-2 border-[#101D32] text-xs space-y-2">
                   <div className="flex justify-between items-center text-[#101D32]/80">
                     <span>Workshop Tuition:</span>
-                    <span className="font-bold text-[#101410]">₹{workshop.price || 199}</span>
+                    <span className="font-bold text-[#101410]">₹{workshop.price}</span>
                   </div>
                   <div className="flex justify-between items-center text-[#101D32]/80">
                     <span>Platform Service Fee:</span>
@@ -457,7 +465,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                   </div>
                   <div className="pt-2 border-t-2 border-[#101D32]/10 flex justify-between items-center text-xs font-bold text-[#101410]">
                     <span>Total Payable:</span>
-                    <span className="text-base text-[#F4511E] font-mono">₹{workshop.price || 199}</span>
+                    <span className="text-base text-[#F4511E] font-mono">₹{workshop.price}</span>
                   </div>
                   <div className="text-[10px] text-[#101D32]/70 pt-0.5">
                     Payment Gateway: Razorpay Secure Checkout
@@ -470,7 +478,7 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                     <span className="font-bold text-[#F4511E]">100% Free</span>
                   </div>
                   <p className="text-[11px] text-[#101D32]/70">
-                    Instant seat confirmation. No payment required.
+                    Instant seat confirmation. Zero payment required.
                   </p>
                 </div>
               )}
@@ -503,9 +511,9 @@ export const WorkshopDetail: React.FC<WorkshopDetailProps> = ({ onOpenAuth }) =>
                 >
                   {isRegistering
                     ? 'Processing...'
-                    : workshop.pricingType === 'PAID'
+                    : workshop.pricingType === 'PAID' && (workshop.price || 0) > 0
                     ? `Proceed to Pay ₹${workshop.price} with Razorpay`
-                    : 'Complete Registration'}
+                    : 'Complete Free Registration'}
                 </button>
               </div>
             </motion.div>
